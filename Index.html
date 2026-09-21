@@ -69,9 +69,7 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 /* ---------- home ---------- */
 #home { position: relative; }
 #home .skyline { position: absolute; top: max(18px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); display: flex; justify-content: center; opacity: 0.42; }
-#home .skyline svg { width: min(620px, 100%); height: auto; overflow: visible; }
-#home .skyline path, #home .skyline rect, #home .skyline line { fill: none; stroke: var(--chalk); stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
-#home .skyline .filled { fill: var(--chalk); stroke: none; }
+#home .skyline img { display: block; width: min(620px, 100%); height: 110px; object-fit: cover; object-position: center 55%; filter: grayscale(1) contrast(500%); mix-blend-mode: multiply; opacity: 0.86; }
 #home .home-hero { position: absolute; top: 50%; right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); transform: translateY(-50%); text-align: center; }
 #home h1 { font-size: clamp(3.4rem, 17vmin, 7rem); color: var(--cream); }
 #home .tag { max-width: 28ch; margin: 1rem auto 0; font-size: 1.15rem; line-height: 1.4; }
@@ -255,12 +253,7 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 
   <section id="home" class="screen active">
     <div class="skyline" aria-hidden="true">
-      <svg viewBox="0 0 620 100" role="presentation">
-        <path d="M8 82H612" />
-        <path d="M18 82V63h25v19M50 82V48h30v34M87 82V69h22v13M116 82V37h28v45M151 82V56h18v26M178 82V28h34v54M220 82V61h24v21M252 82V46h42v36M302 82V67h20v15M329 82V53h27v29M366 82V22h7v60M373 82V33h7v49M380 82V48h35v34M424 82V62h22v20M454 82V40h29v42M490 82V57h24v25M522 82V31h39v51M570 82V58h26v24" />
-        <path d="M366 22l7-13 7 13M362 43h22M362 51h22M362 59h22" />
-        <path class="filled" d="M202 28h6v54h-6zM520 31h6v51h-6z" />
-      </svg>
+      <img src="assets/images/city.jpg" alt="">
     </div>
     <div class="home-hero">
       <h1>Sijui<br>Charades</h1>
