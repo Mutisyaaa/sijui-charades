@@ -67,8 +67,10 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 .spacer { flex: 1; }
 
 /* ---------- home ---------- */
+#home { position: relative; }
+#home .home-hero { position: absolute; top: 50%; right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); transform: translateY(-50%); text-align: center; }
 #home h1 { font-size: clamp(3.4rem, 17vmin, 7rem); color: var(--cream); }
-#home .tag { max-width: 28ch; font-size: 1.15rem; line-height: 1.4; margin: 1rem 0 0; }
+#home .tag { max-width: 28ch; margin: 1rem auto 0; font-size: 1.15rem; line-height: 1.4; }
 .primary {
   background: var(--cream);
   color: var(--ink);
@@ -248,8 +250,10 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 <main>
 
   <section id="home" class="screen active">
-    <h1>Sijui<br>Charades</h1>
-    <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
+    <div class="home-hero">
+      <h1>Sijui<br>Charades</h1>
+      <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
+    </div>
     <div class="spacer"></div>
     <button id="playBtn" class="primary" type="button">Play</button>
     <div class="home-tools">
