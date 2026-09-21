@@ -116,36 +116,41 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 #categories h2 { font-size: 2.4rem; }
 #deckList {
   display: grid;
-  gap: 10px;
+  gap: 14px;
   margin-top: 0.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .deck {
   display: flex;
+  position: relative;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   text-align: left;
   color: var(--chalk);
   background: var(--black-soft);
   border: 2px solid transparent;
-  padding: 16px 18px;
-  min-height: 76px;
+  padding: 16px;
+  min-height: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
   box-shadow: 0 8px 0 rgba(17, 17, 15, 0.12), 0 16px 28px rgba(17, 17, 15, 0.08);
   transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
-.deck .deck-copy { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 12px; }
+.deck .deck-copy { display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 6px; min-width: 0; }
 .deck .deck-icon { display: grid; place-items: center; width: 44px; height: 44px; background: var(--cream); color: var(--ink); border-radius: 13px; font-size: 1.55rem; }
 .deck .deck-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .deck .difficulty { font-size: 0.72rem; text-transform: capitalize; opacity: 0.65; }
-.deck.has-cover { min-height: 112px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
-.deck.has-cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17,17,15,.88), rgba(17,17,15,.36)); }
+.deck.has-cover { background-size: cover; background-position: center; }
+.deck.has-cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(17,17,15,.08) 18%, rgba(17,17,15,.9) 100%); }
 .deck.has-cover > * { position: relative; }
+.deck .deck-icon { flex: 0 0 auto; }
+.deck .n { position: absolute; top: 16px; right: 16px; }
 .deck.theme-sunset .deck-icon { background: #e58b5c; }
 .deck.theme-mint .deck-icon { background: #79bfa4; }
 .deck.theme-berry .deck-icon { background: #c47a9c; }
 .deck:hover, .deck:focus-visible {
   color: var(--ink);
-  background: var(--cream);
+  background-color: var(--cream);
   transform: translateY(-3px);
   box-shadow: 0 11px 0 rgba(17, 17, 15, 0.18), 0 20px 34px rgba(17, 17, 15, 0.14);
 }
