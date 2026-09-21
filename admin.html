@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11110F">
+  <title>Admin Â· Sijui Charades</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <a class="brand" href="Index.html">Sijui Charades</a>
+      <div class="user-tools">
+        <span id="userName">Checking accessâ€¦</span>
+        <button id="logoutBtn" class="link-button" type="button">Log out</button>
+      </div>
+    </header>
+
+    <p class="eyebrow">Admin studio</p>
+    <h1>Build your decks.</h1>
+    <p class="intro">Add new categories and keep every card fresh. Changes here are saved directly to your PostgreSQL database.</p>
+
+    <div class="layout">
+      <div>
+        <section class="panel">
+          <h2 id="deckFormTitle">Add a deck</h2>
+          <form id="deckForm" class="form">
+            <div class="field">
+              <label for="deckName">Deck name</label>
+              <input id="deckName" name="name" maxlength="100" placeholder="e.g. Nairobi life" required>
+            </div>
+            <div class="field">
+              <label for="deckDescription">Description</label>
+              <textarea id="deckDescription" name="description" maxlength="240" placeholder="What kind of cards are in this deck?"></textarea>
+            </div>
+            <label class="inline"><input id="deckPublished" type="checkbox" checked> Publish this deck in the game</label>
+            <div class="form-actions">
+              <button class="primary" type="submit">Save deck</button>
+              <button id="cancelDeckEdit" class="ghost" type="button" hidden>Cancel edit</button>
+            </div>
+          </form>
+          <p id="deckStatus" class="status" role="status"></p>
+        </section>
+
+        <section class="panel" style="margin-top: 18px">
+          <h2 id="cardFormTitle">Add a card</h2>
+          <form id="cardForm" class="form">
+            <div class="field">
+              <label for="cardDeck">Deck</label>
+              <select id="cardDeck" required></select>
+            </div>
+            <div class="field">
+              <label for="cardText">Card text</label>
+              <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic" required>
+            </div>
+            <div class="field">
+              <label for="cardOrder">Sort order</label>
+              <input id="cardOrder" type="number" min="0" step="1" value="0">
+            </div>
+            <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
+            <div class="form-actions">
+              <button class="primary" type="submit">Save card</button>
+              <button id="cancelCardEdit" class="ghost" type="button" hidden>Cancel edit</button>
+            </div>
+          </form>
+          <p id="cardStatus" class="status" role="status"></p>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>Your decks</h2>
+        <div id="deckList" class="deck-list"><p class="empty">Loading decksâ€¦</p></div>
+      </section>
+    </div>
+
+    <p class="admin-footer"><a href="Index.html">â† Back to the game</a></p>
+  </main>
+
+  <script>
+    const state = { decks: [], editingDeckId: null, editingCardId: null };
+    const $ = id => document.getElementById(id);
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+      }[char]));
+    }
+
+    async function api(url, options = {}) {
+      const response = await fetch(url, {
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+        ...options
+      });
+      if (response.status === 204) return null;
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Something went wrong.");
+      return data;
+    }
+
+    function setStatus(id, message, kind = "") {
+      const el = $(id); el.textContent = message; el.className = "status" + (kind ? " " + kind : "");
+    }
+
+    function renderDeckOptions() {
+      const select = $("cardDeck");
+      select.innerHTML = state.decks.length
+        ? state.decks.map(deck => `<option value="${deck.id}">${escapeHtml(deck.name)}</option>`).join("")
+        : `<option value="">Create a deck first</option>`;
+      select.disabled = !state.decks.length;
+    }
+
+    function renderDecks() {
+      renderDeckOptions();
+      const list = $("deckList");
+      if (!state.decks.length) {
+        list.innerHTML = `<p class="empty">No decks yet. Add your first one on the left.</p>`;
+        return;
+      }
+      list.innerHTML = state.decks.map(deck => `
+        <article class="deck-card">
+          <div class="deck-heading">
+            <div>
+              <h3>${escapeHtml(deck.name)}</h3>
+              <p class="deck-description">${escapeHtml(deck.description || "No description")}</p>
+            </div>
+            <span class="badge ${deck.is_published ? "" : "off"}">${deck.is_published ? "Published" : "Hidden"}</span>
+          </div>
+          <div class="deck-actions">
+            <button class="small-button" data-action="edit-deck" data-id="${deck.id}" type="button">Edit deck</button>
+            <button class="small-button danger" data-action="delete-deck" data-id="${deck.id}" type="button">Delete deck</button>
+          </div>
+          <ul class="card-list">
+            ${deck.cards.length ? deck.cards.map(card => `
+              <li class="card-row ${card.is_active ? "" : "inactive"}">
+                <span class="card-text">${escapeHtml(card.text)}</span>
+                <span class="card-actions">
+                  <button class="small-button" data-action="edit-card" data-id="${card.id}" type="button">Edit</button>
+                  <button class="small-button danger" data-action="delete-card" data-id="${card.id}" type="button">Delete</button>
+                </span>
+              </li>`).join("") : `<li class="empty">No cards in this deck yet.</li>`}
+          </ul>
+        </article>`).join("");
+    }
+
+    function resetDeckForm() {
+      state.editingDeckId = null;
+      $("deckForm").reset();
+      $("deckPublished").checked = true;
+      $("deckFormTitle").textContent = "Add a deck";
+      $("cancelDeckEdit").hidden = true;
+    }
+
+    function resetCardForm() {
+      state.editingCardId = null;
+      $("cardForm").reset();
+      $("cardActive").checked = true;
+      $("cardOrder").value = "0";
+      $("cardFormTitle").textContent = "Add a card";
+      $("cancelCardEdit").hidden = true;
+    }
+
+    async function load() {
+      const me = await api("/api/me");
+      if (me.user.role !== "admin") throw new Error("Your account is not an admin yet.");
+      $("userName").textContent = me.user.display_name;
+      state.decks = await api("/api/admin/decks");
+      renderDecks();
+    }
+
+    $("deckForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      setStatus("deckStatus", "Savingâ€¦");
+      try {
+        const payload = {
+          name: $("deckName").value,
+          description: $("deckDescription").value,
+          isPublished: $("deckPublished").checked
+        };
+        const url = state.editingDeckId ? `/api/admin/decks/${state.editingDeckId}` : "/api/admin/decks";
+        await api(url, { method: state.editingDeckId ? "PATCH" : "POST", body: JSON.stringify(payload) });
+        await load(); resetDeckForm(); setStatus("deckStatus", "Deck saved.", "success");
+      } catch (error) { setStatus("deckStatus", error.message, "error"); }
+    });
+
+    $("cardForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      setStatus("cardStatus", "Savingâ€¦");
+      try {
+        const payload = {
+          text: $("cardText").value,
+          sortOrder: Number($("cardOrder").value || 0),
+          isActive: $("cardActive").checked
+        };
+        const url = state.editingCardId ? `/api/admin/cards/${state.editingCardId}` : `/api/admin/decks/${$("cardDeck").value}/cards`;
+        await api(url, { method: state.editingCardId ? "PATCH" : "POST", body: JSON.stringify(payload) });
+        await load(); resetCardForm(); setStatus("cardStatus", "Card saved.", "success");
+      } catch (error) { setStatus("cardStatus", error.message, "error"); }
+    });
+
+    $("deckList").addEventListener("click", async event => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const { action, id } = button.dataset;
+      const deck = state.decks.find(item => item.id === id);
+      const card = state.decks.flatMap(item => item.cards).find(item => item.id === id);
+      try {
+        if (action === "edit-deck" && deck) {
+          state.editingDeckId = deck.id; $("deckName").value = deck.name; $("deckDescription").value = deck.description || ""; $("deckPublished").checked = deck.is_published;
+          $("deckFormTitle").textContent = "Edit deck"; $("cancelDeckEdit").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" });
+        } else if (action === "delete-deck" && deck && confirm(`Delete â€œ${deck.name}â€ and all its cards?`)) {
+          await api(`/api/admin/decks/${id}`, { method: "DELETE" }); await load(); setStatus("deckStatus", "Deck deleted.", "success");
+        } else if (action === "edit-card" && card) {
+          state.editingCardId = card.id; $("cardDeck").value = card.deck_id; $("cardText").value = card.text; $("cardOrder").value = card.sort_order; $("cardActive").checked = card.is_active;
+          $("cardFormTitle").textContent = "Edit card"; $("cancelCardEdit").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" });
+        } else if (action === "delete-card" && card && confirm(`Delete â€œ${card.text}â€?`)) {
+          await api(`/api/admin/cards/${id}`, { method: "DELETE" }); await load(); setStatus("cardStatus", "Card deleted.", "success");
+        }
+      } catch (error) { setStatus(action.includes("deck") ? "deckStatus" : "cardStatus", error.message, "error"); }
+    });
+
+    $("cancelDeckEdit").addEventListener("click", resetDeckForm);
+    $("cancelCardEdit").addEventListener("click", resetCardForm);
+    $("logoutBtn").addEventListener("click", async () => { await api("/api/logout", { method: "POST" }); window.location.href = "login.html"; });
+
+    load().catch(error => {
+      $("userName").textContent = "Access denied";
+      $("deckList").innerHTML = `<p class="empty">${escapeHtml(error.message)} <a href="login.html">Log in again</a>.</p>`;
+    });
+  </script>
+</body>
+</html>
+
