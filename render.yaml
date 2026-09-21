@@ -5,7 +5,7 @@ services:
     plan: free
     region: frankfurt
     buildCommand: npm ci
-    startCommand: npm run db:init && npm start
+    startCommand: npm start
     healthCheckPath: /api/health
     autoDeployTrigger: commit
     envVars:

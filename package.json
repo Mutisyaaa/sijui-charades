@@ -6,6 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "prestart": "npm run db:init",
     "db:init": "node scripts/init-db.js",
     "dev": "node --watch server.js"
   },
@@ -16,4 +17,3 @@
     "pg": "^8.16.3"
   }
 }
-
