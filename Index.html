@@ -655,10 +655,7 @@ function renderDecks() {
     meta.append(sub, difficulty);
     copy.append(name, meta);
     left.append(copy);
-    const n = document.createElement("span");
-    n.className = "n";
-    n.textContent = d.cards.length;
-    b.append(left, n);
+    b.append(left);
     b.addEventListener("click", () => chooseDeck(d.id));
     list.appendChild(b);
   });
