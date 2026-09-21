@@ -58,9 +58,6 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 /* ---------- home ---------- */
 #home h1 { font-size: clamp(3.4rem, 17vmin, 7rem); color: var(--cream); }
 #home .tag { max-width: 28ch; font-size: 1.15rem; line-height: 1.4; margin: 1rem 0 0; }
-.seg { display: flex; gap: 8px; margin: 0 0 1rem; padding: 0; border: 0; }
-.seg button { flex: 1; background: var(--black-soft); }
-.seg button[aria-pressed="true"] { background: var(--cream); color: var(--ink); font-weight: 800; }
 .primary {
   background: var(--cream);
   color: var(--ink);
@@ -70,7 +67,6 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   width: 100%;
 }
 .best { margin: 1rem 0 0; opacity: 0.85; text-align: center; }
-.account-link { align-self: center; margin-top: 1rem; color: var(--chalk); font-size: 0.9rem; opacity: 0.75; }
 
 /* ---------- decks ---------- */
 .top { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
@@ -94,6 +90,17 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 .deck b { display: block; font-size: 1.35rem; }
 .deck small { opacity: 0.75; font-size: 0.95rem; }
 .deck .n { font-size: 1.1rem; font-weight: 800; color: var(--cream); }
+
+/* ---------- duration / orientation ---------- */
+#duration, #orientation { justify-content: center; align-items: center; text-align: center; }
+#duration h2, #orientation h2 { font-size: clamp(2.4rem, 9vmin, 4rem); }
+#selectedDeckName { margin: 0.75rem 0 2rem; color: var(--cream); font-size: 1.35rem; font-weight: 800; }
+.duration-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(620px, 100%); }
+.duration-options button { background: var(--black-soft); font-size: 1.2rem; font-weight: 900; }
+.duration-options button[aria-pressed="true"] { background: var(--cream); color: var(--ink); }
+#duration .ghost, #orientation .ghost { margin-top: 1.5rem; }
+#orientation .rotate-icon { font-size: 5rem; line-height: 1; margin-bottom: 1rem; }
+#orientation p { max-width: 28ch; margin: 0.75rem auto 0; font-size: 1.15rem; line-height: 1.4; opacity: 0.85; }
 
 /* ---------- ready ---------- */
 #ready { background: var(--black); align-items: center; justify-content: center; text-align: center; }
@@ -157,14 +164,8 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
     <h1>Sijui<br>Charades</h1>
     <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
     <div class="spacer"></div>
-    <fieldset class="seg" aria-label="Round length">
-      <button type="button" data-secs="60">60s</button>
-      <button type="button" data-secs="90">90s</button>
-      <button type="button" data-secs="120">120s</button>
-    </fieldset>
     <button id="playBtn" class="primary" type="button">Play</button>
     <p id="best" class="best"></p>
-    <a class="account-link" href="login.html">Admin login</a>
   </section>
 
   <section id="categories" class="screen">
@@ -173,6 +174,30 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
     </div>
     <h2>Pick a deck</h2>
     <div id="deckList"></div>
+  </section>
+
+  <section id="duration" class="screen">
+    <div class="top">
+      <button id="durationBack" class="ghost" type="button">Back</button>
+    </div>
+    <div class="spacer"></div>
+    <h2>How long?</h2>
+    <p id="selectedDeckName"></p>
+    <fieldset class="duration-options" aria-label="Round length">
+      <button type="button" data-secs="60" aria-pressed="false">60s</button>
+      <button type="button" data-secs="90" aria-pressed="false">90s</button>
+      <button type="button" data-secs="120" aria-pressed="false">120s</button>
+    </fieldset>
+    <button id="startBtn" class="primary" type="button">Start round</button>
+    <div class="spacer"></div>
+  </section>
+
+  <section id="orientation" class="screen">
+    <div class="rotate-icon" aria-hidden="true">â†”ï¸</div>
+    <h2>Turn it sideways</h2>
+    <p>Landscape mode is the only way to play, so everyone can see the word clearly.</p>
+    <button id="orientationRetryBtn" class="primary" type="button">Iâ€™m ready</button>
+    <button id="orientationCancelBtn" class="ghost" type="button">Cancel</button>
   </section>
 
   <section id="ready" class="screen">
@@ -287,14 +312,33 @@ function initAudio() {
     if (ac.state === "suspended") ac.resume();
   } catch (e) {}
 }
-function beep(freq, dur = 0.12) {
+function tone(startFreq, endFreq, dur = 0.12, type = "sine", gain = 0.12, delay = 0) {
   if (!ac) return;
   try {
+    const now = ac.currentTime + delay;
     const o = ac.createOscillator(), g = ac.createGain();
-    o.type = "sine"; o.frequency.value = freq; g.gain.value = 0.15;
+    o.type = type;
+    o.frequency.setValueAtTime(startFreq, now);
+    o.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), now + dur);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.exponentialRampToValueAtTime(gain, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
     o.connect(g); g.connect(ac.destination);
-    o.start(); o.stop(ac.currentTime + dur);
+    o.start(now); o.stop(now + dur + 0.02);
   } catch (e) {}
+}
+function playCountdownSound() { tone(520, 520, 0.08, "square", 0.08); }
+function playRightSound() {
+  tone(420, 720, 0.12, "triangle", 0.15);
+  tone(680, 1120, 0.18, "square", 0.1, 0.08);
+}
+function playWrongSound() {
+  tone(260, 120, 0.22, "sawtooth", 0.13);
+  tone(170, 90, 0.24, "square", 0.09, 0.16);
+}
+function playEndSound() {
+  tone(520, 310, 0.25, "triangle", 0.12);
+  tone(240, 110, 0.35, "sawtooth", 0.08, 0.2);
 }
 function vibe(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
 let wake = null;
@@ -312,9 +356,11 @@ function releaseWake() { try { wake && wake.release(); } catch (e) {} wake = nul
 const NEEDS_PERMISSION = typeof DeviceMotionEvent !== "undefined" &&
                          typeof DeviceMotionEvent.requestPermission === "function";
 const SIGN = NEEDS_PERMISSION ? -1 : 1;
-const TILT_AT = 6;     // m/sÂ² beyond which a tilt counts
-const UPRIGHT_AT = 3;  // must come back inside this before the next tilt counts
+const TILT_AT = 7.5;       // higher threshold = deliberate tilt, fewer false positives
+const UPRIGHT_AT = 4;      // must come back inside this before the next tilt counts
+const TILT_HOLD_MS = 140;  // hold the tilt briefly before scoring it
 let motionListening = false, motionSeen = false, motionDenied = false;
+let tiltKind = null, tiltSince = 0;
 
 async function ensureMotion() {
   if (motionListening) return;
@@ -335,10 +381,17 @@ function onMotion(e) {
   motionSeen = true;
   if (!S || !S.running) return;
   const z = a.z * SIGN;                       // positive = screen faces up
-  if (Math.abs(z) < UPRIGHT_AT) { S.armed = true; return; }
+  if (Math.abs(z) < UPRIGHT_AT) {
+    S.armed = true;
+    tiltKind = null;
+    tiltSince = 0;
+    return;
+  }
   if (!S.armed || S.locked) return;
-  if (z < -TILT_AT) mark("right");
-  else if (z > TILT_AT) mark("skip");
+  const nextKind = z < -TILT_AT ? "right" : z > TILT_AT ? "skip" : null;
+  if (!nextKind) { tiltKind = null; tiltSince = 0; return; }
+  if (tiltKind !== nextKind) { tiltKind = nextKind; tiltSince = Date.now(); return; }
+  if (Date.now() - tiltSince >= TILT_HOLD_MS) mark(nextKind);
 }
 
 /* ============================================================
@@ -349,12 +402,19 @@ let currentDeckId = null;
 let roundSecs = store.get("roundSecs", 60);
 let best = store.get("best", 0);
 let readyTimer = null;
+let pendingStart = false;
 
 function renderHome() {
-  document.querySelectorAll(".seg button").forEach(b => {
+  $("best").textContent = best ? "Best round: " + best : "";
+}
+
+function renderDuration() {
+  const deck = ALL_DECKS.find(d => d.id === currentDeckId);
+  if (!deck) return;
+  $("selectedDeckName").textContent = deck.name + " Â· " + deck.sub;
+  document.querySelectorAll(".duration-options button").forEach(b => {
     b.setAttribute("aria-pressed", String(Number(b.dataset.secs) === roundSecs));
   });
-  $("best").textContent = best ? "Best round: " + best : "";
 }
 
 function renderDecks() {
@@ -374,15 +434,40 @@ function renderDecks() {
     n.className = "n";
     n.textContent = d.cards.length;
     b.append(left, n);
-    b.addEventListener("click", () => startDeck(d.id));
+    b.addEventListener("click", () => chooseDeck(d.id));
     list.appendChild(b);
   });
 }
 
-async function startDeck(id) {
+function chooseDeck(id) {
   currentDeckId = id;
+  renderDuration();
+  show("duration");
+}
+
+function isLandscape() {
+  return window.matchMedia
+    ? window.matchMedia("(orientation: landscape)").matches
+    : window.innerWidth >= window.innerHeight;
+}
+
+async function requestLandscape() {
+  try {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (e) {}
+  try {
+    if (screen.orientation && screen.orientation.lock) await screen.orientation.lock("landscape");
+  } catch (e) {}
+  return isLandscape();
+}
+
+async function beginCountdown() {
+  const deck = ALL_DECKS.find(d => d.id === currentDeckId);
+  if (!deck || !isLandscape()) { pendingStart = true; show("orientation"); return; }
   initAudio();
-  await ensureMotion();                         // permission prompt on iOS
+  pendingStart = false;
   show("ready");
   let n = 5;
   const count = $("count");
@@ -392,9 +477,24 @@ async function startDeck(id) {
   readyTimer = setInterval(() => {
     n--;
     if (n <= 0) { clearInterval(readyTimer); startRound(); return; }
-    beep(520, 0.08);
+    playCountdownSound();
     paint();
   }, 1000);
+}
+
+async function startSelectedDeck() {
+  initAudio();
+  await ensureMotion();                         // permission prompt on iOS must follow a tap
+  if (!await requestLandscape()) {
+    pendingStart = true;
+    show("orientation");
+    return;
+  }
+  if (S && S.pausedAt) {
+    resumeRound();
+    return;
+  }
+  await beginCountdown();
 }
 
 function startRound() {
@@ -403,7 +503,7 @@ function startRound() {
     deck, queue: shuffle(deck.cards), i: 0,
     right: [], skipped: [], current: null,
     total: roundSecs * 1000, endAt: Date.now() + roundSecs * 1000,
-    running: true, locked: false, armed: false, timer: null
+    running: true, locked: false, armed: false, timer: null, pausedAt: null
   };
   $("score").textContent = "0";
   $("hint").textContent = "";
@@ -411,7 +511,7 @@ function startRound() {
   show("game");
   nextCard();
   requestWake();
-  beep(660, 0.2);
+  tone(660, 860, 0.2, "triangle", 0.12);
   round.timer = setInterval(tick, 100);
   tick();
   setTimeout(() => {
@@ -456,13 +556,15 @@ function mark(kind) {
     $("score").textContent = round.right.length;
     g.classList.add("ok");
     setWord("Got it!");
-    beep(880); vibe(60);
+    playRightSound(); vibe(60);
   } else {
     round.skipped.push(round.current);
     g.classList.add("skip");
     setWord("Skip");
-    beep(300); vibe(30);
+    playWrongSound(); vibe(30);
   }
+  tiltKind = null;
+  tiltSince = 0;
   setTimeout(() => {
     if (S !== round || !round.running) return;
     g.classList.remove("ok", "skip");
@@ -485,8 +587,9 @@ function endRound() {
   S.running = false;
   clearInterval(S.timer);
   releaseWake();
+  try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
   $("game").classList.remove("ok", "skip");
-  beep(440, 0.15); setTimeout(() => beep(330, 0.25), 180);
+  playEndSound();
   vibe([80, 60, 80]);
 
   const score = S.right.length;
@@ -518,22 +621,65 @@ function fillList(ul, items) {
 /* ============================================================
    Wiring
    ============================================================ */
-document.querySelectorAll(".seg button").forEach(b => {
+document.querySelectorAll(".duration-options button").forEach(b => {
   b.addEventListener("click", () => {
     roundSecs = Number(b.dataset.secs);
     store.set("roundSecs", roundSecs);
-    renderHome();
+    renderDuration();
   });
 });
 $("playBtn").addEventListener("click", () => show("categories"));
 $("backHome").addEventListener("click", () => show("home"));
+$("durationBack").addEventListener("click", () => show("categories"));
+$("startBtn").addEventListener("click", startSelectedDeck);
+$("orientationRetryBtn").addEventListener("click", startSelectedDeck);
+$("orientationCancelBtn").addEventListener("click", () => {
+  pendingStart = false;
+  if (S && S.running) {
+    S.running = false;
+    clearInterval(S.timer);
+    releaseWake();
+    S = null;
+  }
+  show("duration");
+});
 $("cancelBtn").addEventListener("click", () => { clearInterval(readyTimer); show("categories"); });
 $("quitBtn").addEventListener("click", endRound);
 $("gotBtn").addEventListener("click", () => mark("right"));
 $("skipBtn").addEventListener("click", () => mark("skip"));
-$("againBtn").addEventListener("click", () => startDeck(currentDeckId));
+$("againBtn").addEventListener("click", startSelectedDeck);
 $("decksBtn").addEventListener("click", () => show("categories"));
 $("homeBtn").addEventListener("click", () => show("home"));
+
+function resumeRound() {
+  if (!S || !S.pausedAt || !isLandscape()) return;
+  S.endAt += Date.now() - S.pausedAt;
+  S.pausedAt = null;
+  show("game");
+  S.timer = setInterval(tick, 100);
+  tick();
+}
+
+function handleOrientationChange() {
+  if (!isLandscape()) {
+    if (S && S.running && !S.pausedAt) {
+      S.pausedAt = Date.now();
+      clearInterval(S.timer);
+      S.timer = null;
+      show("orientation");
+    } else if ($("ready").classList.contains("active")) {
+      clearInterval(readyTimer);
+      pendingStart = true;
+      show("orientation");
+    }
+    return;
+  }
+  if (S && S.pausedAt) resumeRound();
+  else if (pendingStart) startSelectedDeck();
+}
+
+window.addEventListener("orientationchange", handleOrientationChange);
+window.addEventListener("resize", handleOrientationChange);
 
 renderHome();
 renderDecks();
