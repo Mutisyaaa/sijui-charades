@@ -20,6 +20,16 @@ CREATE TABLE IF NOT EXISTS public.users (
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_idx
   ON public.users (lower(email));
 
+CREATE TABLE IF NOT EXISTS public.sessions (
+  token_hash text PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  expires_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS sessions_expires_at_idx
+  ON public.sessions(expires_at);
+
 CREATE TABLE IF NOT EXISTS public.decks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
