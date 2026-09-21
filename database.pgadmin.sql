@@ -1,0 +1,74 @@
+-- Sijui Charades - local PostgreSQL / pgAdmin setup
+-- Run the first statement while connected to the postgres database.
+-- Then connect to sijui_charades and run the remaining statements.
+
+CREATE DATABASE sijui_charades;
+
+-- Run everything below after connecting to the sijui_charades database.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE IF NOT EXISTS public.users (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  display_name text NOT NULL,
+  email text NOT NULL,
+  password_hash text NOT NULL,
+  role text NOT NULL DEFAULT 'user' CHECK (role IN ('admin', 'user')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_idx
+  ON public.users (lower(email));
+
+CREATE TABLE IF NOT EXISTS public.decks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  description text,
+  is_published boolean NOT NULL DEFAULT true,
+  created_by uuid NOT NULL REFERENCES public.users(id) ON DELETE RESTRICT,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.cards (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  deck_id uuid NOT NULL REFERENCES public.decks(id) ON DELETE CASCADE,
+  text text NOT NULL CHECK (length(trim(text)) > 0),
+  sort_order integer NOT NULL DEFAULT 0,
+  is_active boolean NOT NULL DEFAULT true,
+  created_by uuid NOT NULL REFERENCES public.users(id) ON DELETE RESTRICT,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS cards_deck_id_idx ON public.cards(deck_id);
+CREATE INDEX IF NOT EXISTS cards_active_idx ON public.cards(deck_id, is_active);
+
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS users_set_updated_at ON public.users;
+CREATE TRIGGER users_set_updated_at
+BEFORE UPDATE ON public.users
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS decks_set_updated_at ON public.decks;
+CREATE TRIGGER decks_set_updated_at
+BEFORE UPDATE ON public.decks
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+DROP TRIGGER IF EXISTS cards_set_updated_at ON public.cards;
+CREATE TRIGGER cards_set_updated_at
+BEFORE UPDATE ON public.cards
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- After your first signup, promote that account to admin:
+-- UPDATE public.users SET role = 'admin' WHERE email = 'you@example.com';
+
