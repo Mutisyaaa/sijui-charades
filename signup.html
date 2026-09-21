@@ -14,10 +14,10 @@
       <h1 id="signup-heading">Create account.</h1>
       <p class="intro">Create an admin account to add, edit, and organise your decks.</p>
 
-      <form class="auth-form" action="#" method="post" onsubmit="return demoSubmit(event)">
+      <form class="auth-form" action="/api/signup" method="post" onsubmit="return handleSignup(event)">
         <div class="field">
           <label for="name">Your name</label>
-          <input id="name" name="name" type="text" autocomplete="name" placeholder="Your name" required>
+          <input id="name" name="displayName" type="text" autocomplete="name" placeholder="Your name" required>
         </div>
         <div class="field">
           <label for="email">Email address</label>
@@ -28,7 +28,7 @@
           <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required>
         </div>
         <button class="primary" type="submit">Create account</button>
-        <p id="formNote" class="form-note" role="status">Account creation will be connected in the next step.</p>
+        <p id="formNote" class="form-note" role="status"></p>
       </form>
 
       <p class="switch-page">Already have an account? <a href="login.html">Log in</a></p>
@@ -36,9 +36,28 @@
     </section>
   </main>
   <script>
-    function demoSubmit(event) {
+    async function handleSignup(event) {
       event.preventDefault();
-      document.getElementById("formNote").textContent = "Signup is ready for backend connection.";
+      const note = document.getElementById("formNote");
+      const form = event.currentTarget;
+      note.textContent = "Creating your accountâ€¦";
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            displayName: form.displayName.value,
+            email: form.email.value,
+            password: form.password.value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Signup failed.");
+        note.textContent = "Account created. Opening the gameâ€¦";
+        window.setTimeout(() => { window.location.href = "Index.html"; }, 500);
+      } catch (error) {
+        note.textContent = error.message;
+      }
       return false;
     }
   </script>
