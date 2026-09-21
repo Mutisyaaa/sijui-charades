@@ -55,6 +55,11 @@ CREATE TABLE IF NOT EXISTS public.cards (
 CREATE INDEX IF NOT EXISTS cards_deck_id_idx ON public.cards(deck_id);
 CREATE INDEX IF NOT EXISTS cards_active_idx ON public.cards(deck_id, is_active);
 
+CREATE TABLE IF NOT EXISTS public.content_seeds (
+  seed_key text PRIMARY KEY,
+  applied_at timestamptz NOT NULL DEFAULT now()
+);
+
 ALTER TABLE public.decks ADD COLUMN IF NOT EXISTS icon text NOT NULL DEFAULT '🎭';
 ALTER TABLE public.decks ADD COLUMN IF NOT EXISTS theme text NOT NULL DEFAULT 'classic';
 ALTER TABLE public.decks ADD COLUMN IF NOT EXISTS cover_url text;

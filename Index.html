@@ -383,46 +383,9 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 <div id="moment" class="moment" aria-live="polite"></div>
 
 <script>
-/* ============================================================
-   CARDS: edit, add or remove freely. Each deck is a list of words.
-   ============================================================ */
-const DECKS = [
-  { id: "chakula", name: "Chakula", sub: "Food and drink", cards: [
-    "Ugali", "Sukuma wiki", "Nyama choma", "Chapati", "Mandazi", "Githeri",
-    "Pilau", "Mutura", "Samosa", "Kachumbari", "Irio", "Mukimo", "Mursik",
-    "Smokie na kachumbari", "Chai ya tangawizi", "Mahindi choma", "Uji",
-    "Mahamri", "Viazi karai", "Ugali na fish", "Matoke"
-  ]},
-  { id: "usafiri", name: "Usafiri", sub: "Getting around", cards: [
-    "Matatu", "Boda boda", "Tuk tuk", "Nganya", "Makanga", "Bus stage",
-    "Madaraka Express", "Nairobi Expressway", "Thika Road traffic",
-    "Kenya Airways", "Bolt ride", "Likoni Ferry", "JKIA", "Pikipiki",
-    "Squeezed into a full matatu", "Window seat", "Lorry", "Traffic police"
-  ]},
-  { id: "sheng", name: "Sheng", sub: "Slang and street talk", cards: [
-    "Msee", "Manzi", "Ganji", "Chapaa", "Mbogi", "Mtaa", "Kejani", "Buda",
-    "Fiti", "Poa", "Sherehe", "Kuchill", "Niaje", "Wueh!", "Aki wewe!",
-    "Kubonga", "Jobless corner", "Mtoi", "Kuna form?", "Mambo vipi"
-  ]},
-  { id: "maisha", name: "Maisha", sub: "Everyday Kenyan life", cards: [
-    "M-Pesa", "Power blackout", "Mama mboga", "Mitumba shopping",
-    "Chama meeting", "Harambee", "Rain in Nairobi traffic", "Going to shags",
-    "Kiosk", "Buying airtime", "Ruracio", "Sunday service",
-    "Premier League at the local", "Bargaining at Gikomba", "Side hustle",
-    "Kanga", "Kikoi", "Jiko", "Tea break", "Fuel price hike"
-  ]},
-  { id: "kenya", name: "Kenya", sub: "Places and pride", cards: [
-    "Maasai Mara", "Mount Kenya", "Diani Beach", "Lamu", "Fort Jesus",
-    "Great Rift Valley", "Hell's Gate", "Lake Nakuru", "KICC", "Uhuru Park",
-    "Karura Forest", "Nairobi National Park", "Safaricom", "Tusker",
-    "Harambee Stars", "Eliud Kipchoge", "Nyayo Stadium", "Kisumu", "Mombasa",
-    "Wildebeest crossing", "Lake Turkana"
-  ]}
-];
-let ALL_DECKS = DECKS.concat([{
-  id: "mix", name: "Everything", sub: "A bit of every deck",
-  cards: DECKS.flatMap(d => d.cards)
-}]);
+// Decks and cards are seeded into PostgreSQL by scripts/init-db.js and loaded below.
+let ALL_DECKS = [];
+let decksLoading = true;
 
 /* ============================================================
    Helpers
@@ -617,21 +580,22 @@ function applyPreferences() {
 async function loadPublishedDecks() {
   try {
     const response = await fetch("/api/decks", { headers: { Accept: "application/json" } });
-    if (!response.ok) return;
+    if (!response.ok) throw new Error("Could not load decks");
     const remote = await response.json();
-    const builtInIds = new Set(DECKS.map(deck => deck.id));
-    const published = remote.filter(deck => Array.isArray(deck.cards) && deck.cards.length && !builtInIds.has(deck.id)).map(deck => ({
+    const published = remote.filter(deck => Array.isArray(deck.cards) && deck.cards.length).map(deck => ({
       ...deck,
       sub: deck.description || "Fresh from the admin studio",
       cards: deck.cards.map(card => ({ text: card.text, category: card.category, difficulty: card.difficulty }))
     }));
-    ALL_DECKS = DECKS.concat(published, [{
+    ALL_DECKS = published.length ? published.concat([{
       id: "mix", name: "Everything", sub: "A bit of every deck",
-      cards: DECKS.flatMap(d => d.cards).concat(published.flatMap(d => d.cards))
-    }]);
-    renderDecks();
+      cards: published.flatMap(d => d.cards)
+    }]) : [];
   } catch (e) {
-    // Built-in decks keep the game playable while a hosted database wakes up.
+    ALL_DECKS = [];
+  } finally {
+    decksLoading = false;
+    renderDecks();
   }
 }
 
@@ -651,6 +615,14 @@ function renderDuration() {
 function renderDecks() {
   const list = $("deckList");
   list.innerHTML = "";
+  if (decksLoading) {
+    list.innerHTML = "<p class=\"empty\">Loading decks…</p>";
+    return;
+  }
+  if (!ALL_DECKS.length) {
+    list.innerHTML = "<p class=\"empty\">No published decks are available yet.</p>";
+    return;
+  }
   ALL_DECKS.forEach(d => {
     const b = document.createElement("button");
     b.type = "button";
