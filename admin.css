@@ -6,7 +6,16 @@
   --cream-muted: #D9D0C1;
   --red: #D9302A;
   --ok: #2F6B55;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font: "Manline Slabs", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@font-face {
+  font-family: "Manline Slabs";
+  src: url("assets/fonts/ManlineSlabs-pgPVy.otf") format("opentype"),
+       url("assets/fonts/ManlineSlabs-xRWVj.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -63,4 +72,3 @@ h1 { margin-bottom: 12px; font-size: clamp(2.6rem, 8vw, 5rem); letter-spacing: -
   .admin-header { align-items: flex-start; flex-direction: column; padding-bottom: 26px; }
   .layout { grid-template-columns: 1fr; }
 }
-

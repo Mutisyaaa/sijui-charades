@@ -4,7 +4,16 @@
   --cream: #F6F0E4;
   --cream-muted: #D9D0C1;
   --red: #D9302A;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font: "Manline Slabs", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@font-face {
+  font-family: "Manline Slabs";
+  src: url("assets/fonts/ManlineSlabs-pgPVy.otf") format("opentype"),
+       url("assets/fonts/ManlineSlabs-xRWVj.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -120,4 +129,3 @@ h1 {
   .auth-shell { padding: 12px; }
   .auth-card { border-radius: 18px; }
 }
-

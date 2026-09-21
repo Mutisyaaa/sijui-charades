@@ -16,12 +16,20 @@
   --chalk: #F6F0E4;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
+@font-face {
+  font-family: "Manline Slabs";
+  src: url("assets/fonts/ManlineSlabs-pgPVy.otf") format("opentype"),
+       url("assets/fonts/ManlineSlabs-xRWVj.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body {
   background: var(--black);
   color: var(--chalk);
-  font-family: var(--font);
+  font-family: "Manline Slabs", var(--font);
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
@@ -128,10 +136,12 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   overflow: hidden;
 }
 #word {
+  font-family: "Manline Slabs", var(--font);
   font-weight: 900;
   letter-spacing: -0.035em;
   line-height: 1;
-  max-width: 100%;
+  max-width: 94%;
+  overflow-wrap: anywhere;
   text-wrap: balance;
 }
 #hint { text-align: center; font-size: 0.95rem; min-height: 1.4em; margin: 0 0 8px; }
@@ -193,10 +203,10 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   </section>
 
   <section id="orientation" class="screen">
-    <div class="rotate-icon" aria-hidden="true">â†”ï¸</div>
+    <div class="rotate-icon" aria-hidden="true">↔️</div>
     <h2>Turn it sideways</h2>
     <p>Landscape mode is the only way to play, so everyone can see the word clearly.</p>
-    <button id="orientationRetryBtn" class="primary" type="button">Iâ€™m ready</button>
+    <button id="orientationRetryBtn" class="primary" type="button">I’m ready</button>
     <button id="orientationCancelBtn" class="ghost" type="button">Cancel</button>
   </section>
 
@@ -411,7 +421,7 @@ function renderHome() {
 function renderDuration() {
   const deck = ALL_DECKS.find(d => d.id === currentDeckId);
   if (!deck) return;
-  $("selectedDeckName").textContent = deck.name + " Â· " + deck.sub;
+  $("selectedDeckName").textContent = deck.name + " · " + deck.sub;
   document.querySelectorAll(".duration-options button").forEach(b => {
     b.setAttribute("aria-pressed", String(Number(b.dataset.secs) === roundSecs));
   });
@@ -536,15 +546,16 @@ function setWord(text) {
 function fit() {
   const el = $("word"), box = $("wordBox");
   if (!box.clientWidth) return;
-  let size = Math.min(box.clientWidth * 0.34, box.clientHeight * 0.7);
+  let size = Math.min(box.clientWidth * 0.16, box.clientHeight * 0.45, 120);
   el.style.fontSize = size + "px";
   let guard = 60;
-  while ((el.scrollWidth > box.clientWidth + 1 || el.offsetHeight > box.clientHeight) && size > 18 && guard--) {
+  while ((el.scrollWidth > box.clientWidth * 0.94 || el.offsetHeight > box.clientHeight * 0.9) && size > 22 && guard--) {
     size *= 0.92;
     el.style.fontSize = size + "px";
   }
 }
 window.addEventListener("resize", () => { if (S && S.running) fit(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fit());
 
 function mark(kind) {
   if (!S || !S.running || S.locked) return;
@@ -686,4 +697,3 @@ renderDecks();
 </script>
 </body>
 </html>
-
