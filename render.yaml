@@ -12,19 +12,10 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: sijui-charades-db
-          property: connectionString
+        sync: false
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
         sync: false
       - key: ADMIN_DISPLAY_NAME
         value: k3v1n
-
-databases:
-  - name: sijui-charades-db
-    plan: free
-    region: frankfurt
-    databaseName: sijui_charades
-    user: sijui_charades
