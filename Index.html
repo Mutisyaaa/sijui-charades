@@ -68,7 +68,7 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 
 /* ---------- home ---------- */
 #home { position: relative; }
-#home .skyline { position: absolute; top: max(18px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); z-index: 0; overflow: hidden; }
+#home .skyline { position: absolute; top: max(18px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); z-index: 0; max-height: 120px; overflow: hidden; }
 #home .skyline::after { content: ""; position: absolute; right: 0; bottom: 0; left: 0; height: 48%; background: linear-gradient(to bottom, transparent, var(--black)); pointer-events: none; }
 #home .skyline img { display: block; width: 100%; height: auto; filter: contrast(1.45) brightness(0.72); opacity: 0.9; }
 #home .home-hero, #home > .spacer, #home > .primary, #home > .home-tools, #home > .best { position: relative; z-index: 1; }
