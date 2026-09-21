@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#11110F">
+<title>Mbogi Charades</title>
+<style>
+:root {
+  --black: #11110F;
+  --black-soft: #22221F;
+  --cream: #F6F0E4;
+  --red: #D9302A;
+  --ok: #2F6B55;
+  --ink: #11110F;
+  --chalk: #F6F0E4;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--black);
+  color: var(--chalk);
+  font-family: var(--font);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: 0;
+  border-radius: 14px;
+  min-height: 52px;
+  padding: 0 20px;
+}
+button:focus-visible { outline: 3px solid var(--cream); outline-offset: 3px; }
+h1, h2, h3 { margin: 0; }
+h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
+
+/* ---------- screens ---------- */
+.screen {
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding:
+    max(20px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+.screen.active { display: flex; }
+.spacer { flex: 1; }
+
+/* ---------- home ---------- */
+#home h1 { font-size: clamp(3.4rem, 17vmin, 7rem); color: var(--cream); }
+#home .tag { max-width: 28ch; font-size: 1.15rem; line-height: 1.4; margin: 1rem 0 0; }
+.seg { display: flex; gap: 8px; margin: 0 0 1rem; padding: 0; border: 0; }
+.seg button { flex: 1; background: var(--black-soft); }
+.seg button[aria-pressed="true"] { background: var(--cream); color: var(--ink); font-weight: 800; }
+.primary {
+  background: var(--cream);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 1.5rem;
+  min-height: 68px;
+  width: 100%;
+}
+.best { margin: 1rem 0 0; opacity: 0.85; text-align: center; }
+
+/* ---------- decks ---------- */
+.top { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+.ghost { background: transparent; border: 2px solid rgba(246, 240, 228, 0.4); }
+#categories h2 { font-size: 2.4rem; }
+#deckList {
+  display: grid;
+  gap: 10px;
+  margin-top: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+}
+.deck {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  background: var(--black-soft);
+  padding: 16px 18px;
+  min-height: 76px;
+}
+.deck b { display: block; font-size: 1.35rem; }
+.deck small { opacity: 0.75; font-size: 0.95rem; }
+.deck .n { font-size: 1.1rem; font-weight: 800; color: var(--cream); }
+
+/* ---------- ready ---------- */
+#ready { background: var(--black); align-items: center; justify-content: center; text-align: center; }
+#ready p { font-size: 1.4rem; max-width: 24ch; margin: 0 0 0.5rem; }
+#count { font-size: clamp(8rem, 45vmin, 20rem); font-weight: 900; color: var(--cream); line-height: 1; }
+.pop { animation: pop 0.6s ease-out; }
+@keyframes pop { from { transform: scale(1.35); opacity: 0.3; } to { transform: scale(1); opacity: 1; } }
+#ready .ghost { margin-top: 1.5rem; }
+
+/* ---------- game ---------- */
+#game { background: var(--cream); color: var(--ink); transition: background 0.12s; }
+#game.ok { background: var(--ok); color: #fff; }
+#game.skip { background: var(--red); color: #fff; }
+.hud { display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 1.7rem; }
+.mini { min-height: 40px; font-size: 0.9rem; padding: 0 14px; background: transparent; border: 2px solid currentColor; }
+.bar { height: 10px; background: rgba(17, 17, 15, 0.18); border-radius: 99px; overflow: hidden; margin: 10px 0; }
+#barFill { display: block; height: 100%; background: currentColor; transform-origin: left; }
+#wordBox {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+#word {
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  max-width: 100%;
+  text-wrap: balance;
+}
+#hint { text-align: center; font-size: 0.95rem; min-height: 1.4em; margin: 0 0 8px; }
+.pads { display: flex; gap: 10px; }
+.pads button { flex: 1; background: transparent; border: 2px solid currentColor; font-weight: 800; }
+.low { color: var(--red); }
+#game.ok .low, #game.skip .low { color: inherit; }
+
+/* ---------- results ---------- */
+#results h2 { font-size: 1.6rem; }
+#finalScore { font-size: clamp(5rem, 28vmin, 12rem); color: var(--cream); font-weight: 900; line-height: 0.9; margin-top: 0.5rem; }
+#resultNote { font-size: 1.1rem; margin: 0.5rem 0 0; }
+.lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin: 1.25rem 0; }
+.lists h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+.lists ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.lists li { background: var(--black-soft); padding: 6px 12px; border-radius: 99px; font-size: 0.95rem; }
+.lists .missed li { opacity: 0.7; }
+.actions { display: grid; gap: 10px; margin-top: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pop { animation: none; }
+  #game { transition: none; }
+}
+</style>
+</head>
+<body>
+<main>
+
+  <section id="home" class="screen active">
+    <h1>Mbogi<br>Charades</h1>
+    <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
+    <div class="spacer"></div>
+    <fieldset class="seg" aria-label="Round length">
+      <button type="button" data-secs="60">60s</button>
+      <button type="button" data-secs="90">90s</button>
+      <button type="button" data-secs="120">120s</button>
+    </fieldset>
+    <button id="playBtn" class="primary" type="button">Play</button>
+    <p id="best" class="best"></p>
+  </section>
+
+  <section id="categories" class="screen">
+    <div class="top">
+      <button id="backHome" class="ghost" type="button" aria-label="Back to home">Back</button>
+    </div>
+    <h2>Pick a deck</h2>
+    <div id="deckList"></div>
+  </section>
+
+  <section id="ready" class="screen">
+    <p>Phone on your forehead, screen facing your friends.</p>
+    <div id="count" aria-live="polite">5</div>
+    <button id="cancelBtn" class="ghost" type="button">Cancel</button>
+  </section>
+
+  <section id="game" class="screen">
+    <div class="hud">
+      <span id="timeLeft">60</span>
+      <button id="quitBtn" class="mini" type="button">End round</button>
+      <span id="score">0</span>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div id="wordBox"><h2 id="word"></h2></div>
+    <p id="hint"></p>
+    <div class="pads">
+      <button id="skipBtn" type="button">Skip</button>
+      <button id="gotBtn" type="button">Got it</button>
+    </div>
+  </section>
+
+  <section id="results" class="screen">
+    <h2>Time's up</h2>
+    <div id="finalScore">0</div>
+    <p id="resultNote"></p>
+    <div class="lists">
+      <div><h3>Got it</h3><ul id="rightList"></ul></div>
+      <div class="missed"><h3>Skipped</h3><ul id="skipList"></ul></div>
+    </div>
+    <div class="actions">
+      <button id="againBtn" class="primary" type="button">Play this deck again</button>
+      <button id="decksBtn" class="ghost" type="button">Pick another deck</button>
+      <button id="homeBtn" class="ghost" type="button">Home</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ============================================================
+   CARDS: edit, add or remove freely. Each deck is a list of words.
+   ============================================================ */
+const DECKS = [
+  { id: "chakula", name: "Chakula", sub: "Food and drink", cards: [
+    "Ugali", "Sukuma wiki", "Nyama choma", "Chapati", "Mandazi", "Githeri",
+    "Pilau", "Mutura", "Samosa", "Kachumbari", "Irio", "Mukimo", "Mursik",
+    "Smokie na kachumbari", "Chai ya tangawizi", "Mahindi choma", "Uji",
+    "Mahamri", "Viazi karai", "Ugali na fish", "Matoke"
+  ]},
+  { id: "usafiri", name: "Usafiri", sub: "Getting around", cards: [
+    "Matatu", "Boda boda", "Tuk tuk", "Nganya", "Makanga", "Bus stage",
+    "Madaraka Express", "Nairobi Expressway", "Thika Road traffic",
+    "Kenya Airways", "Bolt ride", "Likoni Ferry", "JKIA", "Pikipiki",
+    "Squeezed into a full matatu", "Window seat", "Lorry", "Traffic police"
+  ]},
+  { id: "sheng", name: "Sheng", sub: "Slang and street talk", cards: [
+    "Msee", "Manzi", "Ganji", "Chapaa", "Mbogi", "Mtaa", "Kejani", "Buda",
+    "Fiti", "Poa", "Sherehe", "Kuchill", "Niaje", "Wueh!", "Aki wewe!",
+    "Kubonga", "Jobless corner", "Mtoi", "Kuna form?", "Mambo vipi"
+  ]},
+  { id: "maisha", name: "Maisha", sub: "Everyday Kenyan life", cards: [
+    "M-Pesa", "Power blackout", "Mama mboga", "Mitumba shopping",
+    "Chama meeting", "Harambee", "Rain in Nairobi traffic", "Going to shags",
+    "Kiosk", "Buying airtime", "Ruracio", "Sunday service",
+    "Premier League at the local", "Bargaining at Gikomba", "Side hustle",
+    "Kanga", "Kikoi", "Jiko", "Tea break", "Fuel price hike"
+  ]},
+  { id: "kenya", name: "Kenya", sub: "Places and pride", cards: [
+    "Maasai Mara", "Mount Kenya", "Diani Beach", "Lamu", "Fort Jesus",
+    "Great Rift Valley", "Hell's Gate", "Lake Nakuru", "KICC", "Uhuru Park",
+    "Karura Forest", "Nairobi National Park", "Safaricom", "Tusker",
+    "Harambee Stars", "Eliud Kipchoge", "Nyayo Stadium", "Kisumu", "Mombasa",
+    "Wildebeest crossing", "Lake Turkana"
+  ]}
+];
+const ALL_DECKS = DECKS.concat([{
+  id: "mix", name: "Everything", sub: "A bit of every deck",
+  cards: DECKS.flatMap(d => d.cards)
+}]);
+
+/* ============================================================
+   Helpers
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+/* ============================================================
+   Sound, vibration, wake lock
+   ============================================================ */
+let ac;
+function initAudio() {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === "suspended") ac.resume();
+  } catch (e) {}
+}
+function beep(freq, dur = 0.12) {
+  if (!ac) return;
+  try {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = "sine"; o.frequency.value = freq; g.gain.value = 0.15;
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch (e) {}
+}
+function vibe(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
+let wake = null;
+async function requestWake() {
+  try { if ("wakeLock" in navigator) wake = await navigator.wakeLock.request("screen"); } catch (e) {}
+}
+function releaseWake() { try { wake && wake.release(); } catch (e) {} wake = null; }
+
+/* ============================================================
+   Tilt sensor
+   Screen facing the floor = correct. Screen facing the ceiling = skip.
+   iOS reports the z axis with the opposite sign to Android, so SIGN
+   flips it. If tilt feels backwards on a device, change SIGN.
+   ============================================================ */
+const NEEDS_PERMISSION = typeof DeviceMotionEvent !== "undefined" &&
+                         typeof DeviceMotionEvent.requestPermission === "function";
+const SIGN = NEEDS_PERMISSION ? -1 : 1;
+const TILT_AT = 6;     // m/sÂ² beyond which a tilt counts
+const UPRIGHT_AT = 3;  // must come back inside this before the next tilt counts
+let motionListening = false, motionSeen = false, motionDenied = false;
+
+async function ensureMotion() {
+  if (motionListening) return;
+  motionDenied = false;
+  if (NEEDS_PERMISSION) {
+    try {
+      const r = await DeviceMotionEvent.requestPermission(); // must run inside a tap
+      if (r !== "granted") { motionDenied = true; return; }
+    } catch (e) { motionDenied = true; return; }
+  }
+  window.addEventListener("devicemotion", onMotion);
+  motionListening = true;
+}
+
+function onMotion(e) {
+  const a = e.accelerationIncludingGravity;
+  if (!a || a.z == null) return;
+  motionSeen = true;
+  if (!S || !S.running) return;
+  const z = a.z * SIGN;                       // positive = screen faces up
+  if (Math.abs(z) < UPRIGHT_AT) { S.armed = true; return; }
+  if (!S.armed || S.locked) return;
+  if (z < -TILT_AT) mark("right");
+  else if (z > TILT_AT) mark("skip");
+}
+
+/* ============================================================
+   Game state
+   ============================================================ */
+let S = null;                                  // current round
+let currentDeckId = null;
+let roundSecs = store.get("roundSecs", 60);
+let best = store.get("best", 0);
+let readyTimer = null;
+
+function renderHome() {
+  document.querySelectorAll(".seg button").forEach(b => {
+    b.setAttribute("aria-pressed", String(Number(b.dataset.secs) === roundSecs));
+  });
+  $("best").textContent = best ? "Best round: " + best : "";
+}
+
+function renderDecks() {
+  const list = $("deckList");
+  list.innerHTML = "";
+  ALL_DECKS.forEach(d => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "deck";
+    const left = document.createElement("div");
+    const name = document.createElement("b");
+    name.textContent = d.name;
+    const sub = document.createElement("small");
+    sub.textContent = d.sub;
+    left.append(name, sub);
+    const n = document.createElement("span");
+    n.className = "n";
+    n.textContent = d.cards.length;
+    b.append(left, n);
+    b.addEventListener("click", () => startDeck(d.id));
+    list.appendChild(b);
+  });
+}
+
+async function startDeck(id) {
+  currentDeckId = id;
+  initAudio();
+  await ensureMotion();                         // permission prompt on iOS
+  show("ready");
+  let n = 5;
+  const count = $("count");
+  const paint = () => { count.textContent = n; count.classList.remove("pop"); void count.offsetWidth; count.classList.add("pop"); };
+  paint();
+  clearInterval(readyTimer);
+  readyTimer = setInterval(() => {
+    n--;
+    if (n <= 0) { clearInterval(readyTimer); startRound(); return; }
+    beep(520, 0.08);
+    paint();
+  }, 1000);
+}
+
+function startRound() {
+  const deck = ALL_DECKS.find(d => d.id === currentDeckId);
+  const round = S = {
+    deck, queue: shuffle(deck.cards), i: 0,
+    right: [], skipped: [], current: null,
+    total: roundSecs * 1000, endAt: Date.now() + roundSecs * 1000,
+    running: true, locked: false, armed: false, timer: null
+  };
+  $("score").textContent = "0";
+  $("hint").textContent = "";
+  $("game").classList.remove("ok", "skip");
+  show("game");
+  nextCard();
+  requestWake();
+  beep(660, 0.2);
+  round.timer = setInterval(tick, 100);
+  tick();
+  setTimeout(() => {
+    if (S !== round || !round.running || motionSeen) return;
+    $("hint").textContent = motionDenied
+      ? "Motion access was blocked. Use the buttons below."
+      : "Tilt isn't available on this device. Use the buttons below.";
+  }, 1500);
+}
+
+function nextCard() {
+  if (S.i >= S.queue.length) { S.queue = shuffle(S.deck.cards); S.i = 0; }
+  S.current = S.queue[S.i++];
+  setWord(S.current);
+}
+
+function setWord(text) {
+  $("word").textContent = text;
+  fit();
+}
+
+function fit() {
+  const el = $("word"), box = $("wordBox");
+  if (!box.clientWidth) return;
+  let size = Math.min(box.clientWidth * 0.34, box.clientHeight * 0.7);
+  el.style.fontSize = size + "px";
+  let guard = 60;
+  while ((el.scrollWidth > box.clientWidth + 1 || el.offsetHeight > box.clientHeight) && size > 18 && guard--) {
+    size *= 0.92;
+    el.style.fontSize = size + "px";
+  }
+}
+window.addEventListener("resize", () => { if (S && S.running) fit(); });
+
+function mark(kind) {
+  if (!S || !S.running || S.locked) return;
+  const round = S, g = $("game");
+  round.locked = true;
+  round.armed = false;
+  if (kind === "right") {
+    round.right.push(round.current);
+    $("score").textContent = round.right.length;
+    g.classList.add("ok");
+    setWord("Got it!");
+    beep(880); vibe(60);
+  } else {
+    round.skipped.push(round.current);
+    g.classList.add("skip");
+    setWord("Skip");
+    beep(300); vibe(30);
+  }
+  setTimeout(() => {
+    if (S !== round || !round.running) return;
+    g.classList.remove("ok", "skip");
+    round.locked = false;
+    nextCard();
+  }, 650);
+}
+
+function tick() {
+  if (!S || !S.running) return;
+  const left = Math.max(0, S.endAt - Date.now());
+  $("timeLeft").textContent = Math.ceil(left / 1000);
+  $("timeLeft").classList.toggle("low", left <= 10000);
+  $("barFill").style.transform = "scaleX(" + (left / S.total) + ")";
+  if (left <= 0) endRound();
+}
+
+function endRound() {
+  if (!S || !S.running) return;
+  S.running = false;
+  clearInterval(S.timer);
+  releaseWake();
+  $("game").classList.remove("ok", "skip");
+  beep(440, 0.15); setTimeout(() => beep(330, 0.25), 180);
+  vibe([80, 60, 80]);
+
+  const score = S.right.length;
+  let note = "Best round: " + best;
+  if (score > best) { best = score; store.set("best", best); note = "New best round!"; }
+  $("finalScore").textContent = score;
+  $("resultNote").textContent = note;
+  fillList($("rightList"), S.right);
+  fillList($("skipList"), S.skipped);
+  renderHome();
+  show("results");
+}
+
+function fillList(ul, items) {
+  ul.innerHTML = "";
+  if (!items.length) {
+    const li = document.createElement("li");
+    li.textContent = "None";
+    ul.appendChild(li);
+    return;
+  }
+  items.forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    ul.appendChild(li);
+  });
+}
+
+/* ============================================================
+   Wiring
+   ============================================================ */
+document.querySelectorAll(".seg button").forEach(b => {
+  b.addEventListener("click", () => {
+    roundSecs = Number(b.dataset.secs);
+    store.set("roundSecs", roundSecs);
+    renderHome();
+  });
+});
+$("playBtn").addEventListener("click", () => show("categories"));
+$("backHome").addEventListener("click", () => show("home"));
+$("cancelBtn").addEventListener("click", () => { clearInterval(readyTimer); show("categories"); });
+$("quitBtn").addEventListener("click", endRound);
+$("gotBtn").addEventListener("click", () => mark("right"));
+$("skipBtn").addEventListener("click", () => mark("skip"));
+$("againBtn").addEventListener("click", () => startDeck(currentDeckId));
+$("decksBtn").addEventListener("click", () => show("categories"));
+$("homeBtn").addEventListener("click", () => show("home"));
+
+renderHome();
+renderDecks();
+</script>
+</body>
+</html>
+
