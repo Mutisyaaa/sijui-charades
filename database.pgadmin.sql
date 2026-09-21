@@ -34,6 +34,9 @@ CREATE TABLE IF NOT EXISTS public.decks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   description text,
+  icon text NOT NULL DEFAULT '🎭',
+  theme text NOT NULL DEFAULT 'classic',
+  cover_url text,
   is_published boolean NOT NULL DEFAULT true,
   created_by uuid NOT NULL REFERENCES public.users(id) ON DELETE RESTRICT,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -44,6 +47,8 @@ CREATE TABLE IF NOT EXISTS public.cards (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   deck_id uuid NOT NULL REFERENCES public.decks(id) ON DELETE CASCADE,
   text text NOT NULL CHECK (length(trim(text)) > 0),
+  category text NOT NULL DEFAULT 'General',
+  difficulty text NOT NULL DEFAULT 'medium',
   sort_order integer NOT NULL DEFAULT 0,
   is_active boolean NOT NULL DEFAULT true,
   created_by uuid NOT NULL REFERENCES public.users(id) ON DELETE RESTRICT,
@@ -53,6 +58,12 @@ CREATE TABLE IF NOT EXISTS public.cards (
 
 CREATE INDEX IF NOT EXISTS cards_deck_id_idx ON public.cards(deck_id);
 CREATE INDEX IF NOT EXISTS cards_active_idx ON public.cards(deck_id, is_active);
+
+ALTER TABLE public.decks ADD COLUMN IF NOT EXISTS icon text NOT NULL DEFAULT '🎭';
+ALTER TABLE public.decks ADD COLUMN IF NOT EXISTS theme text NOT NULL DEFAULT 'classic';
+ALTER TABLE public.decks ADD COLUMN IF NOT EXISTS cover_url text;
+ALTER TABLE public.cards ADD COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'General';
+ALTER TABLE public.cards ADD COLUMN IF NOT EXISTS difficulty text NOT NULL DEFAULT 'medium';
 
 CREATE OR REPLACE FUNCTION public.set_updated_at()
 RETURNS trigger
@@ -81,4 +92,3 @@ FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- After your first signup, promote that account to admin:
 -- UPDATE public.users SET role = 'admin' WHERE email = 'you@example.com';
-

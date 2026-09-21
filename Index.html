@@ -35,6 +35,9 @@ body {
   user-select: none;
   touch-action: manipulation;
 }
+body.readable #word { letter-spacing: -0.02em; }
+body.high-contrast { --black: #FFFDF7; --black-soft: #E8E1D5; --cream: #000000; --ink: #FFFFFF; --chalk: #000000; --red: #B00020; --ok: #075E3D; }
+body.reduce-motion *, body.reduce-motion *::before, body.reduce-motion *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: 0.001ms !important; }
 button {
   font: inherit;
   color: inherit;
@@ -75,6 +78,31 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   width: 100%;
 }
 .best { margin: 1rem 0 0; opacity: 0.85; text-align: center; }
+.home-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.settings { border: 1px solid rgba(17, 17, 15, 0.18); border-radius: 14px; padding: 10px 14px; }
+.settings summary { cursor: pointer; font-weight: 900; }
+.settings-grid { display: grid; gap: 10px; margin-top: 12px; font-size: 0.9rem; }
+.settings-grid label { display: flex; align-items: center; gap: 8px; }
+.settings-grid input[type="range"] { width: 120px; accent-color: var(--cream); }
+.settings-grid input[type="checkbox"] { accent-color: var(--cream); }
+
+/* ---------- tutorial / setup ---------- */
+#tutorial, #setup { justify-content: center; align-items: center; text-align: center; }
+#tutorial h2, #setup h2 { font-size: clamp(2.4rem, 9vmin, 4rem); }
+.tutorial-copy { width: min(620px, 100%); margin: 0.8rem 0 1.4rem; line-height: 1.45; opacity: 0.88; }
+.how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(700px, 100%); margin: 0 0 1.4rem; }
+.how-card { padding: 14px 10px; background: var(--black-soft); border-radius: 14px; }
+.how-card span { display: block; font-size: 2rem; margin-bottom: 5px; }
+.how-card b { display: block; font-size: 0.95rem; }
+.how-card small { display: block; margin-top: 3px; opacity: 0.72; }
+.mode-options { display: flex; gap: 10px; width: min(560px, 100%); margin: 1rem 0; }
+.mode-options button { flex: 1; background: var(--black-soft); font-weight: 900; }
+.mode-options button[aria-pressed="true"] { color: var(--ink); background: var(--cream); }
+.team-fields { display: none; width: min(560px, 100%); gap: 10px; grid-template-columns: repeat(2, 1fr); margin-bottom: 1rem; }
+.team-fields.visible { display: grid; }
+.team-fields input { width: 100%; min-height: 48px; padding: 0 14px; color: var(--chalk); background: var(--black-soft); border: 2px solid transparent; border-radius: 12px; font: inherit; }
+.team-fields input:focus { border-color: var(--cream); outline: none; }
+#setup .ghost { margin-top: 1rem; }
 
 /* ---------- decks ---------- */
 .top { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
@@ -99,6 +127,16 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   box-shadow: 0 8px 0 rgba(17, 17, 15, 0.12), 0 16px 28px rgba(17, 17, 15, 0.08);
   transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 }
+.deck .deck-copy { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 12px; }
+.deck .deck-icon { display: grid; place-items: center; width: 44px; height: 44px; background: var(--cream); color: var(--ink); border-radius: 13px; font-size: 1.55rem; }
+.deck .deck-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.deck .difficulty { font-size: 0.72rem; text-transform: capitalize; opacity: 0.65; }
+.deck.has-cover { min-height: 112px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
+.deck.has-cover::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(17,17,15,.88), rgba(17,17,15,.36)); }
+.deck.has-cover > * { position: relative; }
+.deck.theme-sunset .deck-icon { background: #e58b5c; }
+.deck.theme-mint .deck-icon { background: #79bfa4; }
+.deck.theme-berry .deck-icon { background: #c47a9c; }
 .deck:hover, .deck:focus-visible {
   color: var(--ink);
   background: var(--cream);
@@ -146,6 +184,9 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 #game.ok { background: var(--ok); color: #fff; }
 #game.skip { background: var(--red); color: #fff; }
 .hud { display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 1.7rem; }
+.hud-center { display: grid; justify-items: center; gap: 1px; }
+#teamTurn { font-size: 0.78rem; opacity: 0.76; }
+#streak { font-size: 0.8rem; min-height: 1.2em; color: var(--red); }
 .mini { min-height: 40px; font-size: 0.9rem; padding: 0 14px; background: transparent; border: 2px solid currentColor; }
 .bar { height: 10px; background: rgba(17, 17, 15, 0.18); border-radius: 99px; overflow: hidden; margin: 10px 0; }
 #barFill { display: block; height: 100%; background: currentColor; transform-origin: left; }
@@ -177,6 +218,14 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 #results h2 { font-size: 1.6rem; }
 #finalScore { font-size: clamp(5rem, 28vmin, 12rem); color: var(--cream); font-weight: 900; line-height: 0.9; margin-top: 0.5rem; }
 #resultNote { font-size: 1.1rem; margin: 0.5rem 0 0; }
+#teamResults { display: none; margin: 1rem 0; padding: 12px 14px; background: var(--black-soft); border-radius: 14px; font-weight: 800; }
+#teamResults.visible { display: block; }
+#confetti { pointer-events: none; position: fixed; inset: 0; z-index: 10; overflow: hidden; }
+.confetti-bit { position: absolute; top: -15px; width: 10px; height: 18px; background: var(--cream); animation: fall 1s ease-out forwards; }
+@keyframes fall { to { transform: translate3d(var(--x), 110vh, 0) rotate(720deg); opacity: 0; } }
+.moment { position: fixed; left: 50%; bottom: 18%; z-index: 11; transform: translateX(-50%); padding: 10px 16px; color: var(--ink); background: var(--cream); border-radius: 999px; font-weight: 900; opacity: 0; pointer-events: none; }
+.moment.show { animation: moment 1s ease-out; }
+@keyframes moment { 0% { opacity: 0; transform: translate(-50%, 12px) scale(.9); } 18%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px) scale(1.03); } }
 .lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin: 1.25rem 0; }
 .lists h3 { font-size: 1rem; margin-bottom: 0.5rem; }
 .lists ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
@@ -188,6 +237,11 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   .pop { animation: none; }
   #game { transition: none; }
 }
+@media (max-width: 560px) {
+  .how-grid { grid-template-columns: 1fr; }
+  .how-card { display: grid; grid-template-columns: 40px 1fr; text-align: left; align-items: center; column-gap: 8px; }
+  .how-card span { grid-row: span 2; }
+}
 </style>
 </head>
 <body>
@@ -198,7 +252,32 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
     <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
     <div class="spacer"></div>
     <button id="playBtn" class="primary" type="button">Play</button>
+    <div class="home-tools">
+      <span>Ready to embarrass your friends?</span>
+      <details id="settingsPanel" class="settings">
+        <summary>Settings</summary>
+        <div class="settings-grid">
+          <label><input id="soundToggle" type="checkbox"> Sound on</label>
+          <label>Volume <input id="volumeControl" type="range" min="0" max="1" step="0.05"></label>
+          <label><input id="readableToggle" type="checkbox"> Extra readable text</label>
+          <label><input id="contrastToggle" type="checkbox"> High contrast</label>
+          <label><input id="motionToggle" type="checkbox"> Reduce motion</label>
+        </div>
+      </details>
+    </div>
     <p id="best" class="best"></p>
+  </section>
+
+  <section id="tutorial" class="screen">
+    <h2>How to play</h2>
+    <p class="tutorial-copy">One player holds the phone to their forehead. Everyone else acts. Tilt down when they guess it, tilt up when the word is a menace. No talking to the phone, it has enough attitude already.</p>
+    <div class="how-grid">
+      <div class="how-card"><span>📱</span><b>Hold it up</b><small>Landscape, screen facing friends</small></div>
+      <div class="how-card"><span>🎭</span><b>Act it out</b><small>Friends give clues without saying it</small></div>
+      <div class="how-card"><span>↕️</span><b>Tilt to score</b><small>Down = got it, up = skip</small></div>
+    </div>
+    <button id="tutorialNext" class="primary" type="button">Choose a deck</button>
+    <button id="tutorialBack" class="ghost" type="button">Back</button>
   </section>
 
   <section id="categories" class="screen">
@@ -221,8 +300,25 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
       <button type="button" data-secs="90" aria-pressed="false">90s</button>
       <button type="button" data-secs="120" aria-pressed="false">120s</button>
     </fieldset>
-    <button id="startBtn" class="primary" type="button">Start round</button>
+    <button id="startBtn" class="primary" type="button">Continue</button>
     <div class="spacer"></div>
+  </section>
+
+  <section id="setup" class="screen">
+    <h2>Set the vibe</h2>
+    <p class="tutorial-copy">Choose solo score-chasing or pass the phone around with teams.</p>
+    <div class="mode-options" aria-label="Game mode">
+      <button type="button" data-mode="solo" aria-pressed="true">Solo score</button>
+      <button type="button" data-mode="team" aria-pressed="false">Team battle</button>
+    </div>
+    <div id="teamFields" class="team-fields">
+      <input id="teamA" maxlength="24" value="Team A" aria-label="First team name">
+      <input id="teamB" maxlength="24" value="Team B" aria-label="Second team name">
+      <input id="teamC" maxlength="24" placeholder="Team C (optional)" aria-label="Third team name">
+      <input id="teamD" maxlength="24" placeholder="Team D (optional)" aria-label="Fourth team name">
+    </div>
+    <button id="setupStart" class="primary" type="button">Start round</button>
+    <button id="setupBack" class="ghost" type="button">Back</button>
   </section>
 
   <section id="orientation" class="screen">
@@ -242,6 +338,7 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   <section id="game" class="screen">
     <div class="hud">
       <span id="timeLeft">60</span>
+      <div class="hud-center"><span id="teamTurn">Your turn</span><span id="streak"></span></div>
       <button id="quitBtn" class="mini" type="button">End round</button>
       <span id="score">0</span>
     </div>
@@ -258,6 +355,7 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
     <h2>Time's up</h2>
     <div id="finalScore">0</div>
     <p id="resultNote"></p>
+    <div id="teamResults"></div>
     <div class="lists">
       <div><h3>Got it</h3><ul id="rightList"></ul></div>
       <div class="missed"><h3>Skipped</h3><ul id="skipList"></ul></div>
@@ -270,6 +368,8 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   </section>
 
 </main>
+<div id="confetti" aria-hidden="true"></div>
+<div id="moment" class="moment" aria-live="polite"></div>
 
 <script>
 /* ============================================================
@@ -308,7 +408,7 @@ const DECKS = [
     "Wildebeest crossing", "Lake Turkana"
   ]}
 ];
-const ALL_DECKS = DECKS.concat([{
+let ALL_DECKS = DECKS.concat([{
   id: "mix", name: "Everything", sub: "A bit of every deck",
   cards: DECKS.flatMap(d => d.cards)
 }]);
@@ -339,6 +439,9 @@ function show(id) {
    Sound, vibration, wake lock
    ============================================================ */
 let ac;
+let soundMuted = store.get("soundMuted", false);
+let soundVolume = store.get("soundVolume", 0.7);
+const customAudio = {};
 function initAudio() {
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
@@ -346,7 +449,7 @@ function initAudio() {
   } catch (e) {}
 }
 function tone(startFreq, endFreq, dur = 0.12, type = "sine", gain = 0.12, delay = 0) {
-  if (!ac) return;
+  if (!ac || soundMuted || soundVolume <= 0) return;
   try {
     const now = ac.currentTime + delay;
     const o = ac.createOscillator(), g = ac.createGain();
@@ -354,24 +457,40 @@ function tone(startFreq, endFreq, dur = 0.12, type = "sine", gain = 0.12, delay 
     o.frequency.setValueAtTime(startFreq, now);
     o.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), now + dur);
     g.gain.setValueAtTime(0.001, now);
-    g.gain.exponentialRampToValueAtTime(gain, now + 0.02);
+    g.gain.exponentialRampToValueAtTime(gain * soundVolume, now + 0.02);
     g.gain.exponentialRampToValueAtTime(0.001, now + dur);
     o.connect(g); g.connect(ac.destination);
     o.start(now); o.stop(now + dur + 0.02);
   } catch (e) {}
 }
+function playCustomSound(name, fallback) {
+  if (soundMuted || soundVolume <= 0) return fallback();
+  try {
+    const src = `assets/sounds/${name}.mp3`;
+    const audio = customAudio[name] || (customAudio[name] = new Audio(src));
+    audio.volume = soundVolume;
+    audio.currentTime = 0;
+    audio.play().catch(() => fallback());
+  } catch (e) { fallback(); }
+}
 function playCountdownSound() { tone(520, 520, 0.08, "square", 0.08); }
 function playRightSound() {
-  tone(420, 720, 0.12, "triangle", 0.15);
-  tone(680, 1120, 0.18, "square", 0.1, 0.08);
+  playCustomSound("right", () => {
+    tone(420, 720, 0.12, "triangle", 0.15);
+    tone(680, 1120, 0.18, "square", 0.1, 0.08);
+  });
 }
 function playWrongSound() {
-  tone(260, 120, 0.22, "sawtooth", 0.13);
-  tone(170, 90, 0.24, "square", 0.09, 0.16);
+  playCustomSound("wrong", () => {
+    tone(260, 120, 0.22, "sawtooth", 0.13);
+    tone(170, 90, 0.24, "square", 0.09, 0.16);
+  });
 }
 function playEndSound() {
-  tone(520, 310, 0.25, "triangle", 0.12);
-  tone(240, 110, 0.35, "sawtooth", 0.08, 0.2);
+  playCustomSound("end", () => {
+    tone(520, 310, 0.25, "triangle", 0.12);
+    tone(240, 110, 0.35, "sawtooth", 0.08, 0.2);
+  });
 }
 function vibe(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} }
 let wake = null;
@@ -436,6 +555,74 @@ let roundSecs = store.get("roundSecs", 60);
 let best = store.get("best", 0);
 let readyTimer = null;
 let pendingStart = false;
+let gameMode = store.get("gameMode", "solo");
+let teamNames = store.get("teamNames", ["Team A", "Team B"]);
+
+function cardText(card) { return typeof card === "string" ? card : card.text; }
+function cardMeta(card) {
+  if (!card || typeof card === "string") return "Tilt down for got it · up to skip";
+  return `${card.category || "General"} · ${card.difficulty || "medium"}`;
+}
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+}
+function showMoment(message) {
+  const el = $("moment");
+  el.textContent = message;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+}
+function celebrate() {
+  if (store.get("reduceMotion", false)) return;
+  const layer = $("confetti");
+  layer.innerHTML = "";
+  for (let i = 0; i < 28; i++) {
+    const bit = document.createElement("i");
+    bit.className = "confetti-bit";
+    bit.style.left = `${Math.random() * 100}%`;
+    bit.style.setProperty("--x", `${(Math.random() - 0.5) * 180}px`);
+    bit.style.background = ["#11110F", "#D9302A", "#2F6B55", "#F6F0E4"][i % 4];
+    bit.style.animationDelay = `${Math.random() * 0.18}s`;
+    layer.appendChild(bit);
+  }
+  setTimeout(() => { layer.innerHTML = ""; }, 1400);
+}
+
+function applyPreferences() {
+  const readable = store.get("readable", false);
+  const highContrast = store.get("highContrast", false);
+  const reduceMotion = store.get("reduceMotion", false);
+  document.body.classList.toggle("readable", readable);
+  document.body.classList.toggle("high-contrast", highContrast);
+  document.body.classList.toggle("reduce-motion", reduceMotion);
+  $("soundToggle").checked = !soundMuted;
+  $("volumeControl").value = soundVolume;
+  $("readableToggle").checked = readable;
+  $("contrastToggle").checked = highContrast;
+  $("motionToggle").checked = reduceMotion;
+}
+
+async function loadPublishedDecks() {
+  try {
+    const response = await fetch("/api/decks", { headers: { Accept: "application/json" } });
+    if (!response.ok) return;
+    const remote = await response.json();
+    const builtInIds = new Set(DECKS.map(deck => deck.id));
+    const published = remote.filter(deck => Array.isArray(deck.cards) && deck.cards.length && !builtInIds.has(deck.id)).map(deck => ({
+      ...deck,
+      sub: deck.description || "Fresh from the admin studio",
+      cards: deck.cards.map(card => ({ text: card.text, category: card.category, difficulty: card.difficulty }))
+    }));
+    ALL_DECKS = DECKS.concat(published, [{
+      id: "mix", name: "Everything", sub: "A bit of every deck",
+      cards: DECKS.flatMap(d => d.cards).concat(published.flatMap(d => d.cards))
+    }]);
+    renderDecks();
+  } catch (e) {
+    // Built-in decks keep the game playable while a hosted database wakes up.
+  }
+}
 
 function renderHome() {
   $("best").textContent = best ? "Best round: " + best : "";
@@ -456,13 +643,31 @@ function renderDecks() {
   ALL_DECKS.forEach(d => {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "deck";
+    b.className = `deck theme-${d.theme || "classic"}`;
+    if (d.cover_url) {
+      b.classList.add("has-cover");
+      b.style.backgroundImage = `url(${JSON.stringify(d.cover_url)})`;
+    }
     const left = document.createElement("div");
+    left.className = "deck-copy";
+    const icon = document.createElement("span");
+    icon.className = "deck-icon";
+    icon.textContent = d.icon || "🎭";
+    const copy = document.createElement("div");
+    copy.className = "deck-copy-text";
     const name = document.createElement("b");
     name.textContent = d.name;
     const sub = document.createElement("small");
     sub.textContent = d.sub;
-    left.append(name, sub);
+    const meta = document.createElement("span");
+    meta.className = "deck-meta";
+    const difficulty = document.createElement("span");
+    difficulty.className = "difficulty";
+    const hardCount = d.cards.filter(card => card && typeof card !== "string" && card.difficulty === "hard").length;
+    difficulty.textContent = hardCount ? `${hardCount} spicy cards` : "Good vibes only";
+    meta.append(sub, difficulty);
+    copy.append(name, meta);
+    left.append(icon, copy);
     const n = document.createElement("span");
     n.className = "n";
     n.textContent = d.cards.length;
@@ -535,10 +740,13 @@ function startRound() {
   const round = S = {
     deck, queue: shuffle(deck.cards), i: 0,
     right: [], skipped: [], current: null,
+    streak: 0, teamIndex: 0, teamScores: teamNames.map(name => ({ name, score: 0 })),
     total: roundSecs * 1000, endAt: Date.now() + roundSecs * 1000,
     running: true, locked: false, armed: false, timer: null, pausedAt: null
   };
   $("score").textContent = "0";
+  $("teamTurn").textContent = gameMode === "team" ? round.teamScores[0].name : "Your turn";
+  $("streak").textContent = "";
   $("hint").textContent = "";
   $("game").classList.remove("ok", "skip");
   show("game");
@@ -558,7 +766,8 @@ function startRound() {
 function nextCard() {
   if (S.i >= S.queue.length) { S.queue = shuffle(S.deck.cards); S.i = 0; }
   S.current = S.queue[S.i++];
-  setWord(S.current);
+  setWord(cardText(S.current));
+  $("hint").textContent = cardMeta(S.current);
 }
 
 function setWord(text) {
@@ -587,12 +796,18 @@ function mark(kind) {
   round.armed = false;
   if (kind === "right") {
     round.right.push(round.current);
-    $("score").textContent = round.right.length;
+    round.streak++;
+    if (gameMode === "team") round.teamScores[round.teamIndex].score++;
+    $("score").textContent = gameMode === "team" ? round.teamScores[round.teamIndex].score : round.right.length;
+    $("streak").textContent = round.streak >= 2 ? `🔥 ${round.streak} streak` : "";
     g.classList.add("ok");
     setWord("Got it!");
     playRightSound(); vibe(60);
+    if (round.streak >= 3) { celebrate(); showMoment(round.streak >= 5 ? "Unstoppable! 🔥" : "That was clean! ✨"); }
   } else {
     round.skipped.push(round.current);
+    round.streak = 0;
+    $("streak").textContent = "";
     g.classList.add("skip");
     setWord("Skip");
     playWrongSound(); vibe(30);
@@ -603,6 +818,11 @@ function mark(kind) {
     if (S !== round || !round.running) return;
     g.classList.remove("ok", "skip");
     round.locked = false;
+    if (gameMode === "team") {
+      round.teamIndex = (round.teamIndex + 1) % round.teamScores.length;
+      $("teamTurn").textContent = round.teamScores[round.teamIndex].name;
+      $("score").textContent = round.teamScores[round.teamIndex].score;
+    }
     nextCard();
   }, 650);
 }
@@ -630,7 +850,13 @@ function endRound() {
   let note = "Best round: " + best;
   if (score > best) { best = score; store.set("best", best); note = "New best round!"; }
   $("finalScore").textContent = score;
-  $("resultNote").textContent = note;
+  $("resultNote").textContent = gameMode === "team" ? "Final whistle! Here’s how the teams did." : note;
+  $("teamResults").classList.toggle("visible", gameMode === "team");
+  if (gameMode === "team") {
+    const sorted = S.teamScores.slice().sort((a, b) => b.score - a.score);
+    $("teamResults").innerHTML = sorted.map((team, index) => `${index + 1}. ${escapeHtml(team.name)} — ${team.score}`).join("<br>");
+  }
+  $("finalScore").classList.remove("pop"); void $("finalScore").offsetWidth; $("finalScore").classList.add("pop");
   fillList($("rightList"), S.right);
   fillList($("skipList"), S.skipped);
   renderHome();
@@ -647,7 +873,7 @@ function fillList(ul, items) {
   }
   items.forEach(t => {
     const li = document.createElement("li");
-    li.textContent = t;
+    li.textContent = cardText(t);
     ul.appendChild(li);
   });
 }
@@ -662,10 +888,27 @@ document.querySelectorAll(".duration-options button").forEach(b => {
     renderDuration();
   });
 });
-$("playBtn").addEventListener("click", () => show("categories"));
+$("playBtn").addEventListener("click", () => show("tutorial"));
+$("tutorialNext").addEventListener("click", () => show("categories"));
+$("tutorialBack").addEventListener("click", () => show("home"));
 $("backHome").addEventListener("click", () => show("home"));
 $("durationBack").addEventListener("click", () => show("categories"));
-$("startBtn").addEventListener("click", startSelectedDeck);
+$("startBtn").addEventListener("click", () => show("setup"));
+$("setupBack").addEventListener("click", () => show("duration"));
+$("setupStart").addEventListener("click", () => {
+  if (gameMode === "team") {
+    teamNames = ["teamA", "teamB", "teamC", "teamD"].map(id => $(id).value.trim()).filter(Boolean);
+    if (teamNames.length < 2) teamNames = ["Team A", "Team B"];
+    store.set("teamNames", teamNames);
+  }
+  startSelectedDeck();
+});
+document.querySelectorAll(".mode-options button").forEach(button => button.addEventListener("click", () => {
+  gameMode = button.dataset.mode;
+  store.set("gameMode", gameMode);
+  document.querySelectorAll(".mode-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  $("teamFields").classList.toggle("visible", gameMode === "team");
+}));
 $("orientationRetryBtn").addEventListener("click", startSelectedDeck);
 $("orientationCancelBtn").addEventListener("click", () => {
   pendingStart = false;
@@ -684,6 +927,11 @@ $("skipBtn").addEventListener("click", () => mark("skip"));
 $("againBtn").addEventListener("click", startSelectedDeck);
 $("decksBtn").addEventListener("click", () => show("categories"));
 $("homeBtn").addEventListener("click", () => show("home"));
+$("soundToggle").addEventListener("change", event => { soundMuted = !event.target.checked; store.set("soundMuted", soundMuted); });
+$("volumeControl").addEventListener("input", event => { soundVolume = Number(event.target.value); store.set("soundVolume", soundVolume); });
+$("readableToggle").addEventListener("change", event => { store.set("readable", event.target.checked); applyPreferences(); if (S && S.running) fit(); });
+$("contrastToggle").addEventListener("change", event => { store.set("highContrast", event.target.checked); applyPreferences(); });
+$("motionToggle").addEventListener("change", event => { store.set("reduceMotion", event.target.checked); applyPreferences(); });
 
 function resumeRound() {
   if (!S || !S.pausedAt || !isLandscape()) return;
@@ -717,6 +965,9 @@ window.addEventListener("resize", handleOrientationChange);
 
 renderHome();
 renderDecks();
+applyPreferences();
+$("teamFields").classList.toggle("visible", gameMode === "team");
+loadPublishedDecks();
 </script>
 </body>
 </html>

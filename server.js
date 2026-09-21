@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === "production") {
 
 const pool = new Pool(poolConfig);
 
-app.use(express.json({ limit: "20kb" }));
+app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: false }));
 
 function normaliseEmail(email) {
@@ -204,16 +204,34 @@ app.post("/api/logout", async (request, response) => {
   response.status(204).end();
 });
 
+app.get("/api/decks", async (_request, response) => {
+  const result = await pool.query(
+    `SELECT d.id, d.name, d.description, d.icon, d.theme, d.cover_url,
+            json_agg(
+              json_build_object(
+                'id', c.id, 'text', c.text, 'category', c.category,
+                'difficulty', c.difficulty, 'sort_order', c.sort_order
+              ) ORDER BY c.sort_order ASC, c.created_at ASC
+            ) FILTER (WHERE c.id IS NOT NULL) AS cards
+     FROM public.decks d
+     LEFT JOIN public.cards c ON c.deck_id = d.id AND c.is_active = true
+     WHERE d.is_published = true
+     GROUP BY d.id
+     ORDER BY d.name ASC`
+  );
+  response.json(result.rows.map(deck => ({ ...deck, cards: deck.cards || [] })));
+});
+
 app.get("/api/admin/decks", requireAdmin, async (_request, response) => {
   const deckResult = await pool.query(
-    `SELECT id, name, description, is_published, created_by, created_at, updated_at
+    `SELECT id, name, description, icon, theme, cover_url, is_published, created_by, created_at, updated_at
      FROM public.decks ORDER BY name ASC`
   );
   const decks = deckResult.rows;
   if (!decks.length) return response.json([]);
 
   const cardResult = await pool.query(
-    `SELECT id, deck_id, text, sort_order, is_active, created_at, updated_at
+    `SELECT id, deck_id, text, category, difficulty, sort_order, is_active, created_at, updated_at
      FROM public.cards
      WHERE deck_id = ANY($1::uuid[])
      ORDER BY deck_id, sort_order ASC, created_at ASC`,
@@ -227,16 +245,19 @@ app.get("/api/admin/decks", requireAdmin, async (_request, response) => {
 app.post("/api/admin/decks", requireAdmin, async (request, response) => {
   const name = String(request.body.name || "").trim();
   const description = String(request.body.description || "").trim() || null;
+  const icon = String(request.body.icon || "🎭").trim().slice(0, 8) || "🎭";
+  const theme = String(request.body.theme || "classic").trim().slice(0, 30) || "classic";
+  const coverUrl = String(request.body.coverUrl || "").trim() || null;
   const isPublished = request.body.isPublished !== false;
   if (!name || name.length > 100) {
     return response.status(400).json({ error: "Deck name is required and must be under 100 characters." });
   }
 
   const result = await pool.query(
-    `INSERT INTO public.decks (name, description, is_published, created_by)
-     VALUES ($1, $2, $3, $4)
-     RETURNING id, name, description, is_published, created_by, created_at, updated_at`,
-    [name, description, isPublished, request.user.id]
+    `INSERT INTO public.decks (name, description, icon, theme, cover_url, is_published, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING id, name, description, icon, theme, cover_url, is_published, created_by, created_at, updated_at`,
+    [name, description, icon, theme, coverUrl, isPublished, request.user.id]
   );
   response.status(201).json(result.rows[0]);
 });
@@ -244,6 +265,9 @@ app.post("/api/admin/decks", requireAdmin, async (request, response) => {
 app.patch("/api/admin/decks/:deckId", requireAdmin, async (request, response) => {
   const name = String(request.body.name || "").trim();
   const description = String(request.body.description || "").trim() || null;
+  const icon = String(request.body.icon || "🎭").trim().slice(0, 8) || "🎭";
+  const theme = String(request.body.theme || "classic").trim().slice(0, 30) || "classic";
+  const coverUrl = String(request.body.coverUrl || "").trim() || null;
   const isPublished = request.body.isPublished !== false;
   if (!name || name.length > 100) {
     return response.status(400).json({ error: "Deck name is required and must be under 100 characters." });
@@ -251,10 +275,10 @@ app.patch("/api/admin/decks/:deckId", requireAdmin, async (request, response) =>
 
   const result = await pool.query(
     `UPDATE public.decks
-     SET name = $1, description = $2, is_published = $3
-     WHERE id = $4
-     RETURNING id, name, description, is_published, created_by, created_at, updated_at`,
-    [name, description, isPublished, request.params.deckId]
+     SET name = $1, description = $2, icon = $3, theme = $4, cover_url = $5, is_published = $6
+     WHERE id = $7
+     RETURNING id, name, description, icon, theme, cover_url, is_published, created_by, created_at, updated_at`,
+    [name, description, icon, theme, coverUrl, isPublished, request.params.deckId]
   );
   if (!result.rows[0]) return response.status(404).json({ error: "Deck not found." });
   response.json(result.rows[0]);
@@ -266,8 +290,46 @@ app.delete("/api/admin/decks/:deckId", requireAdmin, async (request, response) =
   response.status(204).end();
 });
 
+app.post("/api/admin/decks/:deckId/duplicate", requireAdmin, async (request, response) => {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const source = await client.query(
+      `SELECT name, description, icon, theme, cover_url, is_published
+       FROM public.decks WHERE id = $1`,
+      [request.params.deckId]
+    );
+    if (!source.rows[0]) {
+      await client.query("ROLLBACK");
+      return response.status(404).json({ error: "Deck not found." });
+    }
+    const deck = source.rows[0];
+    const copy = await client.query(
+      `INSERT INTO public.decks (name, description, icon, theme, cover_url, is_published, created_by)
+       VALUES ($1, $2, $3, $4, $5, false, $6)
+       RETURNING id, name, description, icon, theme, cover_url, is_published, created_by, created_at, updated_at`,
+      [deck.name + " copy", deck.description, deck.icon, deck.theme, deck.cover_url, request.user.id]
+    );
+    await client.query(
+      `INSERT INTO public.cards (deck_id, text, category, difficulty, sort_order, is_active, created_by)
+       SELECT $1, text, category, difficulty, sort_order, is_active, $2
+       FROM public.cards WHERE deck_id = $3`,
+      [copy.rows[0].id, request.user.id, request.params.deckId]
+    );
+    await client.query("COMMIT");
+    response.status(201).json(copy.rows[0]);
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+});
+
 app.post("/api/admin/decks/:deckId/cards", requireAdmin, async (request, response) => {
   const text = String(request.body.text || "").trim();
+  const category = String(request.body.category || "General").trim().slice(0, 60) || "General";
+  const difficulty = ["easy", "medium", "hard"].includes(request.body.difficulty) ? request.body.difficulty : "medium";
   const sortOrder = Number.isInteger(Number(request.body.sortOrder)) ? Number(request.body.sortOrder) : 0;
   const isActive = request.body.isActive !== false;
   if (!text || text.length > 160) {
@@ -275,11 +337,11 @@ app.post("/api/admin/decks/:deckId/cards", requireAdmin, async (request, respons
   }
 
   const result = await pool.query(
-    `INSERT INTO public.cards (deck_id, text, sort_order, is_active, created_by)
-     SELECT $1, $2, $3, $4, $5
+    `INSERT INTO public.cards (deck_id, text, category, difficulty, sort_order, is_active, created_by)
+     SELECT $1, $2, $3, $4, $5, $6, $7
      WHERE EXISTS (SELECT 1 FROM public.decks WHERE id = $1)
-     RETURNING id, deck_id, text, sort_order, is_active, created_at, updated_at`,
-    [request.params.deckId, text, sortOrder, isActive, request.user.id]
+     RETURNING id, deck_id, text, category, difficulty, sort_order, is_active, created_at, updated_at`,
+    [request.params.deckId, text, category, difficulty, sortOrder, isActive, request.user.id]
   );
   if (!result.rows[0]) return response.status(404).json({ error: "Deck not found." });
   response.status(201).json(result.rows[0]);
@@ -287,6 +349,8 @@ app.post("/api/admin/decks/:deckId/cards", requireAdmin, async (request, respons
 
 app.patch("/api/admin/cards/:cardId", requireAdmin, async (request, response) => {
   const text = String(request.body.text || "").trim();
+  const category = String(request.body.category || "General").trim().slice(0, 60) || "General";
+  const difficulty = ["easy", "medium", "hard"].includes(request.body.difficulty) ? request.body.difficulty : "medium";
   const sortOrder = Number.isInteger(Number(request.body.sortOrder)) ? Number(request.body.sortOrder) : 0;
   const isActive = request.body.isActive !== false;
   if (!text || text.length > 160) {
@@ -295,10 +359,10 @@ app.patch("/api/admin/cards/:cardId", requireAdmin, async (request, response) =>
 
   const result = await pool.query(
     `UPDATE public.cards
-     SET text = $1, sort_order = $2, is_active = $3
-     WHERE id = $4
-     RETURNING id, deck_id, text, sort_order, is_active, created_at, updated_at`,
-    [text, sortOrder, isActive, request.params.cardId]
+     SET text = $1, category = $2, difficulty = $3, sort_order = $4, is_active = $5
+     WHERE id = $6
+     RETURNING id, deck_id, text, category, difficulty, sort_order, is_active, created_at, updated_at`,
+    [text, category, difficulty, sortOrder, isActive, request.params.cardId]
   );
   if (!result.rows[0]) return response.status(404).json({ error: "Card not found." });
   response.json(result.rows[0]);
@@ -324,4 +388,3 @@ app.use((error, _request, response, _next) => {
 app.listen(port, () => {
   console.log(`Sijui Charades running at http://localhost:${port}`);
 });
-

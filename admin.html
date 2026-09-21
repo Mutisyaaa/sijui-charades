@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#11110F">
-  <title>Admin Â· Sijui Charades</title>
+  <title>Admin · Sijui Charades</title>
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
     <header class="admin-header">
       <a class="brand" href="Index.html">Sijui Charades</a>
       <div class="user-tools">
-        <span id="userName">Checking accessâ€¦</span>
+        <span id="userName">Checking access…</span>
         <button id="logoutBtn" class="link-button" type="button">Log out</button>
       </div>
     </header>
@@ -34,6 +34,16 @@
               <label for="deckDescription">Description</label>
               <textarea id="deckDescription" name="description" maxlength="240" placeholder="What kind of cards are in this deck?"></textarea>
             </div>
+            <div class="field-row">
+              <div class="field"><label for="deckIcon">Deck icon</label><input id="deckIcon" maxlength="4" value="🎭" placeholder="🎭"></div>
+              <div class="field"><label for="deckTheme">Deck theme</label><select id="deckTheme"><option value="classic">Classic</option><option value="sunset">Sunset</option><option value="mint">Mint</option><option value="berry">Berry</option></select></div>
+            </div>
+            <div class="field">
+              <label for="deckCover">Cover image</label>
+              <input id="deckCover" type="file" accept="image/png,image/jpeg,image/webp">
+              <small class="field-help">Optional. Keep images under 700KB.</small>
+              <img id="deckCoverPreview" class="cover-preview" alt="Deck cover preview" hidden>
+            </div>
             <label class="inline"><input id="deckPublished" type="checkbox" checked> Publish this deck in the game</label>
             <div class="form-actions">
               <button class="primary" type="submit">Save deck</button>
@@ -54,6 +64,11 @@
               <label for="cardText">Card text</label>
               <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic" required>
             </div>
+            <div class="field-row">
+              <div class="field"><label for="cardCategory">Category</label><input id="cardCategory" maxlength="60" placeholder="People, places, actions…"></div>
+              <div class="field"><label for="cardDifficulty">Difficulty</label><select id="cardDifficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+            </div>
+            <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
             <div class="field">
               <label for="cardOrder">Sort order</label>
               <input id="cardOrder" type="number" min="0" step="1" value="0">
@@ -70,15 +85,15 @@
 
       <section class="panel">
         <h2>Your decks</h2>
-        <div id="deckList" class="deck-list"><p class="empty">Loading decksâ€¦</p></div>
+        <div id="deckList" class="deck-list"><p class="empty">Loading decks…</p></div>
       </section>
     </div>
 
-    <p class="admin-footer"><a href="Index.html">â† Back to the game</a></p>
+    <p class="admin-footer"><a href="Index.html">← Back to the game</a></p>
   </main>
 
   <script>
-    const state = { decks: [], editingDeckId: null, editingCardId: null };
+    const state = { decks: [], editingDeckId: null, editingCardId: null, coverUrl: "" };
     const $ = id => document.getElementById(id);
 
     function escapeHtml(value) {
@@ -128,12 +143,13 @@
           </div>
           <div class="deck-actions">
             <button class="small-button" data-action="edit-deck" data-id="${deck.id}" type="button">Edit deck</button>
+            <button class="small-button" data-action="duplicate-deck" data-id="${deck.id}" type="button">Duplicate</button>
             <button class="small-button danger" data-action="delete-deck" data-id="${deck.id}" type="button">Delete deck</button>
           </div>
           <ul class="card-list">
             ${deck.cards.length ? deck.cards.map(card => `
               <li class="card-row ${card.is_active ? "" : "inactive"}">
-                <span class="card-text">${escapeHtml(card.text)}</span>
+                <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")} · ${escapeHtml(card.difficulty || "medium")}</small></span>
                 <span class="card-actions">
                   <button class="small-button" data-action="edit-card" data-id="${card.id}" type="button">Edit</button>
                   <button class="small-button danger" data-action="delete-card" data-id="${card.id}" type="button">Delete</button>
@@ -147,6 +163,11 @@
       state.editingDeckId = null;
       $("deckForm").reset();
       $("deckPublished").checked = true;
+      $("deckIcon").value = "🎭";
+      $("deckTheme").value = "classic";
+      state.coverUrl = "";
+      $("deckCover").value = "";
+      $("deckCoverPreview").hidden = true;
       $("deckFormTitle").textContent = "Add a deck";
       $("cancelDeckEdit").hidden = true;
     }
@@ -156,8 +177,11 @@
       $("cardForm").reset();
       $("cardActive").checked = true;
       $("cardOrder").value = "0";
+      $("cardCategory").value = "General";
+      $("cardDifficulty").value = "medium";
       $("cardFormTitle").textContent = "Add a card";
       $("cancelCardEdit").hidden = true;
+      renderCardPreview();
     }
 
     async function load() {
@@ -170,11 +194,14 @@
 
     $("deckForm").addEventListener("submit", async event => {
       event.preventDefault();
-      setStatus("deckStatus", "Savingâ€¦");
+      setStatus("deckStatus", "Saving…");
       try {
         const payload = {
           name: $("deckName").value,
           description: $("deckDescription").value,
+          icon: $("deckIcon").value,
+          theme: $("deckTheme").value,
+          coverUrl: state.coverUrl || "",
           isPublished: $("deckPublished").checked
         };
         const url = state.editingDeckId ? `/api/admin/decks/${state.editingDeckId}` : "/api/admin/decks";
@@ -185,10 +212,12 @@
 
     $("cardForm").addEventListener("submit", async event => {
       event.preventDefault();
-      setStatus("cardStatus", "Savingâ€¦");
+      setStatus("cardStatus", "Saving…");
       try {
         const payload = {
           text: $("cardText").value,
+          category: $("cardCategory").value,
+          difficulty: $("cardDifficulty").value,
           sortOrder: Number($("cardOrder").value || 0),
           isActive: $("cardActive").checked
         };
@@ -206,14 +235,16 @@
       const card = state.decks.flatMap(item => item.cards).find(item => item.id === id);
       try {
         if (action === "edit-deck" && deck) {
-          state.editingDeckId = deck.id; $("deckName").value = deck.name; $("deckDescription").value = deck.description || ""; $("deckPublished").checked = deck.is_published;
+          state.editingDeckId = deck.id; $("deckName").value = deck.name; $("deckDescription").value = deck.description || ""; $("deckPublished").checked = deck.is_published; $("deckIcon").value = deck.icon || "🎭"; $("deckTheme").value = deck.theme || "classic"; state.coverUrl = deck.cover_url || ""; $("deckCoverPreview").src = state.coverUrl; $("deckCoverPreview").hidden = !state.coverUrl;
           $("deckFormTitle").textContent = "Edit deck"; $("cancelDeckEdit").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" });
-        } else if (action === "delete-deck" && deck && confirm(`Delete â€œ${deck.name}â€ and all its cards?`)) {
+        } else if (action === "duplicate-deck" && deck) {
+          await api(`/api/admin/decks/${id}/duplicate`, { method: "POST" }); await load(); setStatus("deckStatus", "Deck duplicated as a hidden copy.", "success");
+        } else if (action === "delete-deck" && deck && confirm(`Delete “${deck.name}” and all its cards?`)) {
           await api(`/api/admin/decks/${id}`, { method: "DELETE" }); await load(); setStatus("deckStatus", "Deck deleted.", "success");
         } else if (action === "edit-card" && card) {
-          state.editingCardId = card.id; $("cardDeck").value = card.deck_id; $("cardText").value = card.text; $("cardOrder").value = card.sort_order; $("cardActive").checked = card.is_active;
+          state.editingCardId = card.id; $("cardDeck").value = card.deck_id; $("cardText").value = card.text; $("cardCategory").value = card.category || "General"; $("cardDifficulty").value = card.difficulty || "medium"; $("cardOrder").value = card.sort_order; $("cardActive").checked = card.is_active; renderCardPreview();
           $("cardFormTitle").textContent = "Edit card"; $("cancelCardEdit").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" });
-        } else if (action === "delete-card" && card && confirm(`Delete â€œ${card.text}â€?`)) {
+        } else if (action === "delete-card" && card && confirm(`Delete “${card.text}”?`)) {
           await api(`/api/admin/cards/${id}`, { method: "DELETE" }); await load(); setStatus("cardStatus", "Card deleted.", "success");
         }
       } catch (error) { setStatus(action.includes("deck") ? "deckStatus" : "cardStatus", error.message, "error"); }
@@ -221,13 +252,28 @@
 
     $("cancelDeckEdit").addEventListener("click", resetDeckForm);
     $("cancelCardEdit").addEventListener("click", resetCardForm);
+    ["cardText", "cardCategory", "cardDifficulty"].forEach(id => $(id).addEventListener("input", renderCardPreview));
+    $("deckCover").addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 700000) { setStatus("deckStatus", "Cover image must be under 700KB.", "error"); event.target.value = ""; return; }
+      const reader = new FileReader();
+      reader.onload = () => { state.coverUrl = reader.result; $("deckCoverPreview").src = state.coverUrl; $("deckCoverPreview").hidden = false; };
+      reader.readAsDataURL(file);
+    });
     $("logoutBtn").addEventListener("click", async () => { await api("/api/logout", { method: "POST" }); window.location.href = "login.html"; });
 
-    load().catch(error => {
+    function renderCardPreview() {
+      const text = $("cardText").value.trim() || "Your card text";
+      const category = $("cardCategory").value.trim() || "General";
+      const difficulty = $("cardDifficulty").value;
+      $("cardPreview").innerHTML = `<b>${escapeHtml(text)}</b><small>${escapeHtml(category)} · ${escapeHtml(difficulty)}</small>`;
+    }
+
+    load().then(() => renderCardPreview()).catch(error => {
       $("userName").textContent = "Access denied";
       $("deckList").innerHTML = `<p class="empty">${escapeHtml(error.message)} <a href="login.html">Log in again</a>.</p>`;
     });
   </script>
 </body>
 </html>
-
