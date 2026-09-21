@@ -54,7 +54,7 @@
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Signup failed.");
         note.textContent = "Account created. Opening the gameâ€¦";
-        window.setTimeout(() => { window.location.href = "Index.html"; }, 500);
+        window.setTimeout(() => { window.location.href = "admin.html"; }, 500);
       } catch (error) {
         note.textContent = error.message;
       }
