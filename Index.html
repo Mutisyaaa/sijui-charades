@@ -638,8 +638,7 @@ function renderDecks() {
     }
     const left = document.createElement("div");
     left.className = "deck-copy";
-    const icon = document.createElement("span");
-    icon.className = "deck-icon";
+    const icon = {}; // Kept detached for compatibility with older deck records; icons are no longer shown.
     icon.textContent = d.icon || "🎭";
     const copy = document.createElement("div");
     copy.className = "deck-copy-text";
@@ -655,7 +654,7 @@ function renderDecks() {
     difficulty.textContent = hardCount ? `${hardCount} spicy cards` : "Good vibes only";
     meta.append(sub, difficulty);
     copy.append(name, meta);
-    left.append(icon, copy);
+    left.append(copy);
     const n = document.createElement("span");
     n.className = "n";
     n.textContent = d.cards.length;
