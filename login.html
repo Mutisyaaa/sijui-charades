@@ -14,7 +14,7 @@
       <h1 id="login-heading">Welcome back.</h1>
       <p class="intro">Log in to manage your charades decks and cards.</p>
 
-      <form class="auth-form" action="#" method="post" onsubmit="return demoSubmit(event, 'Login')">
+      <form class="auth-form" action="/api/login" method="post" onsubmit="return handleLogin(event)">
         <div class="field">
           <label for="email">Email address</label>
           <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
@@ -24,7 +24,7 @@
           <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
         </div>
         <button class="primary" type="submit">Log in</button>
-        <p id="formNote" class="form-note" role="status">Authentication will be connected in the next step.</p>
+        <p id="formNote" class="form-note" role="status"></p>
       </form>
 
       <p class="switch-page">Need an account? <a href="signup.html">Create one</a></p>
@@ -32,9 +32,23 @@
     </section>
   </main>
   <script>
-    function demoSubmit(event, action) {
+    async function handleLogin(event) {
       event.preventDefault();
-      document.getElementById("formNote").textContent = action + " is ready for backend connection.";
+      const note = document.getElementById("formNote");
+      const form = event.currentTarget;
+      note.textContent = "Signing you inâ€¦";
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: form.email.value, password: form.password.value })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Login failed.");
+        window.location.href = "Index.html";
+      } catch (error) {
+        note.textContent = error.message;
+      }
       return false;
     }
   </script>
