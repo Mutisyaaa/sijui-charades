@@ -10,14 +10,21 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const sessionDays = 7;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || undefined,
-  host: process.env.PGHOST || "localhost",
-  port: Number(process.env.PGPORT || 5432),
-  database: process.env.PGDATABASE || "sijui_charades",
-  user: process.env.PGUSER || "postgres",
-  password: process.env.PGPASSWORD,
-});
+const poolConfig = process.env.DATABASE_URL
+  ? { connectionString: process.env.DATABASE_URL }
+  : {
+      host: process.env.PGHOST || "localhost",
+      port: Number(process.env.PGPORT || 5432),
+      database: process.env.PGDATABASE || "sijui_charades",
+      user: process.env.PGUSER || "postgres",
+      password: process.env.PGPASSWORD,
+    };
+
+if (process.env.NODE_ENV === "production") {
+  poolConfig.ssl = { rejectUnauthorized: false };
+}
+
+const pool = new Pool(poolConfig);
 
 app.use(express.json({ limit: "20kb" }));
 app.use(express.urlencoded({ extended: false }));
@@ -301,6 +308,10 @@ app.delete("/api/admin/cards/:cardId", requireAdmin, async (request, response) =
   const result = await pool.query("DELETE FROM public.cards WHERE id = $1 RETURNING id", [request.params.cardId]);
   if (!result.rows[0]) return response.status(404).json({ error: "Card not found." });
   response.status(204).end();
+});
+
+app.get("/", (_request, response) => {
+  response.sendFile(path.join(__dirname, "Index.html"));
 });
 
 app.use(express.static(path.join(__dirname)));

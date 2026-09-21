@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: sijui-charades-web
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm ci
+    startCommand: npm run db:init && npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sijui-charades-db
+          property: connectionString
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_DISPLAY_NAME
+        value: k3v1n
+
+databases:
+  - name: sijui-charades-db
+    plan: free
+    region: frankfurt
+    databaseName: sijui_charades
+    user: sijui_charades
