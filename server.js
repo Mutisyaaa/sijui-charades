@@ -79,6 +79,26 @@ async function currentUser(request) {
   return result.rows[0] || null;
 }
 
+async function requireAuth(request, response, next) {
+  try {
+    const user = await currentUser(request);
+    if (!user) return response.status(401).json({ error: "Not signed in." });
+    request.user = user;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function requireAdmin(request, response, next) {
+  await requireAuth(request, response, () => {
+    if (request.user.role !== "admin") {
+      return response.status(403).json({ error: "Admin access is required." });
+    }
+    return next();
+  });
+}
+
 function validPassword(password) {
   return typeof password === "string" && password.length >= 8 && password.length <= 128;
 }
@@ -174,6 +194,112 @@ app.post("/api/logout", async (request, response) => {
     await pool.query("DELETE FROM public.sessions WHERE token_hash = $1", [hashSessionToken(token)]);
   }
   clearSessionCookie(response);
+  response.status(204).end();
+});
+
+app.get("/api/admin/decks", requireAdmin, async (_request, response) => {
+  const deckResult = await pool.query(
+    `SELECT id, name, description, is_published, created_by, created_at, updated_at
+     FROM public.decks ORDER BY name ASC`
+  );
+  const decks = deckResult.rows;
+  if (!decks.length) return response.json([]);
+
+  const cardResult = await pool.query(
+    `SELECT id, deck_id, text, sort_order, is_active, created_at, updated_at
+     FROM public.cards
+     WHERE deck_id = ANY($1::uuid[])
+     ORDER BY deck_id, sort_order ASC, created_at ASC`,
+    [decks.map(deck => deck.id)]
+  );
+  const cardsByDeck = new Map(decks.map(deck => [deck.id, []]));
+  cardResult.rows.forEach(card => cardsByDeck.get(card.deck_id).push(card));
+  response.json(decks.map(deck => ({ ...deck, cards: cardsByDeck.get(deck.id) })));
+});
+
+app.post("/api/admin/decks", requireAdmin, async (request, response) => {
+  const name = String(request.body.name || "").trim();
+  const description = String(request.body.description || "").trim() || null;
+  const isPublished = request.body.isPublished !== false;
+  if (!name || name.length > 100) {
+    return response.status(400).json({ error: "Deck name is required and must be under 100 characters." });
+  }
+
+  const result = await pool.query(
+    `INSERT INTO public.decks (name, description, is_published, created_by)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, name, description, is_published, created_by, created_at, updated_at`,
+    [name, description, isPublished, request.user.id]
+  );
+  response.status(201).json(result.rows[0]);
+});
+
+app.patch("/api/admin/decks/:deckId", requireAdmin, async (request, response) => {
+  const name = String(request.body.name || "").trim();
+  const description = String(request.body.description || "").trim() || null;
+  const isPublished = request.body.isPublished !== false;
+  if (!name || name.length > 100) {
+    return response.status(400).json({ error: "Deck name is required and must be under 100 characters." });
+  }
+
+  const result = await pool.query(
+    `UPDATE public.decks
+     SET name = $1, description = $2, is_published = $3
+     WHERE id = $4
+     RETURNING id, name, description, is_published, created_by, created_at, updated_at`,
+    [name, description, isPublished, request.params.deckId]
+  );
+  if (!result.rows[0]) return response.status(404).json({ error: "Deck not found." });
+  response.json(result.rows[0]);
+});
+
+app.delete("/api/admin/decks/:deckId", requireAdmin, async (request, response) => {
+  const result = await pool.query("DELETE FROM public.decks WHERE id = $1 RETURNING id", [request.params.deckId]);
+  if (!result.rows[0]) return response.status(404).json({ error: "Deck not found." });
+  response.status(204).end();
+});
+
+app.post("/api/admin/decks/:deckId/cards", requireAdmin, async (request, response) => {
+  const text = String(request.body.text || "").trim();
+  const sortOrder = Number.isInteger(Number(request.body.sortOrder)) ? Number(request.body.sortOrder) : 0;
+  const isActive = request.body.isActive !== false;
+  if (!text || text.length > 160) {
+    return response.status(400).json({ error: "Card text is required and must be under 160 characters." });
+  }
+
+  const result = await pool.query(
+    `INSERT INTO public.cards (deck_id, text, sort_order, is_active, created_by)
+     SELECT $1, $2, $3, $4, $5
+     WHERE EXISTS (SELECT 1 FROM public.decks WHERE id = $1)
+     RETURNING id, deck_id, text, sort_order, is_active, created_at, updated_at`,
+    [request.params.deckId, text, sortOrder, isActive, request.user.id]
+  );
+  if (!result.rows[0]) return response.status(404).json({ error: "Deck not found." });
+  response.status(201).json(result.rows[0]);
+});
+
+app.patch("/api/admin/cards/:cardId", requireAdmin, async (request, response) => {
+  const text = String(request.body.text || "").trim();
+  const sortOrder = Number.isInteger(Number(request.body.sortOrder)) ? Number(request.body.sortOrder) : 0;
+  const isActive = request.body.isActive !== false;
+  if (!text || text.length > 160) {
+    return response.status(400).json({ error: "Card text is required and must be under 160 characters." });
+  }
+
+  const result = await pool.query(
+    `UPDATE public.cards
+     SET text = $1, sort_order = $2, is_active = $3
+     WHERE id = $4
+     RETURNING id, deck_id, text, sort_order, is_active, created_at, updated_at`,
+    [text, sortOrder, isActive, request.params.cardId]
+  );
+  if (!result.rows[0]) return response.status(404).json({ error: "Card not found." });
+  response.json(result.rows[0]);
+});
+
+app.delete("/api/admin/cards/:cardId", requireAdmin, async (request, response) => {
+  const result = await pool.query("DELETE FROM public.cards WHERE id = $1 RETURNING id", [request.params.cardId]);
+  if (!result.rows[0]) return response.status(404).json({ error: "Card not found." });
   response.status(204).end();
 });
 
