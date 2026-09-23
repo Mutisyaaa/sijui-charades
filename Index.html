@@ -91,6 +91,14 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 .settings-grid label { display: flex; align-items: center; gap: 8px; }
 .settings-grid input[type="range"] { width: 120px; accent-color: var(--cream); }
 .settings-grid input[type="checkbox"] { accent-color: var(--cream); }
+.settings-how { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(17, 17, 15, 0.18); }
+.settings-how h3 { font-size: 1.15rem; }
+.settings-how .tutorial-copy { margin: 0.55rem 0 0.9rem; font-size: 0.9rem; }
+.settings-how .how-grid { grid-template-columns: 1fr; width: 100%; gap: 8px; margin: 0; }
+.settings-how .how-card { display: grid; grid-template-columns: 36px 1fr; text-align: left; align-items: center; column-gap: 8px; padding: 9px 10px; }
+.settings-how .how-card span { grid-row: span 2; margin: 0; font-size: 1.55rem; }
+.settings-how .how-card b { font-size: 0.88rem; }
+.settings-how .how-card small { font-size: 0.78rem; }
 
 /* ---------- tutorial / setup ---------- */
 #tutorial, #setup { justify-content: center; align-items: center; text-align: center; }
@@ -225,12 +233,66 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 .low { color: var(--red); }
 #game.ok .low, #game.skip .low { color: inherit; }
 
+/* ---------- turn break (team intermission) ---------- */
+#turnBreak {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+#turnBreak h2 { font-size: clamp(2.2rem, 7vmin, 3.6rem); }
+.turn-break-score {
+  font-size: clamp(3.8rem, 16vmin, 6.5rem);
+  font-weight: 900;
+  color: var(--cream);
+  line-height: 1;
+  margin: 0.5rem 0 0.2rem;
+}
+.turn-break-sub { font-size: 1.15rem; opacity: 0.85; margin: 0 0 1.2rem; }
+.turn-break-standings {
+  width: min(540px, 100%);
+  background: var(--black-soft);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin: 0 auto 1.2rem;
+  font-weight: 800;
+  text-align: left;
+}
+.turn-break-standings h4 { margin: 0 0 8px; font-size: 0.85rem; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.04em; }
+.standings-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.standings-item { display: flex; justify-content: space-between; align-items: center; font-size: 1.05rem; }
+.standings-item.up-next { color: var(--cream); font-weight: 900; }
+.standings-badge { font-size: 0.8rem; padding: 2px 8px; border-radius: 99px; background: var(--cream); color: var(--ink); }
+.turn-break-next {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0 0 1.5rem;
+}
+#turnBreak .actions { width: min(540px, 100%); margin: 0 auto; }
+
 /* ---------- results ---------- */
 #results h2 { font-size: 1.6rem; }
 #finalScore { font-size: clamp(5rem, 28vmin, 12rem); color: var(--cream); font-weight: 900; line-height: 0.9; margin-top: 0.5rem; }
 #resultNote { font-size: 1.1rem; margin: 0.5rem 0 0; }
 #teamResults { display: none; margin: 1rem 0; padding: 12px 14px; background: var(--black-soft); border-radius: 14px; font-weight: 800; }
 #teamResults.visible { display: block; }
+.team-rank-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(17, 17, 15, 0.08); font-size: 1.05rem; }
+.team-rank-row:last-child { border-bottom: none; }
+#teamBreakdowns { display: none; margin: 1.25rem 0; width: 100%; }
+#teamBreakdowns.visible { display: grid; gap: 14px; }
+.team-breakdown-card {
+  background: var(--black-soft);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: left;
+}
+.team-breakdown-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.team-breakdown-header h3 { font-size: 1.2rem; font-weight: 900; margin: 0; }
+.team-breakdown-header .badge { background: var(--cream); color: var(--ink); padding: 4px 12px; border-radius: 999px; font-weight: 900; font-size: 0.95rem; }
+.team-breakdown-words { display: grid; gap: 8px; font-size: 0.9rem; }
+.team-breakdown-words h4 { margin: 0 0 4px; font-size: 0.85rem; opacity: 0.75; }
+.team-breakdown-words ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.team-breakdown-words li { background: rgba(17, 17, 15, 0.08); padding: 4px 10px; border-radius: 99px; font-size: 0.88rem; }
+.team-breakdown-words .missed li { opacity: 0.65; }
 #confetti { pointer-events: none; position: fixed; inset: 0; z-index: 10; overflow: hidden; }
 .confetti-bit { position: absolute; top: -15px; width: 10px; height: 18px; background: var(--cream); animation: fall 1s ease-out forwards; }
 @keyframes fall { to { transform: translate3d(var(--x), 110vh, 0) rotate(720deg); opacity: 0; } }
@@ -278,6 +340,15 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
           <label><input id="readableToggle" type="checkbox"> Extra readable text</label>
           <label><input id="contrastToggle" type="checkbox"> High contrast</label>
           <label><input id="motionToggle" type="checkbox"> Reduce motion</label>
+        </div>
+        <div class="settings-how">
+          <h3>How to play</h3>
+          <p class="tutorial-copy">One player holds the phone to their forehead. Everyone else acts. Tilt down when they guess it and tilt up to skip.</p>
+          <div class="how-grid">
+            <div class="how-card"><span aria-hidden="true">&#128241;</span><b>Hold it up</b><small>Landscape, screen facing friends</small></div>
+            <div class="how-card"><span aria-hidden="true">&#127917;</span><b>Act it out</b><small>Give clues without saying the word</small></div>
+            <div class="how-card"><span aria-hidden="true">&#8597;&#65039;</span><b>Tilt to score</b><small>Down = got it, up = skip</small></div>
+          </div>
         </div>
       </details>
     </div>
@@ -346,7 +417,7 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
   </section>
 
   <section id="ready" class="screen">
-    <p>Phone on your forehead, screen facing your friends.</p>
+    <p id="readyPrompt">Phone on your forehead, screen facing your friends.</p>
     <div id="count" aria-live="polite">5</div>
     <button id="cancelBtn" class="ghost" type="button">Cancel</button>
   </section>
@@ -367,15 +438,30 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
     </div>
   </section>
 
+  <section id="turnBreak" class="screen">
+    <div class="spacer"></div>
+    <h2 id="turnBreakTitle">Turn Over!</h2>
+    <div id="turnBreakScore" class="turn-break-score">0</div>
+    <p id="turnBreakSub" class="turn-break-sub">words guessed</p>
+    <div id="turnBreakStandings" class="turn-break-standings"></div>
+    <p id="turnBreakNext" class="turn-break-next"></p>
+    <div class="actions">
+      <button id="nextTeamBtn" class="primary" type="button">Start Next Turn</button>
+      <button id="turnBreakEndMatchBtn" class="ghost" type="button">End Match Early</button>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
   <section id="results" class="screen">
-    <h2>Time's up</h2>
+    <h2 id="resultsHeading">Time's up</h2>
     <div id="finalScore">0</div>
     <p id="resultNote"></p>
     <div id="teamResults"></div>
-    <div class="lists">
+    <div id="soloLists" class="lists">
       <div><h3>Got it</h3><ul id="rightList"></ul></div>
       <div class="missed"><h3>Skipped</h3><ul id="skipList"></ul></div>
     </div>
+    <div id="teamBreakdowns"></div>
     <div class="actions">
       <button id="againBtn" class="primary" type="button">Play this deck again</button>
       <button id="decksBtn" class="ghost" type="button">Pick another deck</button>
@@ -582,6 +668,140 @@ function applyPreferences() {
   $("motionToggle").checked = reduceMotion;
 }
 
+const FALLBACK_DECKS = [
+  {
+    id: "chakula",
+    name: "Chakula",
+    sub: "Food and drink",
+    icon: "🍲",
+    theme: "sunset",
+    cards: [
+      { text: "Ugali", category: "Food and drink", difficulty: "easy" },
+      { text: "Sukuma wiki", category: "Food and drink", difficulty: "easy" },
+      { text: "Nyama choma", category: "Food and drink", difficulty: "easy" },
+      { text: "Chapati", category: "Food and drink", difficulty: "easy" },
+      { text: "Mandazi", category: "Food and drink", difficulty: "easy" },
+      { text: "Githeri", category: "Food and drink", difficulty: "easy" },
+      { text: "Pilau", category: "Food and drink", difficulty: "easy" },
+      { text: "Mutura", category: "Food and drink", difficulty: "medium" },
+      { text: "Samosa", category: "Food and drink", difficulty: "easy" },
+      { text: "Kachumbari", category: "Food and drink", difficulty: "easy" },
+      { text: "Irio", category: "Food and drink", difficulty: "medium" },
+      { text: "Mukimo", category: "Food and drink", difficulty: "medium" },
+      { text: "Smokie na kachumbari", category: "Food and drink", difficulty: "medium" },
+      { text: "Chai ya tangawizi", category: "Food and drink", difficulty: "easy" },
+      { text: "Mahindi choma", category: "Food and drink", difficulty: "easy" },
+      { text: "Uji", category: "Food and drink", difficulty: "easy" },
+      { text: "Mahamri", category: "Food and drink", difficulty: "medium" },
+      { text: "Viazi karai", category: "Food and drink", difficulty: "medium" },
+      { text: "Ugali na fish", category: "Food and drink", difficulty: "easy" },
+      { text: "Matoke", category: "Food and drink", difficulty: "medium" }
+    ]
+  },
+  {
+    id: "usafiri",
+    name: "Usafiri",
+    sub: "Getting around",
+    icon: "🚌",
+    theme: "mint",
+    cards: [
+      { text: "Matatu", category: "Transport", difficulty: "easy" },
+      { text: "Boda boda", category: "Transport", difficulty: "easy" },
+      { text: "Tuk tuk", category: "Transport", difficulty: "easy" },
+      { text: "Nganya", category: "Transport", difficulty: "medium" },
+      { text: "Makanga", category: "Transport", difficulty: "easy" },
+      { text: "Bus stage", category: "Transport", difficulty: "easy" },
+      { text: "Madaraka Express", category: "Transport", difficulty: "medium" },
+      { text: "Nairobi Expressway", category: "Transport", difficulty: "medium" },
+      { text: "Thika Road traffic", category: "Transport", difficulty: "medium" },
+      { text: "Kenya Airways", category: "Transport", difficulty: "easy" },
+      { text: "Bolt ride", category: "Transport", difficulty: "easy" },
+      { text: "Likoni Ferry", category: "Transport", difficulty: "medium" },
+      { text: "JKIA", category: "Transport", difficulty: "easy" },
+      { text: "Pikipiki", category: "Transport", difficulty: "easy" },
+      { text: "Squeezed into a full matatu", category: "Transport", difficulty: "hard" },
+      { text: "Window seat", category: "Transport", difficulty: "easy" },
+      { text: "Traffic police", category: "Transport", difficulty: "medium" }
+    ]
+  },
+  {
+    id: "sheng",
+    name: "Sheng",
+    sub: "Slang and street talk",
+    icon: "🗣️",
+    theme: "berry",
+    cards: [
+      { text: "Msee", category: "Sheng", difficulty: "easy" },
+      { text: "Manzi", category: "Sheng", difficulty: "easy" },
+      { text: "Ganji", category: "Sheng", difficulty: "easy" },
+      { text: "Chapaa", category: "Sheng", difficulty: "easy" },
+      { text: "Mbogi", category: "Sheng", difficulty: "easy" },
+      { text: "Mtaa", category: "Sheng", difficulty: "easy" },
+      { text: "Kejani", category: "Sheng", difficulty: "easy" },
+      { text: "Buda", category: "Sheng", difficulty: "easy" },
+      { text: "Fiti", category: "Sheng", difficulty: "easy" },
+      { text: "Poa", category: "Sheng", difficulty: "easy" },
+      { text: "Sherehe", category: "Sheng", difficulty: "easy" },
+      { text: "Kuchill", category: "Sheng", difficulty: "easy" },
+      { text: "Niaje", category: "Sheng", difficulty: "easy" },
+      { text: "Wueh!", category: "Sheng", difficulty: "easy" },
+      { text: "Aki wewe!", category: "Sheng", difficulty: "easy" },
+      { text: "Kubonga", category: "Sheng", difficulty: "medium" },
+      { text: "Jobless corner", category: "Sheng", difficulty: "hard" },
+      { text: "Mtoi", category: "Sheng", difficulty: "medium" },
+      { text: "Kuna form?", category: "Sheng", difficulty: "medium" }
+    ]
+  },
+  {
+    id: "maisha",
+    name: "Maisha",
+    sub: "Everyday Kenyan life",
+    icon: "🌍",
+    theme: "classic",
+    cards: [
+      { text: "M-Pesa", category: "Everyday life", difficulty: "easy" },
+      { text: "Power blackout", category: "Everyday life", difficulty: "easy" },
+      { text: "Mama mboga", category: "Everyday life", difficulty: "easy" },
+      { text: "Mitumba shopping", category: "Everyday life", difficulty: "easy" },
+      { text: "Chama meeting", category: "Everyday life", difficulty: "medium" },
+      { text: "Harambee", category: "Everyday life", difficulty: "easy" },
+      { text: "Going to shags", category: "Everyday life", difficulty: "easy" },
+      { text: "Kiosk", category: "Everyday life", difficulty: "easy" },
+      { text: "Buying airtime", category: "Everyday life", difficulty: "easy" },
+      { text: "Ruracio", category: "Everyday life", difficulty: "medium" },
+      { text: "Sunday service", category: "Everyday life", difficulty: "easy" },
+      { text: "Side hustle", category: "Everyday life", difficulty: "easy" },
+      { text: "Jiko", category: "Everyday life", difficulty: "easy" },
+      { text: "Tea break", category: "Everyday life", difficulty: "easy" },
+      { text: "Fuel price hike", category: "Everyday life", difficulty: "medium" }
+    ]
+  },
+  {
+    id: "kenya",
+    name: "Kenya",
+    sub: "Places and pride",
+    icon: "🇰🇪",
+    theme: "sunset",
+    cards: [
+      { text: "Maasai Mara", category: "Kenya", difficulty: "easy" },
+      { text: "Mount Kenya", category: "Kenya", difficulty: "easy" },
+      { text: "Diani Beach", category: "Kenya", difficulty: "easy" },
+      { text: "Lamu", category: "Kenya", difficulty: "medium" },
+      { text: "Fort Jesus", category: "Kenya", difficulty: "easy" },
+      { text: "Great Rift Valley", category: "Kenya", difficulty: "easy" },
+      { text: "Lake Nakuru", category: "Kenya", difficulty: "easy" },
+      { text: "KICC", category: "Kenya", difficulty: "easy" },
+      { text: "Uhuru Park", category: "Kenya", difficulty: "easy" },
+      { text: "Karura Forest", category: "Kenya", difficulty: "easy" },
+      { text: "Nairobi National Park", category: "Kenya", difficulty: "easy" },
+      { text: "Safaricom", category: "Kenya", difficulty: "easy" },
+      { text: "Eliud Kipchoge", category: "Kenya", difficulty: "easy" },
+      { text: "Mombasa", category: "Kenya", difficulty: "easy" },
+      { text: "Kisumu", category: "Kenya", difficulty: "easy" }
+    ]
+  }
+];
+
 async function loadPublishedDecks() {
   try {
     const response = await fetch("/api/decks", { headers: { Accept: "application/json" } });
@@ -595,9 +815,15 @@ async function loadPublishedDecks() {
     ALL_DECKS = published.length ? published.concat([{
       id: "mix", name: "Everything", sub: "A bit of every deck",
       cards: published.flatMap(d => d.cards)
-    }]) : [];
+    }]) : FALLBACK_DECKS.concat([{
+      id: "mix", name: "Everything", sub: "A bit of every deck",
+      cards: FALLBACK_DECKS.flatMap(d => d.cards)
+    }]);
   } catch (e) {
-    ALL_DECKS = [];
+    ALL_DECKS = FALLBACK_DECKS.concat([{
+      id: "mix", name: "Everything", sub: "A bit of every deck",
+      cards: FALLBACK_DECKS.flatMap(d => d.cards)
+    }]);
   } finally {
     decksLoading = false;
     renderDecks();
@@ -690,6 +916,15 @@ async function beginCountdown() {
   if (!deck || !isLandscape()) { pendingStart = true; show("orientation"); return; }
   initAudio();
   pendingStart = false;
+
+  const promptEl = $("readyPrompt");
+  if (gameMode === "team" && S && S.teamScores[S.teamIndex]) {
+    const currentTeam = S.teamScores[S.teamIndex].name;
+    promptEl.innerHTML = `Pass the phone to <strong>${escapeHtml(currentTeam)}</strong>!<br>Hold phone to forehead, screen facing friends.`;
+  } else {
+    promptEl.textContent = "Phone on your forehead, screen facing your friends.";
+  }
+
   show("ready");
   let n = 5;
   const count = $("count");
@@ -698,10 +933,29 @@ async function beginCountdown() {
   clearInterval(readyTimer);
   readyTimer = setInterval(() => {
     n--;
-    if (n <= 0) { clearInterval(readyTimer); startRound(); return; }
+    if (n <= 0) {
+      clearInterval(readyTimer);
+      beginTeamTurn();
+      return;
+    }
     playCountdownSound();
     paint();
   }, 1000);
+}
+
+function initMatch() {
+  const deck = ALL_DECKS.find(d => d.id === currentDeckId);
+  if (!deck) return;
+  const activeTeams = gameMode === "team" ? teamNames : ["Solo"];
+  S = {
+    deck,
+    teamIndex: 0,
+    teamScores: activeTeams.map(name => ({ name, score: 0, played: false })),
+    teamCards: activeTeams.map(() => ({ right: [], skipped: [] })),
+    right: [], skipped: [], current: null, queue: [], i: 0,
+    streak: 0, total: roundSecs * 1000, endAt: 0,
+    running: false, locked: false, armed: false, timer: null, pausedAt: null, finalized: false
+  };
 }
 
 async function startSelectedDeck() {
@@ -716,20 +970,44 @@ async function startSelectedDeck() {
     resumeRound();
     return;
   }
+  if (!S || S.finalized) {
+    initMatch();
+  }
   await beginCountdown();
 }
 
 function startRound() {
-  const deck = ALL_DECKS.find(d => d.id === currentDeckId);
-  const round = S = {
-    deck, queue: shuffle(deck.cards), i: 0,
-    right: [], skipped: [], current: null,
-    streak: 0, teamIndex: 0, teamScores: teamNames.map(name => ({ name, score: 0 })),
-    total: roundSecs * 1000, endAt: Date.now() + roundSecs * 1000,
-    running: true, locked: false, armed: false, timer: null, pausedAt: null
-  };
+  initMatch();
+  startSelectedDeck();
+}
+
+function beginTeamTurn() {
+  if (!S) initMatch();
+  const round = S;
+  round.right = [];
+  round.skipped = [];
+  round.current = null;
+  round.queue = shuffle(round.deck.cards);
+  round.i = 0;
+  round.streak = 0;
+  round.total = roundSecs * 1000;
+  round.endAt = Date.now() + round.total;
+  round.running = true;
+  round.locked = false;
+  round.armed = false;
+  round.pausedAt = null;
+
+  if (gameMode === "team") {
+    const team = round.teamScores[round.teamIndex];
+    showMoment(`${team.name}'s turn!`);
+    $("teamTurn").textContent = `${team.name} (${round.teamIndex + 1}/${round.teamScores.length})`;
+    $("quitBtn").textContent = "End turn";
+  } else {
+    $("teamTurn").textContent = "Your turn";
+    $("quitBtn").textContent = "End round";
+  }
+
   $("score").textContent = "0";
-  $("teamTurn").textContent = gameMode === "team" ? round.teamScores[0].name : "Your turn";
   $("streak").textContent = "";
   $("hint").textContent = "";
   $("game").classList.remove("ok", "skip");
@@ -737,6 +1015,7 @@ function startRound() {
   nextCard();
   requestWake();
   tone(660, 860, 0.2, "triangle", 0.12);
+  clearInterval(round.timer);
   round.timer = setInterval(tick, 100);
   tick();
   setTimeout(() => {
@@ -781,8 +1060,7 @@ function mark(kind) {
   if (kind === "right") {
     round.right.push(round.current);
     round.streak++;
-    if (gameMode === "team") round.teamScores[round.teamIndex].score++;
-    $("score").textContent = gameMode === "team" ? round.teamScores[round.teamIndex].score : round.right.length;
+    $("score").textContent = round.right.length;
     $("streak").textContent = round.streak >= 2 ? `🔥 ${round.streak} streak` : "";
     g.classList.add("ok");
     setWord("Got it!");
@@ -802,11 +1080,6 @@ function mark(kind) {
     if (S !== round || !round.running) return;
     g.classList.remove("ok", "skip");
     round.locked = false;
-    if (gameMode === "team") {
-      round.teamIndex = (round.teamIndex + 1) % round.teamScores.length;
-      $("teamTurn").textContent = round.teamScores[round.teamIndex].name;
-      $("score").textContent = round.teamScores[round.teamIndex].score;
-    }
     nextCard();
   }, 650);
 }
@@ -817,32 +1090,159 @@ function tick() {
   $("timeLeft").textContent = Math.ceil(left / 1000);
   $("timeLeft").classList.toggle("low", left <= 10000);
   $("barFill").style.transform = "scaleX(" + (left / S.total) + ")";
-  if (left <= 0) endRound();
+  if (left <= 0) endTeamTurn();
 }
 
-function endRound() {
-  if (!S || !S.running) return;
-  S.running = false;
-  clearInterval(S.timer);
+function endTeamTurn() {
+  const round = S;
+  if (!round || !round.running) return;
+  round.running = false;
+  round.locked = true;
+  round.armed = false;
+  clearInterval(round.timer);
+  round.timer = null;
   releaseWake();
-  try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
   $("game").classList.remove("ok", "skip");
+
+  const currentTeam = round.teamScores[round.teamIndex];
+  currentTeam.score = round.right.length;
+  currentTeam.played = true;
+  round.teamCards[round.teamIndex].right = [...round.right];
+  round.teamCards[round.teamIndex].skipped = [...round.skipped];
+
   playEndSound();
   vibe([80, 60, 80]);
 
-  const score = S.right.length;
-  let note = "Best round: " + best;
-  if (score > best) { best = score; store.set("best", best); note = "New best round!"; }
-  $("finalScore").textContent = score;
-  $("resultNote").textContent = gameMode === "team" ? "Final whistle! Here’s how the teams did." : note;
-  $("teamResults").classList.toggle("visible", gameMode === "team");
   if (gameMode === "team") {
-    const sorted = S.teamScores.slice().sort((a, b) => b.score - a.score);
-    $("teamResults").innerHTML = sorted.map((team, index) => `${index + 1}. ${escapeHtml(team.name)} — ${team.score}`).join("<br>");
+    const nextIndex = round.teamIndex + 1;
+    if (nextIndex < round.teamScores.length) {
+      showTurnBreak(round.teamIndex, nextIndex);
+    } else {
+      finalResults();
+    }
+  } else {
+    finalResults();
   }
-  $("finalScore").classList.remove("pop"); void $("finalScore").offsetWidth; $("finalScore").classList.add("pop");
-  fillList($("rightList"), S.right);
-  fillList($("skipList"), S.skipped);
+}
+
+function showTurnBreak(prevIndex, nextIndex) {
+  const round = S;
+  if (!round) return;
+  round.teamIndex = nextIndex;
+
+  const prevTeam = round.teamScores[prevIndex];
+  const nextTeam = round.teamScores[nextIndex];
+
+  $("turnBreakTitle").textContent = `${prevTeam.name}'s turn is done!`;
+  $("turnBreakScore").textContent = prevTeam.score;
+  $("turnBreakSub").textContent = `${prevTeam.score} word${prevTeam.score === 1 ? "" : "s"} guessed!`;
+
+  const standingsEl = $("turnBreakStandings");
+  const itemsHtml = round.teamScores.map((team, idx) => {
+    let statusBadge = "";
+    let itemClass = "standings-item";
+    if (team.played) {
+      statusBadge = `<span>${team.score} pts</span>`;
+    } else if (idx === nextIndex) {
+      itemClass += " up-next";
+      statusBadge = `<span class="standings-badge">Up next</span>`;
+    } else {
+      statusBadge = `<span style="opacity: 0.6;">Waiting</span>`;
+    }
+    return `<li class="${itemClass}"><span>${idx + 1}. ${escapeHtml(team.name)}</span> ${statusBadge}</li>`;
+  }).join("");
+
+  standingsEl.innerHTML = `<h4>Current Standings</h4><ul class="standings-list">${itemsHtml}</ul>`;
+
+  $("turnBreakNext").innerHTML = `Pass the phone to <strong>${escapeHtml(nextTeam.name)}</strong>!`;
+  $("nextTeamBtn").textContent = `Start ${nextTeam.name}'s Turn`;
+
+  show("turnBreak");
+}
+
+function endRound() {
+  if (!S) return;
+  if (S.running) endTeamTurn();
+  else if (!S.finalized) finalResults();
+}
+
+function finalResults() {
+  const round = S;
+  if (!round || round.finalized) return;
+  round.finalized = true;
+  round.running = false;
+  clearInterval(round.timer);
+  round.timer = null;
+  releaseWake();
+  try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) {}
+  $("game").classList.remove("ok", "skip");
+
+  if (gameMode === "team") {
+    const sorted = round.teamScores.slice().sort((a, b) => b.score - a.score);
+    const topScore = sorted[0].score;
+    const winners = sorted.filter(t => t.score === topScore);
+
+    $("resultsHeading").textContent = "Match Results";
+    $("finalScore").style.display = "none";
+    $("resultNote").textContent = winners.length > 1
+      ? `It's a tie between ${winners.map(w => escapeHtml(w.name)).join(" & ")} with ${topScore} points!`
+      : `🏆 ${escapeHtml(winners[0].name)} wins with ${topScore} points! 🏆`;
+
+    if (topScore > 0) celebrate();
+
+    $("teamResults").classList.add("visible");
+    $("teamResults").innerHTML = sorted.map((team, index) => {
+      const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}.`;
+      return `<div class="team-rank-row"><span>${medal} ${escapeHtml(team.name)}</span> <strong>${team.score} pts</strong></div>`;
+    }).join("");
+
+    $("soloLists").style.display = "none";
+    const breakdowns = $("teamBreakdowns");
+    breakdowns.classList.add("visible");
+    breakdowns.innerHTML = round.teamScores.map((team, idx) => {
+      const cards = round.teamCards[idx];
+      const rightItems = cards.right.length
+        ? cards.right.map(c => `<li>${escapeHtml(cardText(c))}</li>`).join("")
+        : "<li>None</li>";
+      const skipItems = cards.skipped.length
+        ? cards.skipped.map(c => `<li>${escapeHtml(cardText(c))}</li>`).join("")
+        : "<li>None</li>";
+      return `
+        <div class="team-breakdown-card">
+          <div class="team-breakdown-header">
+            <h3>${escapeHtml(team.name)}</h3>
+            <span class="badge">${team.score} point${team.score === 1 ? "" : "s"}</span>
+          </div>
+          <div class="team-breakdown-words">
+            <div>
+              <h4>Got it (${cards.right.length})</h4>
+              <ul>${rightItems}</ul>
+            </div>
+            <div class="missed">
+              <h4>Skipped (${cards.skipped.length})</h4>
+              <ul>${skipItems}</ul>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  } else {
+    $("resultsHeading").textContent = "Time's up";
+    const score = round.right.length;
+    let note = "Best round: " + best;
+    if (score > best) { best = score; store.set("best", best); note = "New best round!"; }
+    $("finalScore").style.display = "";
+    $("finalScore").textContent = score;
+    $("resultNote").textContent = note;
+    $("teamResults").classList.remove("visible");
+    $("soloLists").style.display = "";
+    const breakdowns = $("teamBreakdowns");
+    breakdowns.classList.remove("visible");
+    breakdowns.innerHTML = "";
+    $("finalScore").classList.remove("pop"); void $("finalScore").offsetWidth; $("finalScore").classList.add("pop");
+    fillList($("rightList"), round.right);
+    fillList($("skipList"), round.skipped);
+  }
   renderHome();
   show("results");
 }
@@ -872,7 +1272,7 @@ document.querySelectorAll(".duration-options button").forEach(b => {
     renderDuration();
   });
 });
-$("playBtn").addEventListener("click", () => show("tutorial"));
+$("playBtn").addEventListener("click", () => show("categories"));
 $("tutorialNext").addEventListener("click", () => show("categories"));
 $("tutorialBack").addEventListener("click", () => show("home"));
 $("backHome").addEventListener("click", () => show("home"));
@@ -885,6 +1285,7 @@ $("setupStart").addEventListener("click", () => {
     if (teamNames.length < 2) teamNames = ["Team A", "Team B"];
     store.set("teamNames", teamNames);
   }
+  initMatch();
   startSelectedDeck();
 });
 document.querySelectorAll(".mode-options button").forEach(button => button.addEventListener("click", () => {
@@ -893,6 +1294,19 @@ document.querySelectorAll(".mode-options button").forEach(button => button.addEv
   document.querySelectorAll(".mode-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
   $("teamFields").classList.toggle("visible", gameMode === "team");
 }));
+$("nextTeamBtn").addEventListener("click", async () => {
+  initAudio();
+  await ensureMotion();
+  if (!await requestLandscape()) {
+    pendingStart = true;
+    show("orientation");
+    return;
+  }
+  await beginCountdown();
+});
+$("turnBreakEndMatchBtn").addEventListener("click", () => {
+  finalResults();
+});
 $("orientationRetryBtn").addEventListener("click", startSelectedDeck);
 $("orientationCancelBtn").addEventListener("click", () => {
   pendingStart = false;
@@ -904,13 +1318,22 @@ $("orientationCancelBtn").addEventListener("click", () => {
   }
   show("duration");
 });
-$("cancelBtn").addEventListener("click", () => { clearInterval(readyTimer); show("categories"); });
+$("cancelBtn").addEventListener("click", () => { clearInterval(readyTimer); S = null; show("categories"); });
 $("quitBtn").addEventListener("click", endRound);
 $("gotBtn").addEventListener("click", () => mark("right"));
 $("skipBtn").addEventListener("click", () => mark("skip"));
-$("againBtn").addEventListener("click", startSelectedDeck);
-$("decksBtn").addEventListener("click", () => show("categories"));
-$("homeBtn").addEventListener("click", () => show("home"));
+$("againBtn").addEventListener("click", () => {
+  initMatch();
+  startSelectedDeck();
+});
+$("decksBtn").addEventListener("click", () => {
+  S = null;
+  show("categories");
+});
+$("homeBtn").addEventListener("click", () => {
+  S = null;
+  show("home");
+});
 $("soundToggle").addEventListener("change", event => { soundMuted = !event.target.checked; store.set("soundMuted", soundMuted); });
 $("volumeControl").addEventListener("input", event => { soundVolume = Number(event.target.value); store.set("soundVolume", soundVolume); });
 $("readableToggle").addEventListener("change", event => { store.set("readable", event.target.checked); applyPreferences(); if (S && S.running) fit(); });
@@ -947,10 +1370,23 @@ function handleOrientationChange() {
 window.addEventListener("orientationchange", handleOrientationChange);
 window.addEventListener("resize", handleOrientationChange);
 
+function applySetupState() {
+  document.querySelectorAll(".mode-options button").forEach(button => {
+    button.setAttribute("aria-pressed", String(button.dataset.mode === gameMode));
+  });
+  $("teamFields").classList.toggle("visible", gameMode === "team");
+  if (Array.isArray(teamNames)) {
+    if (teamNames[0]) $("teamA").value = teamNames[0];
+    if (teamNames[1]) $("teamB").value = teamNames[1];
+    if (teamNames[2]) $("teamC").value = teamNames[2];
+    if (teamNames[3]) $("teamD").value = teamNames[3];
+  }
+}
+
 renderHome();
 renderDecks();
 applyPreferences();
-$("teamFields").classList.toggle("visible", gameMode === "team");
+applySetupState();
 loadPublishedDecks();
 </script>
 </body>
