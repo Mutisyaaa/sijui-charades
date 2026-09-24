@@ -123,12 +123,50 @@ async function seedDefaultContent(client, adminUserId) {
     "SELECT 1 FROM public.content_seeds WHERE seed_key = $1",
     [seedKey],
   );
-  if (alreadySeeded.rows[0]) return;
+  if (!alreadySeeded.rows[0]) {
+    for (const deckData of DEFAULT_DECKS) {
+      const existingDeck = await client.query(
+        "SELECT id FROM public.decks WHERE lower(name) = lower($1) LIMIT 1",
+        [deckData.name],
+      );
+      let deckId = existingDeck.rows[0]?.id;
 
-  for (const deckData of DEFAULT_DECKS) {
+      if (!deckId) {
+        const deckResult = await client.query(
+          `INSERT INTO public.decks (name, description, icon, theme, is_published, created_by)
+           VALUES ($1, $2, $3, $4, true, $5)
+           RETURNING id`,
+          [deckData.name, deckData.description, deckData.icon, deckData.theme, adminUserId],
+        );
+        deckId = deckResult.rows[0].id;
+      }
+
+      const cardCount = await client.query(
+        "SELECT count(*)::int AS count FROM public.cards WHERE deck_id = $1",
+        [deckId],
+      );
+      if (cardCount.rows[0].count === 0) {
+        for (const [sortOrder, text] of deckData.cards.entries()) {
+          await client.query(
+            `INSERT INTO public.cards (deck_id, text, category, difficulty, sort_order, created_by)
+             VALUES ($1, $2, $3, 'medium', $4, $5)`,
+            [deckId, text, deckData.category, sortOrder, adminUserId],
+          );
+        }
+      }
+    }
+    await client.query("INSERT INTO public.content_seeds (seed_key) VALUES ($1) ON CONFLICT DO NOTHING", [seedKey]);
+  }
+
+  // Seed Anatomy Deck (or populate cards if deck already created by admin with 0 cards)
+  const anatomySeedKey = "anatomy-deck-v1";
+  const anatomySeeded = await client.query(
+    "SELECT 1 FROM public.content_seeds WHERE seed_key = $1",
+    [anatomySeedKey],
+  );
+  if (!anatomySeeded.rows[0]) {
     const existingDeck = await client.query(
-      "SELECT id FROM public.decks WHERE lower(name) = lower($1) LIMIT 1",
-      [deckData.name],
+      "SELECT id FROM public.decks WHERE lower(name) = 'anatomy' LIMIT 1",
     );
     let deckId = existingDeck.rows[0]?.id;
 
@@ -137,7 +175,7 @@ async function seedDefaultContent(client, adminUserId) {
         `INSERT INTO public.decks (name, description, icon, theme, is_published, created_by)
          VALUES ($1, $2, $3, $4, true, $5)
          RETURNING id`,
-        [deckData.name, deckData.description, deckData.icon, deckData.theme, adminUserId],
+        ["Anatomy", "Body parts and organs", "🫀", "berry", adminUserId],
       );
       deckId = deckResult.rows[0].id;
     }
@@ -147,17 +185,59 @@ async function seedDefaultContent(client, adminUserId) {
       [deckId],
     );
     if (cardCount.rows[0].count === 0) {
-      for (const [sortOrder, text] of deckData.cards.entries()) {
+      const anatomyCards = [
+        { text: "Heart", category: "Anatomy", difficulty: "easy" },
+        { text: "Brain", category: "Anatomy", difficulty: "easy" },
+        { text: "Lungs", category: "Anatomy", difficulty: "easy" },
+        { text: "Stomach", category: "Anatomy", difficulty: "easy" },
+        { text: "Skeleton", category: "Anatomy", difficulty: "easy" },
+        { text: "Tongue", category: "Anatomy", difficulty: "easy" },
+        { text: "Teeth / Wisdom tooth", category: "Anatomy", difficulty: "easy" },
+        { text: "Backbone / Spine", category: "Anatomy", difficulty: "easy" },
+        { text: "Kneecap (Patella)", category: "Anatomy", difficulty: "easy" },
+        { text: "Eyebrows", category: "Anatomy", difficulty: "easy" },
+        { text: "Adam's Apple", category: "Anatomy", difficulty: "medium" },
+        { text: "Funny bone", category: "Anatomy", difficulty: "medium" },
+        { text: "Rib cage", category: "Anatomy", difficulty: "medium" },
+        { text: "Kidneys", category: "Anatomy", difficulty: "medium" },
+        { text: "Liver", category: "Anatomy", difficulty: "medium" },
+        { text: "Skull", category: "Anatomy", difficulty: "medium" },
+        { text: "Collarbone", category: "Anatomy", difficulty: "medium" },
+        { text: "Tonsils", category: "Anatomy", difficulty: "medium" },
+        { text: "Biceps", category: "Anatomy", difficulty: "medium" },
+        { text: "Achilles tendon", category: "Anatomy", difficulty: "medium" },
+        { text: "Appendix", category: "Anatomy", difficulty: "medium" },
+        { text: "Intestines", category: "Anatomy", difficulty: "medium" },
+        { text: "Goosebumps", category: "Anatomy", difficulty: "hard" },
+        { text: "Vocal cords", category: "Anatomy", difficulty: "hard" },
+        { text: "Eardrum", category: "Anatomy", difficulty: "hard" },
+        { text: "Femur", category: "Anatomy", difficulty: "hard" },
+        { text: "Diaphragm", category: "Anatomy", difficulty: "hard" },
+        { text: "Pulse", category: "Anatomy", difficulty: "hard" },
+        { text: "Bladder", category: "Anatomy", difficulty: "hard" },
+        { text: "Sprained ankle", category: "Anatomy", difficulty: "hard" },
+        { text: "Muscle cramp", category: "Anatomy", difficulty: "hard" },
+        { text: "Reflex", category: "Anatomy", difficulty: "hard" },
+        { text: "Kitambi", category: "Anatomy", difficulty: "easy" },
+        { text: "Upara", category: "Anatomy", difficulty: "easy" },
+        { text: "Kisogo", category: "Anatomy", difficulty: "medium" },
+        { text: "Kupaliwa", category: "Anatomy", difficulty: "medium" }
+      ];
+
+      for (const [sortOrder, card] of anatomyCards.entries()) {
         await client.query(
           `INSERT INTO public.cards (deck_id, text, category, difficulty, sort_order, created_by)
-           VALUES ($1, $2, $3, 'medium', $4, $5)`,
-          [deckId, text, deckData.category, sortOrder, adminUserId],
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [deckId, card.text, card.category, card.difficulty, sortOrder, adminUserId],
         );
       }
     }
-  }
 
-  await client.query("INSERT INTO public.content_seeds (seed_key) VALUES ($1)", [seedKey]);
+    await client.query(
+      "INSERT INTO public.content_seeds (seed_key) VALUES ($1) ON CONFLICT DO NOTHING",
+      [anatomySeedKey],
+    );
+  }
 }
 
 async function main() {
