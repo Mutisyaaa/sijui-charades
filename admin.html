@@ -69,10 +69,6 @@
               <div class="field"><label for="cardDifficulty">Difficulty</label><select id="cardDifficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
             </div>
             <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
-            <div class="field">
-              <label for="cardOrder">Sort order</label>
-              <input id="cardOrder" type="number" min="0" step="1" value="0">
-            </div>
             <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
             <div class="form-actions">
               <button class="primary" type="submit">Save card</button>
@@ -93,7 +89,7 @@
   </main>
 
   <script>
-    const state = { decks: [], editingDeckId: null, editingCardId: null, coverUrl: "" };
+    const state = { decks: [], editingDeckId: null, editingCardId: null, editingCardSortOrder: 0, coverUrl: "" };
     const $ = id => document.getElementById(id);
 
     function escapeHtml(value) {
@@ -120,7 +116,7 @@
     function renderDeckOptions() {
       const select = $("cardDeck");
       select.innerHTML = state.decks.length
-        ? state.decks.map(deck => `<option value="${deck.id}">${escapeHtml(deck.name)}</option>`).join("")
+        ? state.decks.map((deck, idx) => `<option value="${deck.id}">#${idx + 1} ${escapeHtml(deck.name)} (${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"})</option>`).join("")
         : `<option value="">Create a deck first</option>`;
       select.disabled = !state.decks.length;
     }
@@ -132,14 +128,17 @@
         list.innerHTML = `<p class="empty">No decks yet. Add your first one on the left.</p>`;
         return;
       }
-      list.innerHTML = state.decks.map(deck => `
+      list.innerHTML = state.decks.map((deck, deckIdx) => `
         <article class="deck-card">
           <div class="deck-heading">
             <div>
-              <h3>${escapeHtml(deck.name)}</h3>
+              <h3><span class="deck-num">#${deckIdx + 1}</span>${escapeHtml(deck.name)}</h3>
               <p class="deck-description">${escapeHtml(deck.description || "No description")}</p>
             </div>
-            <span class="badge ${deck.is_published ? "" : "off"}">${deck.is_published ? "Published" : "Hidden"}</span>
+            <div class="deck-badges">
+              <span class="badge count">${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"}</span>
+              <span class="badge ${deck.is_published ? "" : "off"}">${deck.is_published ? "Published" : "Hidden"}</span>
+            </div>
           </div>
           <div class="deck-actions">
             <button class="small-button" data-action="edit-deck" data-id="${deck.id}" type="button">Edit deck</button>
@@ -147,9 +146,12 @@
             <button class="small-button danger" data-action="delete-deck" data-id="${deck.id}" type="button">Delete deck</button>
           </div>
           <ul class="card-list">
-            ${deck.cards.length ? deck.cards.map(card => `
+            ${deck.cards.length ? deck.cards.map((card, cardIdx) => `
               <li class="card-row ${card.is_active ? "" : "inactive"}">
-                <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")} · ${escapeHtml(card.difficulty || "medium")}</small></span>
+                <div class="card-main">
+                  <span class="card-num">#${cardIdx + 1}</span>
+                  <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")} · ${escapeHtml(card.difficulty || "medium")}</small></span>
+                </div>
                 <span class="card-actions">
                   <button class="small-button" data-action="edit-card" data-id="${card.id}" type="button">Edit</button>
                   <button class="small-button danger" data-action="delete-card" data-id="${card.id}" type="button">Delete</button>
@@ -174,9 +176,9 @@
 
     function resetCardForm() {
       state.editingCardId = null;
+      state.editingCardSortOrder = 0;
       $("cardForm").reset();
       $("cardActive").checked = true;
-      $("cardOrder").value = "0";
       $("cardCategory").value = "General";
       $("cardDifficulty").value = "medium";
       $("cardFormTitle").textContent = "Add a card";
@@ -218,7 +220,7 @@
           text: $("cardText").value,
           category: $("cardCategory").value,
           difficulty: $("cardDifficulty").value,
-          sortOrder: Number($("cardOrder").value || 0),
+          sortOrder: state.editingCardSortOrder ?? 0,
           isActive: $("cardActive").checked
         };
         const url = state.editingCardId ? `/api/admin/cards/${state.editingCardId}` : `/api/admin/decks/${$("cardDeck").value}/cards`;
@@ -242,7 +244,7 @@
         } else if (action === "delete-deck" && deck && confirm(`Delete “${deck.name}” and all its cards?`)) {
           await api(`/api/admin/decks/${id}`, { method: "DELETE" }); await load(); setStatus("deckStatus", "Deck deleted.", "success");
         } else if (action === "edit-card" && card) {
-          state.editingCardId = card.id; $("cardDeck").value = card.deck_id; $("cardText").value = card.text; $("cardCategory").value = card.category || "General"; $("cardDifficulty").value = card.difficulty || "medium"; $("cardOrder").value = card.sort_order; $("cardActive").checked = card.is_active; renderCardPreview();
+          state.editingCardId = card.id; state.editingCardSortOrder = card.sort_order ?? 0; $("cardDeck").value = card.deck_id; $("cardText").value = card.text; $("cardCategory").value = card.category || "General"; $("cardDifficulty").value = card.difficulty || "medium"; $("cardActive").checked = card.is_active; renderCardPreview();
           $("cardFormTitle").textContent = "Edit card"; $("cancelCardEdit").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" });
         } else if (action === "delete-card" && card && confirm(`Delete “${card.text}”?`)) {
           await api(`/api/admin/cards/${id}`, { method: "DELETE" }); await load(); setStatus("cardStatus", "Card deleted.", "success");

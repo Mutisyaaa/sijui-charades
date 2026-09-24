@@ -1,9 +1,11 @@
 :root {
-  --black: #11110F;
-  --black-soft: #22221F;
-  --cream: #F6F0E4;
+  --black: #1A1512;
+  --black-soft: #3A2E28;
+  --cream: #F5EFE4;
   --cream-muted: #D9D0C1;
-  --red: #D9302A;
+  --amber: #F2A71B;
+  --amber-dark: #C6820E;
+  --red: #C1272D;
   --font: "Manline Slabs", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -29,7 +31,7 @@ body {
 a { color: inherit; }
 button, input { font: inherit; }
 button:focus-visible, input:focus-visible, a:focus-visible {
-  outline: 3px solid var(--cream);
+  outline: 3px solid var(--amber);
   outline-offset: 3px;
 }
 
@@ -53,7 +55,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .brand {
   display: inline-block;
   margin-bottom: 2.5rem;
-  color: var(--cream);
+  color: var(--amber);
   font-size: 1rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -67,6 +69,7 @@ h1 {
   font-weight: 900;
   letter-spacing: -0.05em;
   line-height: 0.95;
+  color: var(--amber);
 }
 
 .intro {
@@ -84,23 +87,36 @@ h1 {
   padding: 0 15px;
   color: var(--cream);
   background: var(--black);
-  border: 2px solid rgba(246, 240, 228, 0.22);
+  border: 2px solid rgba(245, 239, 228, 0.18);
   border-radius: 12px;
 }
-.field input::placeholder { color: rgba(246, 240, 228, 0.48); }
-.field input:focus { border-color: var(--cream); }
+.field input::placeholder { color: rgba(245, 239, 228, 0.45); }
+.field input:focus { border-color: var(--amber); outline: none; }
 
 .primary {
   min-height: 58px;
   margin-top: 0.75rem;
   padding: 0 20px;
-  color: var(--black);
-  background: var(--cream);
-  border: 0;
+  color: #1A1512;
+  background: linear-gradient(180deg, #F5B232 0%, #E69910 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 5px 0 var(--amber-dark), 0 12px 20px rgba(0, 0, 0, 0.4);
   border-radius: 14px;
   cursor: pointer;
   font-size: 1.15rem;
   font-weight: 900;
+  letter-spacing: 0.02em;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+}
+.primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 7px 0 var(--amber-dark), 0 16px 26px rgba(0, 0, 0, 0.45);
+}
+.primary:active {
+  transform: translateY(3px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 0 var(--amber-dark), 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .form-note {

@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#11110F">
-  <title>Create account Â· Sijui Charades</title>
+  <title>Create account · Sijui Charades</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="auth.css">
 </head>
 <body>
@@ -32,7 +33,7 @@
       </form>
 
       <p class="switch-page">Already have an account? <a href="login.html">Log in</a></p>
-      <a class="back-home" href="Index.html">â† Back to the game</a>
+      <a class="back-home" href="Index.html">← Back to the game</a>
     </section>
   </main>
   <script>
@@ -40,7 +41,7 @@
       event.preventDefault();
       const note = document.getElementById("formNote");
       const form = event.currentTarget;
-      note.textContent = "Creating your accountâ€¦";
+      note.textContent = "Creating your account…";
       try {
         const response = await fetch(form.action, {
           method: "POST",
@@ -53,7 +54,7 @@
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || "Signup failed.");
-        note.textContent = "Account created. Opening the gameâ€¦";
+        note.textContent = "Account created. Opening the game…";
         window.setTimeout(() => { window.location.href = "admin.html"; }, 500);
       } catch (error) {
         note.textContent = error.message;
@@ -63,4 +64,3 @@
   </script>
 </body>
 </html>
-

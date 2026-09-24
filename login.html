@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#11110F">
-  <title>Admin login Â· Sijui Charades</title>
+  <title>Admin login · Sijui Charades</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="auth.css">
 </head>
 <body>
@@ -28,7 +29,7 @@
       </form>
 
       <p class="switch-page">Need an account? <a href="signup.html">Create one</a></p>
-      <a class="back-home" href="Index.html">â† Back to the game</a>
+      <a class="back-home" href="Index.html">← Back to the game</a>
     </section>
   </main>
   <script>
@@ -36,7 +37,7 @@
       event.preventDefault();
       const note = document.getElementById("formNote");
       const form = event.currentTarget;
-      note.textContent = "Signing you inâ€¦";
+      note.textContent = "Signing you in…";
       try {
         const response = await fetch(form.action, {
           method: "POST",
@@ -54,4 +55,3 @@
   </script>
 </body>
 </html>
-

@@ -10,15 +10,28 @@ const password = process.env.ADMIN_PASSWORD;
 const displayName = String(process.env.ADMIN_DISPLAY_NAME || "k3v1n").trim();
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is required to initialize the database.");
+  console.warn("⚠️  DATABASE_URL is not set. Skipping database initialization.");
+  console.warn("   -> Sijui Charades will run in standalone mode with built-in decks.");
+  console.warn("   -> To enable PostgreSQL, set DATABASE_URL in a .env file.");
+  process.exit(0);
 }
 
 if (!email || !password || !displayName) {
-  throw new Error("ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_DISPLAY_NAME are required.");
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ADMIN_EMAIL, ADMIN_PASSWORD, and ADMIN_DISPLAY_NAME are required.");
+  } else {
+    console.warn("⚠️  Admin credentials not set (ADMIN_EMAIL, ADMIN_PASSWORD); skipping admin account seeding.");
+    process.exit(0);
+  }
 }
 
 if (password.length < 8 || password.length > 128) {
-  throw new Error("ADMIN_PASSWORD must be between 8 and 128 characters.");
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ADMIN_PASSWORD must be between 8 and 128 characters.");
+  } else {
+    console.warn("⚠️  ADMIN_PASSWORD must be between 8 and 128 characters; skipping admin account seeding.");
+    process.exit(0);
+  }
 }
 
 const pool = new Pool({
@@ -197,6 +210,10 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
+  console.error("❌ Database initialization error:", error.message);
+  if (process.env.NODE_ENV === "production") {
+    process.exitCode = 1;
+  } else {
+    console.warn("⚠️  Continuing in standalone mode. Built-in decks will be used.");
+  }
 });

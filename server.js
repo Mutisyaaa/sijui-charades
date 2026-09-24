@@ -205,21 +205,26 @@ app.post("/api/logout", async (request, response) => {
 });
 
 app.get("/api/decks", async (_request, response) => {
-  const result = await pool.query(
-    `SELECT d.id, d.name, d.description, d.icon, d.theme, d.cover_url,
-            json_agg(
-              json_build_object(
-                'id', c.id, 'text', c.text, 'category', c.category,
-                'difficulty', c.difficulty, 'sort_order', c.sort_order
-              ) ORDER BY c.sort_order ASC, c.created_at ASC
-            ) FILTER (WHERE c.id IS NOT NULL) AS cards
-     FROM public.decks d
-     LEFT JOIN public.cards c ON c.deck_id = d.id AND c.is_active = true
-     WHERE d.is_published = true
-     GROUP BY d.id
-     ORDER BY d.name ASC`
-  );
-  response.json(result.rows.map(deck => ({ ...deck, cards: deck.cards || [] })));
+  try {
+    const result = await pool.query(
+      `SELECT d.id, d.name, d.description, d.icon, d.theme, d.cover_url,
+              json_agg(
+                json_build_object(
+                  'id', c.id, 'text', c.text, 'category', c.category,
+                  'difficulty', c.difficulty, 'sort_order', c.sort_order
+                ) ORDER BY c.sort_order ASC, c.created_at ASC
+              ) FILTER (WHERE c.id IS NOT NULL) AS cards
+       FROM public.decks d
+       LEFT JOIN public.cards c ON c.deck_id = d.id AND c.is_active = true
+       WHERE d.is_published = true
+       GROUP BY d.id
+       ORDER BY d.name ASC`
+    );
+    response.json(result.rows.map(deck => ({ ...deck, cards: deck.cards || [] })));
+  } catch (error) {
+    console.warn("⚠️  Database unavailable for /api/decks. Returning empty list so app uses fallback decks.");
+    response.json([]);
+  }
 });
 
 app.get("/api/admin/decks", requireAdmin, async (_request, response) => {
@@ -371,6 +376,10 @@ app.patch("/api/admin/cards/:cardId", requireAdmin, async (request, response) =>
 app.delete("/api/admin/cards/:cardId", requireAdmin, async (request, response) => {
   const result = await pool.query("DELETE FROM public.cards WHERE id = $1 RETURNING id", [request.params.cardId]);
   if (!result.rows[0]) return response.status(404).json({ error: "Card not found." });
+  response.status(204).end();
+});
+
+app.get("/favicon.ico", (_request, response) => {
   response.status(204).end();
 });
 
