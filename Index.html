@@ -129,36 +129,38 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 }
 .banter-bubble {
   position: absolute;
-  max-width: min(260px, 75vw);
-  padding: 6px 14px;
-  background: rgba(43, 33, 28, 0.78);
+  max-width: min(270px, 78vw);
+  padding: 7px 15px;
+  background: rgba(43, 33, 28, 0.88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(245, 239, 228, 0.16);
+  border: 1.5px solid rgba(245, 239, 228, 0.22);
   border-radius: 999px;
   color: var(--chalk);
   font-family: inherit;
-  font-size: clamp(0.74rem, 2.5vw, 0.88rem);
+  font-size: clamp(0.76rem, 2.7vw, 0.92rem);
   font-weight: 800;
   font-style: italic;
   letter-spacing: 0.01em;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
   opacity: 0;
   pointer-events: none;
   user-select: none;
   will-change: transform, opacity;
-  animation: banterFloat 5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: banterFloat 4.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 .banter-bubble.amber-tint {
   color: var(--amber);
-  border-color: rgba(242, 167, 27, 0.4);
+  border-color: rgba(242, 167, 27, 0.5);
+  background: rgba(48, 36, 26, 0.9);
 }
 .banter-bubble.red-tint {
   color: #FFAAA6;
-  border-color: rgba(193, 39, 45, 0.45);
+  border-color: rgba(193, 39, 45, 0.55);
+  background: rgba(50, 26, 24, 0.9);
 }
 
 @keyframes banterFloat {
@@ -166,17 +168,17 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
     opacity: 0;
     transform: translateY(12px) scale(0.92) rotate(var(--rot, 0deg));
   }
-  16% {
-    opacity: 0.65;
+  15% {
+    opacity: 0.82;
     transform: translateY(0) scale(1) rotate(var(--rot, 0deg));
   }
   75% {
-    opacity: 0.58;
-    transform: translateY(-16px) scale(1) rotate(var(--rot, 0deg));
+    opacity: 0.76;
+    transform: translateY(-18px) scale(1) rotate(var(--rot, 0deg));
   }
   100% {
     opacity: 0;
-    transform: translateY(-32px) scale(0.95) rotate(var(--rot, 0deg));
+    transform: translateY(-34px) scale(0.95) rotate(var(--rot, 0deg));
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2302,97 +2304,35 @@ let banterInterval = null;
 let lastBanterIndex = -1;
 
 function getSafeBanterCoords(tapX = null, tapY = null) {
-  const home = $("home");
-  if (!home) return { x: 20, y: 100 };
-
-  const homeRect = home.getBoundingClientRect();
-  const playBtn = $("playBtn");
-  const homeHero = home.querySelector(".home-hero");
-
-  // Play button boundary (bubbles MUST stay well above the Play button)
-  const playTop = playBtn ? (playBtn.getBoundingClientRect().top - homeRect.top) : (homeRect.height * 0.78);
-  // Generous buffer above play button so bubbles never touch or drift into it
-  const maxSafeY = Math.max(60, playTop - 72);
-
-  const heroRect = homeHero ? homeHero.getBoundingClientRect() : null;
-  const heroTop = heroRect ? (heroRect.top - homeRect.top) : (homeRect.height * 0.35);
-  const heroBottom = heroRect ? (heroRect.bottom - homeRect.top) : (homeRect.height * 0.65);
-  const heroLeft = heroRect ? (heroRect.left - homeRect.left) : (homeRect.width * 0.1);
-  const heroRight = heroRect ? (heroRight.right - homeRect.left) : (homeRect.width * 0.9);
-
-  // If user tapped, clamp tap location safely above buttons and within screen
   if (tapX !== null && tapY !== null) {
-    let px = tapX - homeRect.left - 80;
-    let py = tapY - homeRect.top - 20;
-    px = Math.max(12, Math.min(homeRect.width - 240, px));
-    py = Math.max(70, Math.min(maxSafeY, py));
-    return { x: px, y: py };
+    const home = $("home");
+    const rect = home ? home.getBoundingClientRect() : { width: window.innerWidth, height: window.innerHeight, left: 0, top: 0 };
+    let px = ((tapX - rect.left) / Math.max(1, rect.width)) * 100 - 15;
+    let py = ((tapY - rect.top) / Math.max(1, rect.height)) * 100 - 3;
+    px = Math.max(6, Math.min(64, px));
+    // Clamp safely above Play button
+    py = Math.max(16, Math.min(64, py));
+    return { x: Math.round(px), y: Math.round(py) };
   }
 
-  // Automatic ambient spawn zones that never overlap buttons or hero
-  const zones = [];
-
-  // Zone 1: Upper Left (above hero, below skyline)
-  if (heroTop > 90) {
-    zones.push({
-      xMin: 12,
-      xMax: Math.max(16, homeRect.width * 0.32),
-      yMin: 70,
-      yMax: Math.max(75, heroTop - 45)
-    });
+  // 3 guaranteed safe zones that never touch or go behind buttons:
+  // Zone 1: Upper Left (y: 17% - 31%, x: 6% - 26%)
+  // Zone 2: Upper Right (y: 18% - 33%, x: 44% - 66%)
+  // Zone 3: Mid-pocket safely above Play button (y: 56% - 64%, x: 10% - 48%)
+  const pick = Math.random();
+  let x, y;
+  if (pick < 0.38) {
+    x = 6 + Math.random() * 20;
+    y = 17 + Math.random() * 14;
+  } else if (pick < 0.74) {
+    x = 44 + Math.random() * 22;
+    y = 18 + Math.random() * 15;
+  } else {
+    x = 10 + Math.random() * 38;
+    y = 56 + Math.random() * 8;
   }
 
-  // Zone 2: Upper Right (above hero, below skyline)
-  if (heroTop > 90) {
-    zones.push({
-      xMin: Math.min(homeRect.width - 230, homeRect.width * 0.58),
-      xMax: Math.max(homeRect.width * 0.62, homeRect.width - 190),
-      yMin: 70,
-      yMax: Math.max(75, heroTop - 45)
-    });
-  }
-
-  // Zone 3: Left flank beside hero (if space available)
-  if (heroLeft > 160) {
-    zones.push({
-      xMin: 10,
-      xMax: heroLeft - 180,
-      yMin: Math.max(75, heroTop),
-      yMax: Math.min(maxSafeY, heroBottom - 20)
-    });
-  }
-
-  // Zone 4: Right flank beside hero (if space available)
-  if (homeRect.width - heroRight > 160) {
-    zones.push({
-      xMin: heroRight + 12,
-      xMax: homeRect.width - 190,
-      yMin: Math.max(75, heroTop),
-      yMax: Math.min(maxSafeY, heroBottom - 20)
-    });
-  }
-
-  // Zone 5: Slot between Hero and Play button (if there is at least 65px vertical space)
-  if (maxSafeY - heroBottom > 60) {
-    zones.push({
-      xMin: Math.max(14, homeRect.width * 0.12),
-      xMax: Math.max(20, homeRect.width * 0.45),
-      yMin: heroBottom + 12,
-      yMax: maxSafeY - 10
-    });
-  }
-
-  if (!zones.length) {
-    return {
-      x: Math.max(12, Math.min(homeRect.width - 230, 24)),
-      y: Math.max(70, Math.min(maxSafeY, 80))
-    };
-  }
-
-  const zone = zones[Math.floor(Math.random() * zones.length)];
-  const x = Math.floor(zone.xMin + Math.random() * Math.max(1, zone.xMax - zone.xMin));
-  const y = Math.floor(zone.yMin + Math.random() * Math.max(1, zone.yMax - zone.yMin));
-  return { x, y };
+  return { x: Math.round(x), y: Math.round(y) };
 }
 
 function spawnBanterBubble(customText = null, tapX = null, tapY = null) {
@@ -2421,8 +2361,8 @@ function spawnBanterBubble(customText = null, tapX = null, tapY = null) {
   el.textContent = text;
 
   const coords = getSafeBanterCoords(tapX, tapY);
-  el.style.left = `${coords.x}px`;
-  el.style.top = `${coords.y}px`;
+  el.style.left = `${coords.x}%`;
+  el.style.top = `${coords.y}%`;
 
   const rot = (Math.random() * 8 - 4).toFixed(1);
   el.style.setProperty("--rot", `${rot}deg`);
@@ -2435,14 +2375,14 @@ function startHomeBanter() {
   stopHomeBanter();
   setTimeout(() => {
     if ($("home")?.classList.contains("active")) spawnBanterBubble();
-  }, 900);
+  }, 400);
   banterInterval = setInterval(() => {
     if ($("home")?.classList.contains("active")) {
       spawnBanterBubble();
     } else {
       stopHomeBanter();
     }
-  }, 3200);
+  }, 3000);
 }
 
 function stopHomeBanter() {
