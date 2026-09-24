@@ -687,6 +687,11 @@ body.high-contrast .toggle-switch:checked {
   background-size: cover;
   background-position: center;
 }
+.deck.has-cover:hover::after, .deck.has-cover:focus-visible::after {
+  background: linear-gradient(to bottom, rgba(26,21,18,.15) 15%, rgba(26,21,18,.85) 100%), var(--deck-cover, inherit);
+  background-size: cover;
+  background-position: center;
+}
 .deck .deck-icon { flex: 0 0 auto; }
 .deck .n { position: absolute; top: 16px; right: 16px; }
 .deck:hover, .deck:focus-visible {
@@ -1651,14 +1656,17 @@ async function loadPublishedDecks() {
     }));
     ALL_DECKS = published.length ? published.concat([{
       id: "mix", name: "Everything", sub: "A bit of every deck",
+      cover_url: "/assets/images/everything-deck.jpg",
       cards: published.flatMap(d => d.cards)
     }]) : FALLBACK_DECKS.concat([{
       id: "mix", name: "Everything", sub: "A bit of every deck",
+      cover_url: "/assets/images/everything-deck.jpg",
       cards: FALLBACK_DECKS.flatMap(d => d.cards)
     }]);
   } catch (e) {
     ALL_DECKS = FALLBACK_DECKS.concat([{
       id: "mix", name: "Everything", sub: "A bit of every deck",
+      cover_url: "/assets/images/everything-deck.jpg",
       cards: FALLBACK_DECKS.flatMap(d => d.cards)
     }]);
   } finally {
