@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#11110F">
+  <meta name="theme-color" content="#1A1512">
   <title>Admin · Sijui Charades</title>
   <link rel="stylesheet" href="admin.css">
 </head>
@@ -116,7 +116,7 @@
     function renderDeckOptions() {
       const select = $("cardDeck");
       select.innerHTML = state.decks.length
-        ? state.decks.map((deck, idx) => `<option value="${deck.id}">#${idx + 1} ${escapeHtml(deck.name)} (${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"})</option>`).join("")
+        ? state.decks.map((deck, idx) => `<option value="${deck.id}">${idx + 1}. ${escapeHtml(deck.name)} (${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"})</option>`).join("")
         : `<option value="">Create a deck first</option>`;
       select.disabled = !state.decks.length;
     }
@@ -132,7 +132,7 @@
         <article class="deck-card">
           <div class="deck-heading">
             <div>
-              <h3><span class="deck-num">#${deckIdx + 1}</span>${escapeHtml(deck.name)}</h3>
+              <h3><span class="deck-num">${deckIdx + 1}</span>${escapeHtml(deck.name)}</h3>
               <p class="deck-description">${escapeHtml(deck.description || "No description")}</p>
             </div>
             <div class="deck-badges">
@@ -149,7 +149,7 @@
             ${deck.cards.length ? deck.cards.map((card, cardIdx) => `
               <li class="card-row ${card.is_active ? "" : "inactive"}">
                 <div class="card-main">
-                  <span class="card-num">#${cardIdx + 1}</span>
+                  <span class="card-num">${cardIdx + 1}</span>
                   <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")} · ${escapeHtml(card.difficulty || "medium")}</small></span>
                 </div>
                 <span class="card-actions">
