@@ -119,6 +119,82 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 #home h1 { font-size: clamp(2.6rem, 12vmin, 5rem); color: var(--amber); text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); line-height: 0.95; }
 #home .tag { max-width: 28ch; margin: 0.9rem auto 0; font-size: 1.15rem; line-height: 1.4; color: var(--chalk); opacity: 0.92; }
 
+/* Ambient Sarcastic Banter Floating Layer */
+.home-banter-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.banter-bubble {
+  position: absolute;
+  max-width: min(290px, 78vw);
+  padding: 8px 16px;
+  background: rgba(43, 33, 28, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(245, 239, 228, 0.14);
+  border-radius: 999px;
+  color: var(--chalk);
+  font-family: inherit;
+  font-size: clamp(0.78rem, 2.7vw, 0.95rem);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform, opacity;
+  animation: banterFloat 5.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.banter-bubble.amber-tint {
+  color: var(--amber);
+  border-color: rgba(242, 167, 27, 0.35);
+}
+.banter-bubble.red-tint {
+  color: #FFAAA6;
+  border-color: rgba(193, 39, 45, 0.4);
+}
+
+@keyframes banterFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.92) rotate(var(--rot, 0deg));
+  }
+  16% {
+    opacity: 0.52;
+    transform: translateY(0) scale(1) rotate(var(--rot, 0deg));
+  }
+  75% {
+    opacity: 0.46;
+    transform: translateY(-24px) scale(1) rotate(var(--rot, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(0.95) rotate(var(--rot, 0deg));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .banter-bubble {
+    animation: banterFadeOnly 4.5s ease-in-out forwards;
+  }
+  @keyframes banterFadeOnly {
+    0%, 100% { opacity: 0; }
+    25%, 75% { opacity: 0.45; }
+  }
+}
+body.high-contrast .banter-bubble {
+  background: #000000;
+  border: 2px solid #FFB703;
+  color: #FFFFFF;
+  opacity: 0.85;
+}
+
 /* 3D tactile buttons across app */
 .primary {
   position: relative;
@@ -990,12 +1066,13 @@ body.high-contrast .toggle-switch:checked {
 <main>
 
   <section id="home" class="screen active">
+    <div id="homeBanterLayer" class="home-banter-layer" aria-hidden="true"></div>
     <div class="skyline" aria-hidden="true">
       <img src="assets/images/city-skyline.png" alt="">
     </div>
     <div class="home-hero">
       <div class="home-logo-wrap">
-        <img class="home-logo" src="assets/images/logo.png" alt="Sijui!">
+        <img id="homeLogoImg" class="home-logo" src="assets/images/logo.png" alt="Sijui!">
       </div>
       <h1><span class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">Sijui </span>Charades</h1>
       <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
@@ -1233,6 +1310,8 @@ function show(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   $(id).classList.add("active");
   window.scrollTo(0, 0);
+  if (id === "home") startHomeBanter();
+  else stopHomeBanter();
 }
 
 /* ============================================================
@@ -2187,11 +2266,129 @@ function applySetupState() {
   }
 }
 
+/* ============================================================
+   Ambient Sarcastic Banter Whisper Controller
+   ============================================================ */
+const BANTER_PHRASES = [
+  "“Kwani ulizaliwa juzi?!”",
+  "“Wueh! Huyu anatuangusha bana!”",
+  "“Kwani uko Kenya gani?!”",
+  "“Hata mtoto wa nursery anajua hii!”",
+  "“Skip tu kabla aibu ikutamalize!”",
+  "“Tumeact hadi mikono inauma!”",
+  "“Acha kutuangalia tu, guess!”",
+  "“Hujui kweli ama unajifanya?!”",
+  "“Mbona unatuangalia ivo bana?!”",
+  "“Yani haujui hata hii?!”",
+  "“Umebakisha sekunde tano bro!”",
+  "“Tuko na wewe kwa round kweli?!”",
+  "“Sijui nini na vile tumeact vizuri?!”",
+  "“Hata gesture zetu huoni?!”",
+  "“Aiii bana, fanya haraka!”",
+  "“Kwani ulikosa shule?!”",
+  "“Pole sana mbogi yako inalia…”",
+  "“Hii ni rahisi bana!”",
+  "“Unadhani ni mtihani wa KCSE?!”",
+  "“Hadi tumechoka kuact!”",
+  "“Wacha kizungu mingi, sema jina!”",
+  "“Hata jirani yako anajua hii!”",
+  "“Eish, mko na mchezo sana!”",
+  "“Umesahau mpaka lugha?!”",
+  "“Angalia gestures zangu vizuri!”",
+  "“Usiwahi sema sijui tena!”"
+];
+
+let banterInterval = null;
+let lastBanterIndex = -1;
+
+function spawnBanterBubble(customText = null, tapX = null, tapY = null) {
+  const layer = $("homeBanterLayer");
+  if (!layer || !$("home")?.classList.contains("active")) return;
+
+  if (layer.children.length >= 4) {
+    layer.firstElementChild.remove();
+  }
+
+  let text = customText;
+  if (!text) {
+    let nextIdx;
+    do {
+      nextIdx = Math.floor(Math.random() * BANTER_PHRASES.length);
+    } while (nextIdx === lastBanterIndex && BANTER_PHRASES.length > 1);
+    lastBanterIndex = nextIdx;
+    text = BANTER_PHRASES[nextIdx];
+  }
+
+  const el = document.createElement("div");
+  el.className = "banter-bubble";
+  const r = Math.random();
+  if (r < 0.28) el.classList.add("amber-tint");
+  else if (r > 0.78) el.classList.add("red-tint");
+  el.textContent = text;
+
+  if (tapX !== null && tapY !== null) {
+    const x = Math.max(12, Math.min(window.innerWidth - 220, tapX - 80));
+    const y = Math.max(70, Math.min(window.innerHeight - 120, tapY - 30));
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+  } else {
+    const side = Math.random() < 0.5 ? "left" : "right";
+    const xMin = side === "left" ? 4 : 52;
+    const xMax = side === "left" ? 20 : 72;
+    const x = Math.floor(xMin + Math.random() * (xMax - xMin));
+    const yZone = Math.random() < 0.5 ? "top" : "bottom";
+    const yMin = yZone === "top" ? 14 : 64;
+    const yMax = yZone === "top" ? 34 : 78;
+    const y = Math.floor(yMin + Math.random() * (yMax - yMin));
+    el.style.left = `${x}%`;
+    el.style.top = `${y}%`;
+  }
+
+  const rot = (Math.random() * 8 - 4).toFixed(1);
+  el.style.setProperty("--rot", `${rot}deg`);
+
+  el.addEventListener("animationend", () => el.remove());
+  layer.appendChild(el);
+}
+
+function startHomeBanter() {
+  stopHomeBanter();
+  setTimeout(() => {
+    if ($("home")?.classList.contains("active")) spawnBanterBubble();
+  }, 900);
+  banterInterval = setInterval(() => {
+    if ($("home")?.classList.contains("active")) {
+      spawnBanterBubble();
+    } else {
+      stopHomeBanter();
+    }
+  }, 3200);
+}
+
+function stopHomeBanter() {
+  if (banterInterval) {
+    clearInterval(banterInterval);
+    banterInterval = null;
+  }
+  const layer = $("homeBanterLayer");
+  if (layer) layer.innerHTML = "";
+}
+
+$("homeLogoImg")?.addEventListener("click", () => {
+  spawnBanterBubble("“Hujui hata kuanza? Finya Play!”");
+});
+
+$("home")?.addEventListener("click", event => {
+  if (event.target.closest("button, a, input, select, .settings-modal")) return;
+  spawnBanterBubble(null, event.clientX, event.clientY);
+});
+
 renderHome();
 renderDecks();
 applyPreferences();
 applySetupState();
 loadPublishedDecks();
+startHomeBanter();
 </script>
 </body>
 </html>
