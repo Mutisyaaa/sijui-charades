@@ -48,6 +48,9 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .admin-shell { width: min(1100px, 100%); margin: 0 auto; padding: 24px; }
 .admin-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0 36px; }
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
   color: var(--amber);
   font-weight: 900;
   font-size: 1.15rem;
@@ -55,6 +58,14 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   text-decoration: none;
   text-transform: uppercase;
   transition: opacity 0.15s ease;
+}
+.brand .nav-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(242, 167, 27, 0.45);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  object-fit: cover;
 }
 .brand:hover { opacity: 0.88; }
 .user-tools { display: flex; align-items: center; gap: 12px; color: var(--chalk-muted); font-size: 0.9rem; }

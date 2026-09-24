@@ -380,7 +380,7 @@ app.delete("/api/admin/cards/:cardId", requireAdmin, async (request, response) =
 });
 
 app.get("/favicon.ico", (_request, response) => {
-  response.status(204).end();
+  response.sendFile(path.join(__dirname, "assets", "images", "favicon.ico"));
 });
 
 app.get("/", (_request, response) => {

@@ -53,14 +53,24 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 
 .brand {
-  display: inline-block;
-  margin-bottom: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2rem;
   color: var(--amber);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-decoration: none;
   text-transform: uppercase;
+}
+.brand .auth-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(242, 167, 27, 0.45);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  object-fit: cover;
 }
 
 h1 {

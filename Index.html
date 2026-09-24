@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1A1512">
 <title>Sijui Charades</title>
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
 <style>
 :root {
   /* Nairobi Matatu & Shuka Palette */
@@ -99,9 +102,22 @@ h1, h2 { font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
 #home .skyline::after { content: ""; position: absolute; right: 0; bottom: 0; left: 0; height: 50%; background: linear-gradient(to bottom, transparent, var(--charcoal)); pointer-events: none; }
 #home .skyline img { display: block; width: 100%; height: auto; filter: grayscale(1) contrast(1.15) brightness(0.48); opacity: 0.55; }
 #home .home-hero, #home > .spacer, #home > .primary, #home > .home-tools, #home > .best { position: relative; z-index: 1; }
-#home .home-hero { position: absolute; top: 50%; right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); transform: translateY(-50%); text-align: center; }
-#home h1 { font-size: clamp(3.4rem, 17vmin, 7rem); color: var(--amber); text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
-#home .tag { max-width: 28ch; margin: 1rem auto 0; font-size: 1.15rem; line-height: 1.4; color: var(--chalk); opacity: 0.92; }
+#home .home-hero { position: absolute; top: 48%; right: max(20px, env(safe-area-inset-right)); left: max(20px, env(safe-area-inset-left)); transform: translateY(-50%); text-align: center; }
+.home-logo-wrap { display: flex; justify-content: center; align-items: center; margin-bottom: 12px; }
+.home-logo {
+  width: clamp(92px, 21vmin, 128px);
+  height: clamp(92px, 21vmin, 128px);
+  border-radius: 26px;
+  border: 3px solid rgba(242, 167, 27, 0.5);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(102, 25, 18, 0.45);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+.home-logo:hover { transform: scale(1.05) rotate(-2deg); }
+#home h1 { font-size: clamp(2.6rem, 12vmin, 5rem); color: var(--amber); text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); line-height: 0.95; }
+#home .tag { max-width: 28ch; margin: 0.9rem auto 0; font-size: 1.15rem; line-height: 1.4; color: var(--chalk); opacity: 0.92; }
 
 /* 3D tactile buttons across app */
 .primary {
@@ -978,7 +994,10 @@ body.high-contrast .toggle-switch:checked {
       <img src="assets/images/city-skyline.png" alt="">
     </div>
     <div class="home-hero">
-      <h1>Sijui<br>Charades</h1>
+      <div class="home-logo-wrap">
+        <img class="home-logo" src="assets/images/logo.png" alt="Sijui!">
+      </div>
+      <h1><span class="sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">Sijui </span>Charades</h1>
       <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
     </div>
     <div class="spacer"></div>
