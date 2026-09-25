@@ -331,7 +331,54 @@ app.post("/api/admin/decks/:deckId/duplicate", requireAdmin, async (request, res
   }
 });
 
-app.post("/api/admin/decks/:deckId/cards", requireAdmin, async (request, response) => {
+async function handleCreateCards(request, response) {
+  if (Array.isArray(request.body.cards)) {
+    const rawList = request.body.cards;
+    if (!rawList.length) {
+      return response.status(400).json({ error: "At least one card is required." });
+    }
+    const deckCheck = await pool.query("SELECT id FROM public.decks WHERE id = $1", [request.params.deckId]);
+    if (!deckCheck.rows[0]) return response.status(404).json({ error: "Deck not found." });
+
+    const defaultCategory = String(request.body.category || "General").trim().slice(0, 60) || "General";
+    const defaultDifficulty = ["easy", "medium", "hard"].includes(request.body.difficulty) ? request.body.difficulty : "medium";
+    const defaultActive = request.body.isActive !== false;
+
+    const sortRes = await pool.query(
+      "SELECT COALESCE(MAX(sort_order), -1) AS max_sort FROM public.cards WHERE deck_id = $1",
+      [request.params.deckId]
+    );
+    let nextSort = Number(sortRes.rows[0]?.max_sort ?? -1) + 1;
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const inserted = [];
+      for (const item of rawList) {
+        const itemText = (typeof item === "string" ? item : String(item?.text || "")).trim();
+        if (!itemText || itemText.length > 160) continue;
+        const itemCat = (typeof item === "object" && item?.category ? String(item.category).trim().slice(0, 60) : defaultCategory) || defaultCategory;
+        const itemDiff = (typeof item === "object" && ["easy", "medium", "hard"].includes(item?.difficulty)) ? item.difficulty : defaultDifficulty;
+        const itemActive = typeof item === "object" && item?.isActive !== undefined ? Boolean(item.isActive) : defaultActive;
+
+        const res = await client.query(
+          `INSERT INTO public.cards (deck_id, text, category, difficulty, sort_order, is_active, created_by)
+           VALUES ($1, $2, $3, $4, $5, $6, $7)
+           RETURNING id, deck_id, text, category, difficulty, sort_order, is_active, created_at, updated_at`,
+          [request.params.deckId, itemText, itemCat, itemDiff, nextSort++, itemActive, request.user.id]
+        );
+        if (res.rows[0]) inserted.push(res.rows[0]);
+      }
+      await client.query("COMMIT");
+      return response.status(201).json({ count: inserted.length, cards: inserted });
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
   const text = String(request.body.text || "").trim();
   const category = String(request.body.category || "General").trim().slice(0, 60) || "General";
   const difficulty = ["easy", "medium", "hard"].includes(request.body.difficulty) ? request.body.difficulty : "medium";
@@ -350,7 +397,10 @@ app.post("/api/admin/decks/:deckId/cards", requireAdmin, async (request, respons
   );
   if (!result.rows[0]) return response.status(404).json({ error: "Deck not found." });
   response.status(201).json(result.rows[0]);
-});
+}
+
+app.post("/api/admin/decks/:deckId/cards", requireAdmin, handleCreateCards);
+app.post("/api/admin/decks/:deckId/cards/bulk", requireAdmin, handleCreateCards);
 
 app.patch("/api/admin/cards/:cardId", requireAdmin, async (request, response) => {
   const text = String(request.body.text || "").trim();

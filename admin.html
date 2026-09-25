@@ -58,24 +58,51 @@
         </section>
 
         <section class="panel" style="margin-top: 18px">
-          <h2 id="cardFormTitle">Add a card</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <h2 id="cardFormTitle" style="margin: 0;">Add cards</h2>
+            <div id="cardModeSwitch" class="card-mode-switch" style="display: inline-flex; gap: 4px; background: var(--espresso-dark); padding: 4px; border-radius: 12px; border: 1px solid var(--espresso-border);">
+              <button type="button" id="tabSingleCard" class="small-button active" style="margin: 0; padding: 6px 12px;">Single Card</button>
+              <button type="button" id="tabBulkCards" class="small-button" style="margin: 0; padding: 6px 12px;">⚡ Bulk Paste</button>
+            </div>
+          </div>
           <form id="cardForm" class="form">
             <div class="field">
               <label for="cardDeck">Deck</label>
               <select id="cardDeck" required></select>
             </div>
-            <div class="field">
-              <label for="cardText">Card text</label>
-              <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic" required>
+
+            <!-- Single Card Mode -->
+            <div id="singleCardFields">
+              <div class="field">
+                <label for="cardText">Card text</label>
+                <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic">
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="cardCategory">Category</label><input id="cardCategory" maxlength="60" placeholder="People, places, actions…"></div>
+                <div class="field"><label for="cardDifficulty">Difficulty</label><select id="cardDifficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+              </div>
+              <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
+              <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
             </div>
-            <div class="field-row">
-              <div class="field"><label for="cardCategory">Category</label><input id="cardCategory" maxlength="60" placeholder="People, places, actions…"></div>
-              <div class="field"><label for="cardDifficulty">Difficulty</label><select id="cardDifficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+
+            <!-- Bulk Paste Mode -->
+            <div id="bulkCardFields" hidden>
+              <div class="field">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label for="bulkCardText">Paste words / cards</label>
+                  <span id="bulkCountBadge" class="badge count">0 cards detected</span>
+                </div>
+                <textarea id="bulkCardText" rows="7" placeholder="Paste your words here!&#10;One word per line, or comma-separated:&#10;&#10;Heart&#10;Brain&#10;Lungs&#10;Stomach&#10;Skeleton" style="font-family: inherit; font-size: 0.95rem; resize: vertical; line-height: 1.5;"></textarea>
+                <small style="color: var(--chalk-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Supports bullet points (- or •) and numbering (1. 2.). It cleans them up automatically!</small>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="bulkCardCategory">Default Category</label><input id="bulkCardCategory" maxlength="60" placeholder="e.g. Anatomy"></div>
+                <div class="field"><label for="bulkCardDifficulty">Default Difficulty</label><select id="bulkCardDifficulty"><option value="medium" selected>Medium</option><option value="easy">Easy</option><option value="hard">Hard</option></select></div>
+              </div>
             </div>
-            <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
-            <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
-            <div class="form-actions">
-              <button class="primary" type="submit">Save card</button>
+
+            <div class="form-actions" style="margin-top: 14px;">
+              <button id="saveCardBtn" class="primary" type="submit">Save card</button>
               <button id="cancelCardEdit" class="ghost" type="button" hidden>Cancel edit</button>
             </div>
           </form>
@@ -178,16 +205,65 @@
       $("cancelDeckEdit").hidden = true;
     }
 
+    function switchCardMode(mode) {
+      state.cardMode = mode;
+      const isBulk = mode === "bulk";
+      $("tabSingleCard").classList.toggle("active", !isBulk);
+      $("tabBulkCards").classList.toggle("active", isBulk);
+      $("singleCardFields").hidden = isBulk;
+      $("bulkCardFields").hidden = !isBulk;
+      $("cardText").required = !isBulk;
+      if (isBulk) {
+        $("cardFormTitle").textContent = "Bulk Add Cards";
+        updateBulkBadge();
+        const selectedDeck = state.decks.find(d => d.id === $("cardDeck").value);
+        if (selectedDeck && (!String($("bulkCardCategory").value).trim() || $("bulkCardCategory").value === "General")) {
+          $("bulkCardCategory").value = selectedDeck.name;
+        }
+        $("bulkCardText").focus();
+      } else {
+        $("cardFormTitle").textContent = state.editingCardId ? "Edit card" : "Add a card";
+        $("saveCardBtn").textContent = state.editingCardId ? "Update card" : "Save card";
+        renderCardPreview();
+        $("cardText").focus();
+      }
+    }
+
+    function getBulkCardsList() {
+      const raw = $("bulkCardText")?.value || "";
+      const lines = raw.split(/\r?\n/);
+      const result = [];
+      for (const line of lines) {
+        const segments = line.includes(",") ? line.split(",") : [line];
+        for (const seg of segments) {
+          let cleaned = seg.trim().replace(/^[-*•\d+.)\]\s]+/, "").trim();
+          if (cleaned && cleaned.length > 0 && cleaned.length <= 160) {
+            result.push(cleaned);
+          }
+        }
+      }
+      return result;
+    }
+
+    function updateBulkBadge() {
+      const cards = getBulkCardsList();
+      const count = cards.length;
+      $("bulkCountBadge").textContent = `${count} card${count === 1 ? "" : "s"} detected`;
+      if (state.cardMode === "bulk") {
+        $("saveCardBtn").textContent = count > 0 ? `Add ${count} Card${count === 1 ? "" : "s"}` : "Add Cards";
+      }
+    }
+
     function resetCardForm() {
       state.editingCardId = null;
       state.editingCardSortOrder = 0;
-      $("cardForm").reset();
+      $("cardText").value = "";
       $("cardActive").checked = true;
-      $("cardCategory").value = "General";
+      if (!$("cardCategory").value) $("cardCategory").value = "General";
       $("cardDifficulty").value = "medium";
-      $("cardFormTitle").textContent = "Add a card";
+      $("cardModeSwitch").hidden = false;
       $("cancelCardEdit").hidden = true;
-      renderCardPreview();
+      switchCardMode(state.cardMode || "single");
     }
 
     async function load() {
@@ -220,6 +296,33 @@
       event.preventDefault();
       setStatus("cardStatus", "Saving…");
       try {
+        const deckId = $("cardDeck").value;
+        if (!deckId) throw new Error("Please select a deck first.");
+
+        if (state.cardMode === "bulk" && !state.editingCardId) {
+          const cardsList = getBulkCardsList();
+          if (!cardsList.length) throw new Error("Please enter at least one card in the text area.");
+          const category = $("bulkCardCategory").value.trim() || "General";
+          const difficulty = $("bulkCardDifficulty").value || "medium";
+
+          setStatus("cardStatus", `Saving ${cardsList.length} cards…`);
+          const payload = {
+            cards: cardsList.map(text => ({ text, category, difficulty })),
+            category,
+            difficulty
+          };
+          const res = await api(`/api/admin/decks/${deckId}/cards`, {
+            method: "POST",
+            body: JSON.stringify(payload)
+          });
+          const addedCount = res?.count ?? cardsList.length;
+          await load();
+          $("bulkCardText").value = "";
+          updateBulkBadge();
+          setStatus("cardStatus", `🎉 Successfully added ${addedCount} cards!`, "success");
+          return;
+        }
+
         const payload = {
           text: $("cardText").value,
           category: $("cardCategory").value,
@@ -227,9 +330,16 @@
           sortOrder: state.editingCardSortOrder ?? 0,
           isActive: $("cardActive").checked
         };
-        const url = state.editingCardId ? `/api/admin/cards/${state.editingCardId}` : `/api/admin/decks/${$("cardDeck").value}/cards`;
+        const url = state.editingCardId ? `/api/admin/cards/${state.editingCardId}` : `/api/admin/decks/${deckId}/cards`;
         await api(url, { method: state.editingCardId ? "PATCH" : "POST", body: JSON.stringify(payload) });
-        await load(); resetCardForm(); setStatus("cardStatus", "Card saved.", "success");
+        const savedDeckId = deckId;
+        const savedCategory = $("cardCategory").value;
+        await load();
+        resetCardForm();
+        $("cardDeck").value = savedDeckId;
+        $("cardCategory").value = savedCategory;
+        $("cardText").focus();
+        setStatus("cardStatus", "Card saved! Ready for next card.", "success");
       } catch (error) { setStatus("cardStatus", error.message, "error"); }
     });
 
@@ -248,12 +358,33 @@
         } else if (action === "delete-deck" && deck && confirm(`Delete “${deck.name}” and all its cards?`)) {
           await api(`/api/admin/decks/${id}`, { method: "DELETE" }); await load(); setStatus("deckStatus", "Deck deleted.", "success");
         } else if (action === "edit-card" && card) {
-          state.editingCardId = card.id; state.editingCardSortOrder = card.sort_order ?? 0; $("cardDeck").value = card.deck_id; $("cardText").value = card.text; $("cardCategory").value = card.category || "General"; $("cardDifficulty").value = card.difficulty || "medium"; $("cardActive").checked = card.is_active; renderCardPreview();
-          $("cardFormTitle").textContent = "Edit card"; $("cancelCardEdit").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" });
+          state.editingCardId = card.id; state.editingCardSortOrder = card.sort_order ?? 0;
+          $("cardDeck").value = card.deck_id;
+          $("cardText").value = card.text;
+          $("cardCategory").value = card.category || "General";
+          $("cardDifficulty").value = card.difficulty || "medium";
+          $("cardActive").checked = card.is_active;
+          switchCardMode("single");
+          $("cardModeSwitch").hidden = true;
+          $("cardFormTitle").textContent = "Edit card";
+          $("saveCardBtn").textContent = "Update card";
+          $("cancelCardEdit").hidden = false;
+          renderCardPreview();
+          window.scrollTo({ top: 0, behavior: "smooth" });
         } else if (action === "delete-card" && card && confirm(`Delete “${card.text}”?`)) {
           await api(`/api/admin/cards/${id}`, { method: "DELETE" }); await load(); setStatus("cardStatus", "Card deleted.", "success");
         }
       } catch (error) { setStatus(action.includes("deck") ? "deckStatus" : "cardStatus", error.message, "error"); }
+    });
+
+    $("tabSingleCard").addEventListener("click", () => switchCardMode("single"));
+    $("tabBulkCards").addEventListener("click", () => switchCardMode("bulk"));
+    $("bulkCardText").addEventListener("input", updateBulkBadge);
+    $("cardDeck").addEventListener("change", () => {
+      const selected = state.decks.find(d => d.id === $("cardDeck").value);
+      if (selected && (!String($("bulkCardCategory").value).trim() || $("bulkCardCategory").value === "General")) {
+        $("bulkCardCategory").value = selected.name;
+      }
     });
 
     $("cancelDeckEdit").addEventListener("click", resetDeckForm);
