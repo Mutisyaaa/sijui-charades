@@ -95,10 +95,23 @@ CREATE TRIGGER cards_set_updated_at
 BEFORE UPDATE ON public.cards
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'game_sounds'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'game_sounds' AND column_name = 'id'
+  ) THEN
+    DROP TABLE public.game_sounds CASCADE;
+  END IF;
+END $$;
+
 CREATE TABLE IF NOT EXISTS public.game_sounds (
-  sound_type text PRIMARY KEY CHECK (sound_type IN ('win', 'lose')),
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  sound_type text NOT NULL CHECK (sound_type IN ('win', 'lose')),
   name text NOT NULL,
   audio_url text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 

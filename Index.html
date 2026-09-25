@@ -1372,13 +1372,21 @@ function playWrongSound() {
     tone(170, 90, 0.24, "square", 0.09, 0.16);
   });
 }
-let gameSounds = { win: null, lose: null };
+let gameSounds = { win: [], lose: [] };
 
 async function loadGameSounds() {
   try {
     const res = await fetch("/api/sounds", { headers: { Accept: "application/json" } });
-    if (res.ok) gameSounds = await res.json();
-  } catch (e) {}
+    if (res.ok) {
+      const data = await res.json();
+      gameSounds = {
+        win: Array.isArray(data?.win) ? data.win : (data?.win ? [data.win] : []),
+        lose: Array.isArray(data?.lose) ? data.lose : (data?.lose ? [data.lose] : [])
+      };
+    }
+  } catch (e) {
+    gameSounds = { win: [], lose: [] };
+  }
 }
 
 function synthWinFanfare() {
@@ -1399,18 +1407,21 @@ function synthLoseWahWah() {
 function playEndSound(score = 0) {
   if (soundMuted || soundVolume <= 0) return;
   const isWinner = score >= 10;
-  const custom = isWinner ? gameSounds?.win : gameSounds?.lose;
+  const list = isWinner ? gameSounds?.win : gameSounds?.lose;
 
-  if (custom && custom.audio_url) {
+  if (Array.isArray(list) && list.length > 0) {
     try {
-      const audio = new Audio(custom.audio_url);
-      audio.volume = soundVolume;
-      audio.currentTime = 0;
-      audio.play().catch(() => {
-        if (isWinner) synthWinFanfare();
-        else synthLoseWahWah();
-      });
-      return;
+      const chosen = list[Math.floor(Math.random() * list.length)];
+      if (chosen && chosen.audio_url) {
+        const audio = new Audio(chosen.audio_url);
+        audio.volume = soundVolume;
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+          if (isWinner) synthWinFanfare();
+          else synthLoseWahWah();
+        });
+        return;
+      }
     } catch (e) {}
   }
 
