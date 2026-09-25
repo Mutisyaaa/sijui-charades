@@ -26,8 +26,8 @@ if (process.env.NODE_ENV === "production") {
 
 const pool = new Pool(poolConfig);
 
-app.use(express.json({ limit: "2mb" }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ extended: false, limit: "5mb" }));
 
 function normaliseEmail(email) {
   return String(email || "").trim().toLowerCase();
@@ -224,6 +224,68 @@ app.get("/api/decks", async (_request, response) => {
   } catch (error) {
     console.warn("⚠️  Database unavailable for /api/decks. Returning empty list so app uses fallback decks.");
     response.json([]);
+  }
+});
+
+app.get("/api/sounds", async (_request, response) => {
+  try {
+    const result = await pool.query(
+      "SELECT sound_type, name, audio_url, updated_at FROM public.game_sounds"
+    );
+    const sounds = { win: null, lose: null };
+    for (const row of result.rows) {
+      sounds[row.sound_type] = {
+        name: row.name,
+        audio_url: row.audio_url,
+        updated_at: row.updated_at
+      };
+    }
+    response.json(sounds);
+  } catch (error) {
+    response.json({ win: null, lose: null });
+  }
+});
+
+app.post("/api/admin/sounds", requireAdmin, async (request, response) => {
+  const soundType = String(request.body.sound_type || "").trim().toLowerCase();
+  const name = String(request.body.name || "").trim().slice(0, 80);
+  const audioUrl = String(request.body.audio_url || "").trim();
+
+  if (!["win", "lose"].includes(soundType)) {
+    return response.status(400).json({ error: "Sound category must be 'win' or 'lose'." });
+  }
+  if (!name) {
+    return response.status(400).json({ error: "Sound name is required." });
+  }
+  if (!audioUrl) {
+    return response.status(400).json({ error: "Audio data or URL is required." });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO public.game_sounds (sound_type, name, audio_url)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (sound_type)
+       DO UPDATE SET name = EXCLUDED.name, audio_url = EXCLUDED.audio_url, updated_at = now()
+       RETURNING sound_type, name, audio_url, updated_at`,
+      [soundType, name, audioUrl]
+    );
+    response.json(result.rows[0]);
+  } catch (err) {
+    response.status(500).json({ error: "Failed to save sound: " + err.message });
+  }
+});
+
+app.delete("/api/admin/sounds/:soundType", requireAdmin, async (request, response) => {
+  const soundType = String(request.params.soundType || "").trim().toLowerCase();
+  if (!["win", "lose"].includes(soundType)) {
+    return response.status(400).json({ error: "Invalid sound type." });
+  }
+  try {
+    await pool.query("DELETE FROM public.game_sounds WHERE sound_type = $1", [soundType]);
+    response.status(204).end();
+  } catch (err) {
+    response.status(500).json({ error: "Failed to delete sound: " + err.message });
   }
 });
 

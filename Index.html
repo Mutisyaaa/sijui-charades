@@ -1372,10 +1372,53 @@ function playWrongSound() {
     tone(170, 90, 0.24, "square", 0.09, 0.16);
   });
 }
-function playEndSound() {
-  playCustomSound("end", () => {
-    tone(520, 310, 0.25, "triangle", 0.12);
-    tone(240, 110, 0.35, "sawtooth", 0.08, 0.2);
+let gameSounds = { win: null, lose: null };
+
+async function loadGameSounds() {
+  try {
+    const res = await fetch("/api/sounds", { headers: { Accept: "application/json" } });
+    if (res.ok) gameSounds = await res.json();
+  } catch (e) {}
+}
+
+function synthWinFanfare() {
+  tone(523, 523, 0.14, "triangle", 0.18, 0);
+  tone(659, 659, 0.14, "triangle", 0.18, 0.14);
+  tone(784, 784, 0.16, "triangle", 0.20, 0.28);
+  tone(1046, 1046, 0.45, "square", 0.15, 0.44);
+  tone(1318, 1318, 0.35, "sine", 0.12, 0.50);
+}
+
+function synthLoseWahWah() {
+  tone(320, 270, 0.22, "sawtooth", 0.16, 0);
+  tone(290, 240, 0.24, "sawtooth", 0.16, 0.24);
+  tone(260, 210, 0.26, "sawtooth", 0.16, 0.50);
+  tone(220, 110, 0.55, "sawtooth", 0.18, 0.78);
+}
+
+function playEndSound(score = 0) {
+  if (soundMuted || soundVolume <= 0) return;
+  const isWinner = score >= 10;
+  const custom = isWinner ? gameSounds?.win : gameSounds?.lose;
+
+  if (custom && custom.audio_url) {
+    try {
+      const audio = new Audio(custom.audio_url);
+      audio.volume = soundVolume;
+      audio.currentTime = 0;
+      audio.play().catch(() => {
+        if (isWinner) synthWinFanfare();
+        else synthLoseWahWah();
+      });
+      return;
+    } catch (e) {}
+  }
+
+  playCustomSound(isWinner ? "win" : "lose", () => {
+    playCustomSound("end", () => {
+      if (isWinner) synthWinFanfare();
+      else synthLoseWahWah();
+    });
   });
 }
 let hapticsEnabled = store.get("hapticsEnabled", true);
@@ -2005,8 +2048,9 @@ function endTeamTurn() {
   round.teamCards[round.teamIndex].right = [...round.right];
   round.teamCards[round.teamIndex].skipped = [...round.skipped];
 
-  playEndSound();
-  vibe([80, 60, 80]);
+  playEndSound(currentTeam.score);
+  if (currentTeam.score >= 10) celebrate();
+  vibe(currentTeam.score >= 10 ? [80, 60, 120] : [140, 100, 200]);
 
   if (gameMode === "team") {
     const nextIndex = round.teamIndex + 1;
@@ -2122,9 +2166,9 @@ function finalResults() {
       `;
     }).join("");
   } else {
-    $("resultsHeading").textContent = "Time's up";
     const score = round.right.length;
-    let note = "Best round: " + best;
+    $("resultsHeading").textContent = score >= 10 ? "🏆 Winner!" : "Time's up";
+    let note = score >= 10 ? "Great job! You crushed this round!" : "Better luck next time — guess faster!";
     if (score > best) { best = score; store.set("best", best); note = "New best round!"; }
     $("finalScore").style.display = "";
     $("finalScore").textContent = score;
@@ -2461,6 +2505,7 @@ renderDecks();
 applyPreferences();
 applySetupState();
 loadPublishedDecks();
+loadGameSounds();
 startHomeBanter();
 </script>
 </body>

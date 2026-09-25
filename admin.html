@@ -108,6 +108,61 @@
           </form>
           <p id="cardStatus" class="status" role="status"></p>
         </section>
+
+        <section class="panel" style="margin-top: 18px">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <h2 style="margin: 0;">Game End Sounds</h2>
+            <span class="badge" style="background: rgba(242, 167, 27, 0.12); color: var(--amber); border-color: rgba(242, 167, 27, 0.35);">Threshold: 10 points</span>
+          </div>
+          <p style="color: var(--chalk-muted); font-size: 0.88rem; margin-bottom: 16px; line-height: 1.4;">
+            Customize sounds played when the round ends. Anyone scoring <strong>10 or more</strong> gets the winning celebration sound. Scoring <strong>under 10</strong> gets the losing / roast sound.
+          </p>
+
+          <div style="display: grid; gap: 14px;">
+            <!-- Winning Sound Card -->
+            <div class="sound-card" style="background: var(--espresso-dark); border: 1.5px solid var(--espresso-border); border-radius: 14px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 1.4rem;">🏆</span>
+                  <div>
+                    <strong style="color: var(--chalk); font-size: 0.95rem; display: block;">Winning Sound (10+ pts)</strong>
+                    <small id="winSoundName" style="color: var(--amber); font-size: 0.8rem;">Built-in Fanfare</small>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" id="playWinSoundBtn" class="small-button" title="Test play sound">▶️ Test</button>
+                  <button type="button" id="resetWinSoundBtn" class="small-button danger" title="Reset to default sound" hidden>Reset</button>
+                </div>
+              </div>
+              <div class="field" style="margin-top: 8px;">
+                <label for="winSoundFile" style="font-size: 0.82rem; color: var(--chalk-muted);">Upload custom sound (.mp3, .wav, .m4a):</label>
+                <input type="file" id="winSoundFile" accept="audio/*" style="font-size: 0.85rem; padding: 8px 10px;">
+              </div>
+            </div>
+
+            <!-- Losing Sound Card -->
+            <div class="sound-card" style="background: var(--espresso-dark); border: 1.5px solid var(--espresso-border); border-radius: 14px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span style="font-size: 1.4rem;">❌</span>
+                  <div>
+                    <strong style="color: var(--chalk); font-size: 0.95rem; display: block;">Losing Sound (&lt; 10 pts)</strong>
+                    <small id="loseSoundName" style="color: #FFAAA6; font-size: 0.8rem;">Built-in Wah-Wah / Roast</small>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" id="playLoseSoundBtn" class="small-button" title="Test play sound">▶️ Test</button>
+                  <button type="button" id="resetLoseSoundBtn" class="small-button danger" title="Reset to default sound" hidden>Reset</button>
+                </div>
+              </div>
+              <div class="field" style="margin-top: 8px;">
+                <label for="loseSoundFile" style="font-size: 0.82rem; color: var(--chalk-muted);">Upload custom sound (.mp3, .wav, .m4a):</label>
+                <input type="file" id="loseSoundFile" accept="audio/*" style="font-size: 0.85rem; padding: 8px 10px;">
+              </div>
+            </div>
+          </div>
+          <p id="soundStatus" class="status" role="status" style="margin-top: 10px;"></p>
+        </section>
       </div>
 
       <section class="panel">
@@ -120,7 +175,7 @@
   </main>
 
   <script>
-    const state = { decks: [], editingDeckId: null, editingCardId: null, editingCardSortOrder: 0, coverUrl: "" };
+    const state = { decks: [], editingDeckId: null, editingCardId: null, editingCardSortOrder: 0, coverUrl: "", cardMode: "single", sounds: { win: null, lose: null } };
     const $ = id => document.getElementById(id);
 
     function escapeHtml(value) {
@@ -271,7 +326,9 @@
       if (me.user.role !== "admin") throw new Error("Your account is not an admin yet.");
       $("userName").textContent = me.user.display_name;
       state.decks = await api("/api/admin/decks");
+      state.sounds = await api("/api/sounds").catch(() => ({ win: null, lose: null }));
       renderDecks();
+      renderSoundSettings();
     }
 
     $("deckForm").addEventListener("submit", async event => {
@@ -406,6 +463,150 @@
       const difficulty = $("cardDifficulty").value;
       $("cardPreview").innerHTML = `<b>${escapeHtml(text)}</b><small>${escapeHtml(category)} · ${escapeHtml(difficulty)}</small>`;
     }
+
+    let currentPreviewAudio = null;
+    let adminAc = null;
+
+    function initAdminAudio() {
+      try {
+        adminAc = adminAc || new (window.AudioContext || window.webkitAudioContext)();
+        if (adminAc.state === "suspended") adminAc.resume();
+      } catch (e) {}
+    }
+
+    function adminTone(startFreq, endFreq, dur = 0.12, type = "triangle", gain = 0.15, delay = 0) {
+      if (!adminAc) return;
+      try {
+        const now = adminAc.currentTime + delay;
+        const o = adminAc.createOscillator(), g = adminAc.createGain();
+        o.type = type;
+        o.frequency.setValueAtTime(startFreq, now);
+        o.frequency.exponentialRampToValueAtTime(Math.max(1, endFreq), now + dur);
+        g.gain.setValueAtTime(0.001, now);
+        g.gain.exponentialRampToValueAtTime(gain, now + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        o.connect(g); g.connect(adminAc.destination);
+        o.start(now); o.stop(now + dur + 0.02);
+      } catch (e) {}
+    }
+
+    function synthWinFanfareAdmin() {
+      adminTone(523, 523, 0.14, "triangle", 0.18, 0);
+      adminTone(659, 659, 0.14, "triangle", 0.18, 0.14);
+      adminTone(784, 784, 0.16, "triangle", 0.20, 0.28);
+      adminTone(1046, 1046, 0.45, "square", 0.15, 0.44);
+      adminTone(1318, 1318, 0.35, "sine", 0.12, 0.50);
+    }
+
+    function synthLoseWahWahAdmin() {
+      adminTone(320, 270, 0.22, "sawtooth", 0.16, 0);
+      adminTone(290, 240, 0.24, "sawtooth", 0.16, 0.24);
+      adminTone(260, 210, 0.26, "sawtooth", 0.16, 0.50);
+      adminTone(220, 110, 0.55, "sawtooth", 0.18, 0.78);
+    }
+
+    function stopCurrentPreview() {
+      if (currentPreviewAudio) {
+        try { currentPreviewAudio.pause(); } catch (e) {}
+        currentPreviewAudio = null;
+      }
+      $("playWinSoundBtn").textContent = "▶️ Test";
+      $("playLoseSoundBtn").textContent = "▶️ Test";
+    }
+
+    function testSound(type) {
+      const isWin = type === "win";
+      const btn = isWin ? $("playWinSoundBtn") : $("playLoseSoundBtn");
+
+      if (currentPreviewAudio) {
+        stopCurrentPreview();
+        return;
+      }
+
+      const sound = state.sounds?.[type];
+      if (sound && sound.audio_url) {
+        try {
+          const audio = new Audio(sound.audio_url);
+          currentPreviewAudio = audio;
+          btn.textContent = "⏹️ Stop";
+          audio.onended = () => stopCurrentPreview();
+          audio.onerror = () => stopCurrentPreview();
+          audio.play().catch(() => stopCurrentPreview());
+          return;
+        } catch (e) {
+          stopCurrentPreview();
+        }
+      }
+
+      btn.textContent = "⏹️ Playing…";
+      initAdminAudio();
+      if (isWin) synthWinFanfareAdmin();
+      else synthLoseWahWahAdmin();
+      setTimeout(() => {
+        btn.textContent = "▶️ Test";
+      }, isWin ? 950 : 1400);
+    }
+
+    function renderSoundSettings() {
+      const win = state.sounds?.win;
+      const lose = state.sounds?.lose;
+
+      $("winSoundName").textContent = win ? `Custom: ${win.name}` : "Built-in Fanfare (Synthesized)";
+      $("resetWinSoundBtn").hidden = !win;
+
+      $("loseSoundName").textContent = lose ? `Custom: ${lose.name}` : "Built-in Wah-Wah / Roast (Synthesized)";
+      $("resetLoseSoundBtn").hidden = !lose;
+    }
+
+    async function handleSoundUpload(type, file) {
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        setStatus("soundStatus", "Sound file must be under 2MB.", "error");
+        return;
+      }
+      setStatus("soundStatus", `Saving ${type === "win" ? "winning" : "losing"} sound…`);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const soundName = file.name.replace(/\.[^/.]+$/, "");
+          const res = await api("/api/admin/sounds", {
+            method: "POST",
+            body: JSON.stringify({
+              sound_type: type,
+              name: soundName,
+              audio_url: reader.result
+            })
+          });
+          state.sounds[type] = { name: res.name, audio_url: res.audio_url };
+          renderSoundSettings();
+          setStatus("soundStatus", `🎉 Saved ${type === "win" ? "Winning" : "Losing"} sound: “${soundName}”! Click ▶️ to test.`, "success");
+        } catch (err) {
+          setStatus("soundStatus", err.message, "error");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    $("playWinSoundBtn").addEventListener("click", () => testSound("win"));
+    $("playLoseSoundBtn").addEventListener("click", () => testSound("lose"));
+    $("winSoundFile").addEventListener("change", e => handleSoundUpload("win", e.target.files[0]));
+    $("loseSoundFile").addEventListener("change", e => handleSoundUpload("lose", e.target.files[0]));
+    $("resetWinSoundBtn").addEventListener("click", async () => {
+      if (!confirm("Reset Winning sound back to default fanfare?")) return;
+      await api("/api/admin/sounds/win", { method: "DELETE" });
+      state.sounds.win = null;
+      $("winSoundFile").value = "";
+      renderSoundSettings();
+      setStatus("soundStatus", "Winning sound reset to default.", "success");
+    });
+    $("resetLoseSoundBtn").addEventListener("click", async () => {
+      if (!confirm("Reset Losing sound back to default wah-wah roast?")) return;
+      await api("/api/admin/sounds/lose", { method: "DELETE" });
+      state.sounds.lose = null;
+      $("loseSoundFile").value = "";
+      renderSoundSettings();
+      setStatus("soundStatus", "Losing sound reset to default.", "success");
+    });
 
     load().then(() => renderCardPreview()).catch(error => {
       $("userName").textContent = "Access denied";

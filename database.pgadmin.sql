@@ -95,5 +95,18 @@ CREATE TRIGGER cards_set_updated_at
 BEFORE UPDATE ON public.cards
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+CREATE TABLE IF NOT EXISTS public.game_sounds (
+  sound_type text PRIMARY KEY CHECK (sound_type IN ('win', 'lose')),
+  name text NOT NULL,
+  audio_url text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS game_sounds_set_updated_at ON public.game_sounds;
+CREATE TRIGGER game_sounds_set_updated_at
+BEFORE UPDATE ON public.game_sounds
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+
 -- After your first signup, promote that account to admin:
 -- UPDATE public.users SET role = 'admin' WHERE email = 'you@example.com';
