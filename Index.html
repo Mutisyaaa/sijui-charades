@@ -737,17 +737,84 @@ body.high-contrast .toggle-switch:checked {
 
 /* ---------- duration / orientation ---------- */
 #duration, #orientation { justify-content: center; align-items: center; text-align: center; }
-#duration h2, #orientation h2 { font-size: clamp(2.4rem, 9vmin, 4rem); color: var(--amber); }
-#selectedDeckName { margin: 0.75rem 0 2rem; color: var(--amber); font-size: 1.35rem; font-weight: 800; }
-.duration-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(620px, 100%); margin: 0; padding: 0; border: 0; }
+#duration h2, #orientation h2 { font-size: clamp(2.2rem, 8vmin, 3.5rem); color: var(--amber); margin-bottom: 2px; }
+#selectedDeckName { margin: 0.25rem 0 1.25rem; color: var(--amber); font-size: 1.3rem; font-weight: 800; }
+.setup-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(620px, 100%);
+  margin: 0 auto 12px;
+}
+.setup-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--chalk-muted);
+}
+.difficulty-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.difficulty-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  background: var(--espresso);
+  border: 1px solid var(--espresso-border);
+  color: var(--chalk);
+  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 14px;
+  box-shadow: 0 4px 0 var(--espresso-dark);
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+}
+.difficulty-options button small {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+.difficulty-options button[aria-pressed="true"] {
+  background: var(--amber);
+  color: #1A1512;
+  border-color: var(--amber);
+  box-shadow: 0 4px 0 var(--amber-dark);
+}
+.difficulty-options button[aria-pressed="true"] small {
+  opacity: 0.9;
+  font-weight: 800;
+}
+.difficulty-options button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+@media (max-width: 480px) {
+  .difficulty-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.duration-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; margin: 0; padding: 0; border: 0; }
 .duration-options button {
   background: var(--espresso);
   border: 1px solid var(--espresso-border);
   color: var(--chalk);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 900;
   border-radius: 14px;
   box-shadow: 0 4px 0 var(--espresso-dark);
+  padding: 10px 0;
 }
 .duration-options button[aria-pressed="true"] {
   background: var(--amber);
@@ -755,7 +822,7 @@ body.high-contrast .toggle-switch:checked {
   border-color: var(--amber);
   box-shadow: 0 4px 0 var(--amber-dark);
 }
-#duration #startBtn { margin-top: 18px; }
+#duration #startBtn { margin-top: 14px; }
 #duration .ghost, #orientation .ghost { margin-top: 1.5rem; }
 #orientation .rotate-icon { font-size: 5rem; line-height: 1; margin-bottom: 1rem; }
 #orientation p { max-width: 28ch; margin: 0.75rem auto 0; font-size: 1.15rem; line-height: 1.4; color: var(--chalk); opacity: 0.88; }
@@ -1125,14 +1192,41 @@ body.high-contrast .toggle-switch:checked {
       <button id="durationBack" class="ghost" type="button">Back</button>
     </div>
     <div class="spacer"></div>
-    <h2>How long?</h2>
-    <p id="selectedDeckName"></p>
-    <fieldset class="duration-options" aria-label="Round length">
-      <button type="button" data-secs="60" aria-pressed="false">60s</button>
-      <button type="button" data-secs="90" aria-pressed="false">90s</button>
-      <button type="button" data-secs="120" aria-pressed="false">120s</button>
-    </fieldset>
-    <button id="startBtn" class="primary" type="button">Continue</button>
+    <h2 style="font-size: clamp(2rem, 7vmin, 3.2rem); margin-bottom: 2px;">Round Setup</h2>
+    <p id="selectedDeckName" style="margin: 0.2rem 0 1.2rem;"></p>
+
+    <div class="setup-group">
+      <span class="setup-label">Difficulty Mode</span>
+      <fieldset class="difficulty-options" aria-label="Card difficulty">
+        <button type="button" data-diff="all" aria-pressed="true">
+          <span>All</span>
+          <small>All cards</small>
+        </button>
+        <button type="button" data-diff="easy" aria-pressed="false">
+          <span>🟢 Easy</span>
+          <small>0 cards</small>
+        </button>
+        <button type="button" data-diff="medium" aria-pressed="false">
+          <span>🟡 Medium</span>
+          <small>0 cards</small>
+        </button>
+        <button type="button" data-diff="hard" aria-pressed="false">
+          <span>🌶️ Hard</span>
+          <small>0 cards</small>
+        </button>
+      </fieldset>
+    </div>
+
+    <div class="setup-group" style="margin-top: 6px;">
+      <span class="setup-label">Round Duration</span>
+      <fieldset class="duration-options" aria-label="Round length">
+        <button type="button" data-secs="60" aria-pressed="false">60s</button>
+        <button type="button" data-secs="90" aria-pressed="false">90s</button>
+        <button type="button" data-secs="120" aria-pressed="false">120s</button>
+      </fieldset>
+    </div>
+
+    <button id="startBtn" class="primary" type="button" style="margin-top: 14px;">Continue</button>
     <div class="spacer"></div>
   </section>
 
@@ -1480,6 +1574,7 @@ function onMotion(e) {
 let S = null;                                  // current round
 let currentDeckId = null;
 let roundSecs = store.get("roundSecs", 60);
+let difficultyMode = store.get("difficultyMode", "all");
 let best = store.get("best", 0);
 let readyTimer = null;
 let pendingStart = false;
@@ -1488,8 +1583,11 @@ let teamNames = store.get("teamNames", ["Team A", "Team B"]);
 
 function cardText(card) { return typeof card === "string" ? card : card.text; }
 function cardMeta(card) {
-  if (!card || typeof card === "string") return "Nod down = got it · Tilt back = skip";
-  return `${card.category || "General"} · ${card.difficulty || "medium"}`;
+  if (!card) return "";
+  const cat = typeof card === "object" ? card.category || "General" : "General";
+  const diff = typeof card === "object" ? card.difficulty || "medium" : "medium";
+  const badge = diff === "easy" ? "🟢 Easy" : diff === "hard" ? "🌶️ Hard" : "🟡 Medium";
+  return `${cat} · ${badge}`;
 }
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
@@ -1769,6 +1867,30 @@ function renderDuration() {
   const deck = ALL_DECKS.find(d => d.id === currentDeckId);
   if (!deck) return;
   $("selectedDeckName").textContent = deck.name;
+
+  const easyCount = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === "easy").length;
+  const medCount = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === "medium").length;
+  const hardCount = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === "hard").length;
+  const totalCount = deck.cards.length;
+
+  const counts = { all: totalCount, easy: easyCount, medium: medCount, hard: hardCount };
+
+  if (counts[difficultyMode] === 0) {
+    difficultyMode = "all";
+    store.set("difficultyMode", "all");
+  }
+
+  document.querySelectorAll(".difficulty-options button").forEach(b => {
+    const diff = b.dataset.diff;
+    const count = counts[diff] ?? 0;
+    b.setAttribute("aria-pressed", String(diff === difficultyMode));
+    b.disabled = count === 0;
+    const small = b.querySelector("small");
+    if (small) {
+      small.textContent = count === 0 ? "0 cards" : `${count} card${count === 1 ? "" : "s"}`;
+    }
+  });
+
   document.querySelectorAll(".duration-options button").forEach(b => {
     b.setAttribute("aria-pressed", String(Number(b.dataset.secs) === roundSecs));
   });
@@ -1868,8 +1990,18 @@ function initMatch() {
   const deck = ALL_DECKS.find(d => d.id === currentDeckId);
   if (!deck) return;
   const activeTeams = gameMode === "team" ? teamNames : ["Solo"];
+
+  let playableCards = deck.cards;
+  if (difficultyMode && difficultyMode !== "all") {
+    const filtered = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === difficultyMode);
+    if (filtered.length > 0) {
+      playableCards = filtered;
+    }
+  }
+
   S = {
     deck,
+    cards: playableCards,
     teamIndex: 0,
     teamScores: activeTeams.map(name => ({ name, score: 0, played: false })),
     teamCards: activeTeams.map(() => ({ right: [], skipped: [] })),
@@ -1908,7 +2040,7 @@ function beginTeamTurn() {
   round.right = [];
   round.skipped = [];
   round.current = null;
-  round.queue = shuffle(round.deck.cards);
+  round.queue = shuffle(round.cards || round.deck.cards);
   round.i = 0;
   round.streak = 0;
   round.total = roundSecs * 1000;
@@ -1948,7 +2080,8 @@ function beginTeamTurn() {
 }
 
 function nextCard() {
-  if (S.i >= S.queue.length) { S.queue = shuffle(S.deck.cards); S.i = 0; }
+  const pool = S.cards || S.deck.cards;
+  if (S.i >= pool.length) { S.queue = shuffle(pool); S.i = 0; }
   S.current = S.queue[S.i++];
   setWord(cardText(S.current));
   $("hint").textContent = cardMeta(S.current);
@@ -2128,10 +2261,18 @@ function finalResults() {
     breakdowns.innerHTML = round.teamScores.map((team, idx) => {
       const cards = round.teamCards[idx];
       const rightItems = cards.right.length
-        ? cards.right.map(c => `<li>${escapeHtml(cardText(c))}</li>`).join("")
+        ? cards.right.map(c => {
+            const diff = typeof c === "object" ? c.difficulty || "medium" : "medium";
+            const badge = diff === "easy" ? "🟢" : diff === "hard" ? "🌶️" : "🟡";
+            return `<li>${escapeHtml(cardText(c))} <span style="opacity:0.75; font-size:0.85em; margin-left:4px;">${badge}</span></li>`;
+          }).join("")
         : "<li>None</li>";
       const skipItems = cards.skipped.length
-        ? cards.skipped.map(c => `<li>${escapeHtml(cardText(c))}</li>`).join("")
+        ? cards.skipped.map(c => {
+            const diff = typeof c === "object" ? c.difficulty || "medium" : "medium";
+            const badge = diff === "easy" ? "🟢" : diff === "hard" ? "🌶️" : "🟡";
+            return `<li>${escapeHtml(cardText(c))} <span style="opacity:0.75; font-size:0.85em; margin-left:4px;">${badge}</span></li>`;
+          }).join("")
         : "<li>None</li>";
       return `
         <div class="team-breakdown-card">
@@ -2183,7 +2324,9 @@ function fillList(ul, items) {
   }
   items.forEach(t => {
     const li = document.createElement("li");
-    li.textContent = cardText(t);
+    const diff = typeof t === "object" ? t.difficulty || "medium" : "medium";
+    const badge = diff === "easy" ? "🟢" : diff === "hard" ? "🌶️" : "🟡";
+    li.innerHTML = `${escapeHtml(cardText(t))} <span style="opacity:0.75; font-size:0.85em; margin-left:4px;">${badge}</span>`;
     ul.appendChild(li);
   });
 }
@@ -2191,6 +2334,14 @@ function fillList(ul, items) {
 /* ============================================================
    Wiring
    ============================================================ */
+document.querySelectorAll(".difficulty-options button").forEach(b => {
+  b.addEventListener("click", () => {
+    if (b.disabled) return;
+    difficultyMode = b.dataset.diff;
+    store.set("difficultyMode", difficultyMode);
+    renderDuration();
+  });
+});
 document.querySelectorAll(".duration-options button").forEach(b => {
   b.addEventListener("click", () => {
     roundSecs = Number(b.dataset.secs);
