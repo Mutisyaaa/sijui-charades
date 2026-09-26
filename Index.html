@@ -708,7 +708,7 @@ body.high-contrast .toggle-switch:checked {
 .deck:hover b, .deck:focus-visible b {
   color: var(--amber);
 }
-.deck b { display: block; font-size: 1.35rem; color: var(--chalk); }
+.deck b { display: block; font-size: 1.4rem; font-weight: 800; color: var(--chalk); text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75); line-height: 1.25; }
 .deck small { opacity: 0.78; font-size: 0.95rem; color: var(--chalk); }
 .deck .n {
   display: grid;
@@ -1750,21 +1750,21 @@ async function loadPublishedDecks() {
     const remote = await response.json();
     const published = remote.filter(deck => Array.isArray(deck.cards) && deck.cards.length).map(deck => ({
       ...deck,
-      sub: deck.description || "Fresh from the admin studio",
+      sub: deck.description || "",
       cards: deck.cards.map(card => ({ text: card.text, category: card.category, difficulty: card.difficulty }))
     }));
     ALL_DECKS = published.length ? published.concat([{
-      id: "mix", name: "Everything", sub: "A bit of every deck",
+      id: "mix", name: "Everything", sub: "",
       cover_url: "/assets/images/everything-deck.jpg",
       cards: published.flatMap(d => d.cards)
     }]) : FALLBACK_DECKS.concat([{
-      id: "mix", name: "Everything", sub: "A bit of every deck",
+      id: "mix", name: "Everything", sub: "",
       cover_url: "/assets/images/everything-deck.jpg",
       cards: FALLBACK_DECKS.flatMap(d => d.cards)
     }]);
   } catch (e) {
     ALL_DECKS = FALLBACK_DECKS.concat([{
-      id: "mix", name: "Everything", sub: "A bit of every deck",
+      id: "mix", name: "Everything", sub: "",
       cover_url: "/assets/images/everything-deck.jpg",
       cards: FALLBACK_DECKS.flatMap(d => d.cards)
     }]);
@@ -1781,7 +1781,7 @@ function renderHome() {
 function renderDuration() {
   const deck = ALL_DECKS.find(d => d.id === currentDeckId);
   if (!deck) return;
-  $("selectedDeckName").textContent = deck.name + " · " + deck.sub;
+  $("selectedDeckName").textContent = deck.name;
   document.querySelectorAll(".duration-options button").forEach(b => {
     b.setAttribute("aria-pressed", String(Number(b.dataset.secs) === roundSecs));
   });
@@ -1809,22 +1809,11 @@ function renderDecks() {
     }
     const left = document.createElement("div");
     left.className = "deck-copy";
-    const icon = {}; // Kept detached for compatibility with older deck records; icons are no longer shown.
-    icon.textContent = d.icon || "🎭";
     const copy = document.createElement("div");
     copy.className = "deck-copy-text";
     const name = document.createElement("b");
     name.textContent = d.name;
-    const sub = document.createElement("small");
-    sub.textContent = d.sub;
-    const meta = document.createElement("span");
-    meta.className = "deck-meta";
-    const difficulty = document.createElement("span");
-    difficulty.className = "difficulty";
-    const hardCount = d.cards.filter(card => card && typeof card !== "string" && card.difficulty === "hard").length;
-    difficulty.textContent = hardCount ? `${hardCount} spicy cards` : "Good vibes only";
-    meta.append(sub, difficulty);
-    copy.append(name, meta);
+    copy.append(name);
     left.append(copy);
     b.append(left);
     b.addEventListener("click", () => chooseDeck(d.id));
