@@ -933,16 +933,7 @@ body.high-contrast .toggle-switch:checked {
   100% { opacity: 0; transform: translateY(-34px) scale(0.92); }
 }
 
-#hint { text-align: center; font-size: 0.95rem; min-height: 1.4em; margin: 0 0 8px; }
-.pads { display: flex; gap: 10px; }
-.pads button { flex: 1; background: transparent; border: 2px solid currentColor; font-weight: 800; border-radius: 14px; }
-#skipBtn { border-color: var(--shuka-red); color: var(--shuka-red); }
-#gotBtn { border-color: var(--nganya-blue); color: var(--nganya-blue); }
-#game.ok #skipBtn, #game.ok #gotBtn,
-#game.skip #skipBtn, #game.skip #gotBtn {
-  border-color: rgba(255, 255, 255, 0.7);
-  color: #FFFFFF;
-}
+#hint { text-align: center; font-size: 0.95rem; min-height: 1.4em; margin: 0 0 10px; opacity: 0.8; }
 .low { color: var(--shuka-red); }
 #game.ok .low, #game.skip .low { color: inherit; }
 
@@ -1190,10 +1181,6 @@ body.high-contrast .toggle-switch:checked {
       <h2 id="word"></h2>
     </div>
     <p id="hint"></p>
-    <div class="pads">
-      <button id="skipBtn" type="button">Skip</button>
-      <button id="gotBtn" type="button">Got it</button>
-    </div>
   </section>
 
   <section id="turnBreak" class="screen">
@@ -1955,8 +1942,8 @@ function beginTeamTurn() {
   setTimeout(() => {
     if (S !== round || !round.running || motionSeen) return;
     $("hint").textContent = motionDenied
-      ? "Motion access was blocked. Use the buttons below."
-      : "Tilt isn't available on this device. Use the buttons below.";
+      ? "Motion access was blocked. Please enable motion in browser settings."
+      : "Nod down for Got it, tilt back to Skip.";
   }, 1500);
 }
 
@@ -2259,8 +2246,6 @@ $("orientationCancelBtn").addEventListener("click", () => {
 });
 $("cancelBtn").addEventListener("click", () => { clearInterval(readyTimer); S = null; show("categories"); });
 $("quitBtn").addEventListener("click", endRound);
-$("gotBtn").addEventListener("click", () => mark("right"));
-$("skipBtn").addEventListener("click", () => mark("skip"));
 $("againBtn").addEventListener("click", () => {
   initMatch();
   startSelectedDeck();
@@ -2319,6 +2304,14 @@ $("settingsBackdrop").addEventListener("click", closeSettings);
 window.addEventListener("keydown", event => {
   if (event.key === "Escape" && $("settingsModal")?.classList.contains("open")) {
     closeSettings();
+    return;
+  }
+  if (S && S.running && !S.locked) {
+    if (event.key === "ArrowDown" || event.key === "Enter") {
+      mark("right");
+    } else if (event.key === "ArrowUp" || event.key === " ") {
+      mark("skip");
+    }
   }
 });
 
