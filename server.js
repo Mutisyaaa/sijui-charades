@@ -500,6 +500,23 @@ app.get("/favicon.ico", (_request, response) => {
   response.sendFile(path.join(__dirname, "assets", "images", "favicon.ico"));
 });
 
+app.get("/sw.js", (_request, response) => {
+  response.set({
+    "Content-Type": "application/javascript",
+    "Service-Worker-Allowed": "/",
+    "Cache-Control": "no-cache, no-store, must-revalidate"
+  });
+  response.sendFile(path.join(__dirname, "sw.js"));
+});
+
+app.get("/manifest.json", (_request, response) => {
+  response.set({
+    "Content-Type": "application/manifest+json",
+    "Cache-Control": "public, max-age=3600"
+  });
+  response.sendFile(path.join(__dirname, "manifest.json"));
+});
+
 app.get("/", (_request, response) => {
   response.sendFile(path.join(__dirname, "Index.html"));
 });

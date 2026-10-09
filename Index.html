@@ -5,10 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1A1512">
 <title>Sijui Charades</title>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sijui">
+<meta name="application-name" content="Sijui">
 <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/images/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="assets/images/icon-512.png">
 <style>
 :root {
   /* Nairobi Matatu & Shuka Palette */
@@ -306,6 +315,82 @@ body.high-contrast .settings-trigger-btn:active {
   box-shadow: 0 1px 0 #000000;
 }
 
+/* ---------- PWA Install UI ---------- */
+.pwa-install-container {
+  width: 100%;
+  margin-top: 14px;
+}
+.pwa-install-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(242, 167, 27, 0.16) 0%, rgba(58, 46, 40, 0.85) 100%);
+  border: 1.5px solid var(--amber);
+  border-radius: 16px;
+  padding: 10px 14px;
+  color: var(--chalk);
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  font-family: inherit;
+}
+.pwa-install-banner:hover, .pwa-install-banner:focus-visible {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(242, 167, 27, 0.25);
+}
+.pwa-install-banner:active {
+  transform: translateY(1px);
+}
+.pwa-install-badge {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.pwa-install-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pwa-install-text strong {
+  font-size: 0.95rem;
+  color: var(--chalk);
+}
+.pwa-install-text span {
+  font-size: 0.78rem;
+  color: rgba(245, 239, 228, 0.75);
+}
+.pwa-install-btn-pill {
+  flex: 0 0 auto;
+  background: var(--amber);
+  color: var(--charcoal);
+  font-weight: 900;
+  font-size: 0.82rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.pwa-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(30, 95, 191, 0.25);
+  border: 1px solid var(--nganya-blue);
+  color: var(--chalk);
+}
+.pwa-status-badge.installed {
+  background: rgba(0, 138, 0, 0.25);
+  border-color: #008a00;
+  color: #a3e635;
+}
 
 /* ---------- glassmorphic settings modal ---------- */
 .settings-modal {
@@ -1282,6 +1367,16 @@ body.high-contrast .toggle-switch:checked {
       <span>Ready to embarrass your friends?</span>
       <button id="openSettingsBtn" class="settings-trigger-btn" type="button" aria-haspopup="dialog" aria-expanded="false">⚙️ Settings</button>
     </div>
+    <div id="pwaInstallContainer" class="pwa-install-container" hidden>
+      <button id="pwaInstallBanner" class="pwa-install-banner" type="button" aria-label="Install Sijui App">
+        <span class="pwa-install-badge" aria-hidden="true">📲</span>
+        <div class="pwa-install-text">
+          <strong>Install Sijui App</strong>
+          <span>Play offline & full-screen without a browser</span>
+        </div>
+        <span class="pwa-install-btn-pill">Install</span>
+      </button>
+    </div>
     <p id="best" class="best"></p>
   </section>
 
@@ -1496,6 +1591,17 @@ body.high-contrast .toggle-switch:checked {
         </div>
       </div>
 
+      <div class="settings-section" id="pwaSettingsSection">
+        <h3>App & Offline</h3>
+        <div class="settings-row" style="align-items: center; justify-content: space-between;">
+          <div style="display:flex; flex-direction:column; gap:3px;">
+            <label id="pwaSettingsLabel" style="font-weight:700;">Install Sijui</label>
+            <small id="pwaSettingsSubtext" style="color: rgba(245, 239, 228, 0.7); font-size: 0.8rem;">Add to home screen for full-screen offline play</small>
+          </div>
+          <button id="pwaSettingsInstallBtn" class="small-button" type="button" style="border-radius:10px; font-weight:800; background:var(--amber); color:var(--charcoal); padding:8px 16px; border:none; cursor:pointer; font-family:inherit;">Install</button>
+        </div>
+      </div>
+
       <div class="settings-section">
         <h3>How to play</h3>
         <div class="settings-how-top">
@@ -1513,6 +1619,29 @@ body.high-contrast .toggle-switch:checked {
     </div>
     <div class="settings-footer">
       <button id="doneSettingsBtn" class="primary" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="pwaIosModal" class="settings-modal" role="dialog" aria-modal="true" aria-labelledby="iosInstallTitle">
+  <div id="pwaIosBackdrop" class="settings-backdrop"></div>
+  <div class="settings-sheet" style="max-width: 420px; text-align: center;">
+    <div class="settings-header">
+      <h2 id="iosInstallTitle">📱 Install on iPhone / iPad</h2>
+      <button id="closeIosInstallBtn" class="settings-close-btn" type="button" aria-label="Close">✕</button>
+    </div>
+    <div class="settings-body" style="padding: 18px 16px; display:flex; flex-direction:column; gap:16px; align-items:center;">
+      <img src="assets/images/icon-192.png" width="68" height="68" style="border-radius:16px; box-shadow:0 4px 12px rgba(0,0,0,0.4);" alt="Sijui App">
+      <p style="margin:0; font-size:0.95rem; line-height:1.45; color:var(--chalk);">Install Sijui to play in full-screen anytime, even without an internet connection!</p>
+      <div style="background:rgba(26,21,18,0.6); border:1px solid rgba(245,239,228,0.12); border-radius:14px; padding:14px 16px; text-align:left; width:100%; display:flex; flex-direction:column; gap:10px; font-size:0.9rem;">
+        <div><b>1. Tap Share:</b> In Safari's bottom toolbar, tap the Share icon (<span style="font-size:1.1rem; line-height:1;">⎋</span> or square with upward arrow).</div>
+        <div><b>2. Tap "Add to Home Screen":</b> Scroll down the share sheet and tap <b>Add to Home Screen</b> (➕).</div>
+        <div><b>3. Tap "Add":</b> Confirm in the top-right corner.</div>
+      </div>
+      <p style="margin:0; font-size:0.82rem; color:var(--amber); font-weight:700;">Open Sijui from your home screen for the full app experience!</p>
+    </div>
+    <div class="settings-footer">
+      <button id="gotItIosInstallBtn" class="primary" type="button">Got it!</button>
     </div>
   </div>
 </div>
@@ -3002,6 +3131,123 @@ $("home")?.addEventListener("click", event => {
   spawnBanterBubble(null, event.clientX, event.clientY);
 });
 
+/* ============================================================
+   Progressive Web App (PWA) Controller & Offline Support
+   ============================================================ */
+let deferredInstallPrompt = null;
+
+function isRunningStandalone() {
+  return window.matchMedia("(display-mode: standalone)").matches ||
+         window.navigator.standalone === true ||
+         document.referrer.includes("android-app://");
+}
+
+function isIos() {
+  const ua = window.navigator.userAgent || "";
+  return /iphone|ipad|ipod/i.test(ua) && !window.MSStream;
+}
+
+function updatePwaUI() {
+  const standalone = isRunningStandalone();
+  const installContainer = $("pwaInstallContainer");
+  const settingsBtn = $("pwaSettingsInstallBtn");
+  const settingsSubtext = $("pwaSettingsSubtext");
+
+  if (standalone) {
+    if (installContainer) installContainer.hidden = true;
+    if (settingsBtn) settingsBtn.hidden = true;
+    if (settingsSubtext) {
+      settingsSubtext.innerHTML = '<span class="pwa-status-badge installed">✓ Installed as App</span>';
+    }
+    return;
+  }
+
+  if (deferredInstallPrompt) {
+    if (installContainer) installContainer.hidden = false;
+    if (settingsBtn) {
+      settingsBtn.hidden = false;
+      settingsBtn.textContent = "Install";
+    }
+    if (settingsSubtext) {
+      settingsSubtext.textContent = "Install on your device for full-screen offline play";
+    }
+  } else if (isIos()) {
+    if (installContainer) installContainer.hidden = false;
+    if (settingsBtn) {
+      settingsBtn.hidden = false;
+      settingsBtn.textContent = "How to Install";
+    }
+    if (settingsSubtext) {
+      settingsSubtext.textContent = "Add to home screen from Safari";
+    }
+  } else {
+    if (installContainer) installContainer.hidden = true;
+    if (settingsBtn) {
+      settingsBtn.hidden = false;
+      settingsBtn.textContent = "Install";
+    }
+    if (settingsSubtext) {
+      settingsSubtext.textContent = "Add to home screen for full-screen offline play";
+    }
+  }
+}
+
+async function triggerPwaInstall() {
+  if (deferredInstallPrompt) {
+    try {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      if (choice && choice.outcome === "accepted") {
+        deferredInstallPrompt = null;
+        updatePwaUI();
+        showMoment("🎉 Sijui App installed!");
+      }
+    } catch (e) {
+      console.warn("[PWA] Prompt error:", e);
+    }
+  } else if (isIos()) {
+    $("pwaIosModal")?.classList.add("open");
+  } else {
+    showMoment("To install: open your browser menu (⋮) and tap 'Add to Home Screen' or 'Install App'.");
+  }
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" })
+      .then(reg => {
+        console.log("[PWA] Service Worker registered:", reg.scope);
+      })
+      .catch(err => {
+        console.warn("[PWA] Service Worker registration failed:", err);
+      });
+  });
+}
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  updatePwaUI();
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  updatePwaUI();
+  showMoment("🎉 Sijui App installed successfully!");
+});
+
+$("pwaInstallBanner")?.addEventListener("click", triggerPwaInstall);
+$("pwaSettingsInstallBtn")?.addEventListener("click", triggerPwaInstall);
+$("closeIosInstallBtn")?.addEventListener("click", () => $("pwaIosModal")?.classList.remove("open"));
+$("pwaIosBackdrop")?.addEventListener("click", () => $("pwaIosModal")?.classList.remove("open"));
+$("gotItIosInstallBtn")?.addEventListener("click", () => $("pwaIosModal")?.classList.remove("open"));
+
+if (window.matchMedia) {
+  window.matchMedia("(display-mode: standalone)").addEventListener("change", () => {
+    updatePwaUI();
+  });
+}
+
 renderHome();
 renderDecks();
 applyPreferences();
@@ -3009,6 +3255,7 @@ applySetupState();
 loadPublishedDecks();
 loadGameSounds();
 startHomeBanter();
+updatePwaUI();
 </script>
 </body>
 </html>
