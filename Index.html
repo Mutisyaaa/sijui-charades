@@ -587,6 +587,52 @@ body.high-contrast .toggle-switch:checked {
   font: inherit;
 }
 .team-fields input:focus { border-color: var(--amber); outline: none; }
+.team-rounds-group {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(560px, 100%);
+  margin-bottom: 1.1rem;
+}
+.team-rounds-group.visible {
+  display: flex;
+}
+.rounds-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.rounds-options button {
+  background: var(--espresso);
+  border: 1px solid var(--espresso-border);
+  color: var(--chalk);
+  font-size: 0.95rem;
+  font-weight: 800;
+  border-radius: 12px;
+  box-shadow: 0 4px 0 var(--espresso-dark);
+  padding: 10px 4px;
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+}
+.rounds-options button:hover {
+  border-color: var(--amber);
+}
+.rounds-options button[aria-pressed="true"] {
+  background: var(--amber);
+  color: #1A1512;
+  border-color: var(--amber);
+  box-shadow: 0 4px 0 var(--amber-dark), 0 4px 12px rgba(242, 167, 27, 0.25);
+}
+@media (max-width: 480px) {
+  .rounds-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 #setup .ghost { margin-top: 1rem; }
 
 /* ---------- decks ---------- */
@@ -1383,6 +1429,15 @@ body.high-contrast .toggle-switch:checked {
       <input id="teamC" maxlength="24" placeholder="Team C (optional)" aria-label="Third team name">
       <input id="teamD" maxlength="24" placeholder="Team D (optional)" aria-label="Fourth team name">
     </div>
+    <div id="teamRoundsGroup" class="team-rounds-group">
+      <span class="setup-label">Rounds to play</span>
+      <fieldset class="rounds-options" aria-label="Number of rounds">
+        <button type="button" data-rounds="1" aria-pressed="true">1 Round</button>
+        <button type="button" data-rounds="2" aria-pressed="false">2 Rounds</button>
+        <button type="button" data-rounds="3" aria-pressed="false">3 Rounds</button>
+        <button type="button" data-rounds="5" aria-pressed="false">5 Rounds</button>
+      </fieldset>
+    </div>
     <button id="setupStart" class="primary" type="button">Start round</button>
     <button id="setupBack" class="ghost" type="button">Back</button>
   </section>
@@ -1743,6 +1798,7 @@ let readyTimer = null;
 let pendingStart = false;
 let gameMode = store.get("gameMode", "solo");
 let teamNames = store.get("teamNames", ["Team A", "Team B"]);
+let teamRounds = Number(store.get("teamRounds", 1)) || 1;
 
 function cardText(card) { return typeof card === "string" ? card : card.text; }
 function cardMeta(card) {
@@ -2126,7 +2182,8 @@ async function beginCountdown() {
   const promptEl = $("readyPrompt");
   if (gameMode === "team" && S && S.teamScores[S.teamIndex]) {
     const currentTeam = S.teamScores[S.teamIndex].name;
-    promptEl.innerHTML = `Pass the phone to <strong>${escapeHtml(currentTeam)}</strong>!<br>Hold phone to forehead, screen facing friends.`;
+    const rLabel = S.totalRounds > 1 ? `<br><span style="font-size: 0.95rem; opacity: 0.85; color: var(--amber);">Round ${S.currentRoundNum} of ${S.totalRounds}</span>` : "";
+    promptEl.innerHTML = `Pass the phone to <strong>${escapeHtml(currentTeam)}</strong>!${rLabel}<br>Hold phone to forehead, screen facing friends.`;
   } else {
     promptEl.textContent = "Phone on your forehead, screen facing your friends.";
   }
@@ -2153,6 +2210,7 @@ function initMatch() {
   const deck = ALL_DECKS.find(d => d.id === currentDeckId);
   if (!deck) return;
   const activeTeams = gameMode === "team" ? teamNames : ["Solo"];
+  const totalRounds = gameMode === "team" ? (teamRounds || 1) : 1;
 
   let playableCards = deck.cards;
   if (difficultyMode && difficultyMode !== "all") {
@@ -2166,8 +2224,10 @@ function initMatch() {
     deck,
     cards: playableCards,
     teamIndex: 0,
+    currentRoundNum: 1,
+    totalRounds: totalRounds,
     teamScores: activeTeams.map(name => ({ name, score: 0, played: false })),
-    teamCards: activeTeams.map(() => ({ right: [], skipped: [], history: [] })),
+    teamCards: activeTeams.map(() => ({ right: [], skipped: [], history: [], rounds: [] })),
     right: [], skipped: [], turnHistory: [], current: null, queue: [], i: 0,
     streak: 0, total: roundSecs * 1000, endAt: 0,
     running: false, locked: false, armed: false, timer: null, pausedAt: null, finalized: false
@@ -2217,7 +2277,8 @@ function beginTeamTurn() {
   if (gameMode === "team") {
     const team = round.teamScores[round.teamIndex];
     showMoment(`${team.name}'s turn!`);
-    $("teamTurn").textContent = `${team.name} (${round.teamIndex + 1}/${round.teamScores.length})`;
+    const roundLabel = round.totalRounds > 1 ? ` · Rnd ${round.currentRoundNum}/${round.totalRounds}` : "";
+    $("teamTurn").textContent = `${team.name}${roundLabel} (${round.teamIndex + 1}/${round.teamScores.length})`;
     $("quitBtn").textContent = "End turn";
   } else {
     $("teamTurn").textContent = "Your turn";
@@ -2317,6 +2378,27 @@ function tick() {
   if (left <= 0) endTeamTurn();
 }
 
+function recomputeTeamTotals(teamIdx) {
+  const round = S;
+  if (!round) return;
+  const cardsData = round.teamCards[teamIdx];
+  const team = round.teamScores[teamIdx];
+  if (!cardsData || !team) return;
+
+  let totalRight = [];
+  let totalSkipped = [];
+  (cardsData.rounds || []).forEach(r => {
+    if (r) {
+      if (r.right) totalRight.push(...r.right);
+      if (r.skipped) totalSkipped.push(...r.skipped);
+    }
+  });
+
+  cardsData.right = totalRight;
+  cardsData.skipped = totalSkipped;
+  team.score = totalRight.length;
+}
+
 function endTeamTurn() {
   const round = S;
   if (!round || !round.running) return;
@@ -2330,15 +2412,26 @@ function endTeamTurn() {
 
   const currentIdx = round.teamIndex;
   const currentTeam = round.teamScores[currentIdx];
-  currentTeam.score = round.right.length;
-  currentTeam.played = true;
-  round.teamCards[currentIdx].right = [...round.right];
-  round.teamCards[currentIdx].skipped = [...round.skipped];
-  round.teamCards[currentIdx].history = [...(round.turnHistory || [])];
+  const currentRnd = round.currentRoundNum || 1;
+  const roundIdx = currentRnd - 1;
 
-  playEndSound(currentTeam.score);
-  if (currentTeam.score >= 10) celebrate();
-  vibe(currentTeam.score >= 10 ? [80, 60, 120] : [140, 100, 200]);
+  const turnRight = [...round.right];
+  const turnSkipped = [...round.skipped];
+  const turnHistory = [...(round.turnHistory || [])];
+
+  if (!round.teamCards[currentIdx].rounds) round.teamCards[currentIdx].rounds = [];
+  round.teamCards[currentIdx].rounds[roundIdx] = {
+    right: turnRight,
+    skipped: turnSkipped,
+    history: turnHistory
+  };
+
+  recomputeTeamTotals(currentIdx);
+  currentTeam.played = true;
+
+  playEndSound(turnRight.length);
+  if (turnRight.length >= 10) celebrate();
+  vibe(turnRight.length >= 10 ? [80, 60, 120] : [140, 100, 200]);
 
   if (gameMode === "team") {
     showTurnBreak(currentIdx);
@@ -2352,37 +2445,72 @@ function showTurnBreak(reviewedIdx) {
   if (!round) return;
 
   round.reviewedTeamIndex = reviewedIdx;
+  round.reviewedRoundNum = round.currentRoundNum || 1;
+
   const currentTeam = round.teamScores[reviewedIdx];
-  const isLastTeam = (reviewedIdx >= round.teamScores.length - 1);
-  const nextIdx = isLastTeam ? null : reviewedIdx + 1;
+  const numTeams = round.teamScores.length;
+  const totalRounds = round.totalRounds || 1;
+  const currentRnd = round.currentRoundNum || 1;
+
+  const isEndOfRound = (reviewedIdx >= numTeams - 1);
+  const isLastMatchTurn = isEndOfRound && (currentRnd >= totalRounds);
+
+  round.isLastMatchTurn = isLastMatchTurn;
+
+  let nextIdx = null;
+  let nextRnd = currentRnd;
+
+  if (!isLastMatchTurn) {
+    if (isEndOfRound) {
+      nextIdx = 0;
+      nextRnd = currentRnd + 1;
+    } else {
+      nextIdx = reviewedIdx + 1;
+      nextRnd = currentRnd;
+    }
+  }
+
   round.nextTeamIndex = nextIdx;
-  round.isLastTeam = isLastTeam;
+  round.nextRoundNum = nextRnd;
 
   const badgeEl = $("turnBreakTeamBadge");
-  if (badgeEl) badgeEl.textContent = currentTeam.name;
+  if (badgeEl) {
+    badgeEl.textContent = totalRounds > 1
+      ? `${currentTeam.name} · Round ${currentRnd}/${totalRounds}`
+      : currentTeam.name;
+  }
 
-  $("turnBreakTitle").textContent = `${currentTeam.name}'s Turn Done!`;
+  $("turnBreakTitle").textContent = totalRounds > 1
+    ? `${currentTeam.name}'s Round ${currentRnd} Done!`
+    : `${currentTeam.name}'s Turn Done!`;
 
-  renderTurnBreakReview(reviewedIdx);
+  renderTurnBreakReview(reviewedIdx, currentRnd);
   renderTurnBreakStandings(nextIdx);
 
   const durationWrap = $("turnBreakDurationWrap");
-  if (isLastTeam) {
+  if (isLastMatchTurn) {
     if (durationWrap) durationWrap.style.display = "none";
-    $("turnBreakNext").innerHTML = `🎉 <strong>All teams have played!</strong><br><small style="opacity: 0.82; font-size: 0.95rem;">Review and adjust any answers above, then view the final results.</small>`;
+    $("turnBreakNext").innerHTML = `🎉 <strong>Match Finished! (${totalRounds} Round${totalRounds === 1 ? '' : 's'})</strong><br><small style="opacity: 0.82; font-size: 0.95rem;">Review and adjust any answers above, then view the final results.</small>`;
     $("nextTeamBtn").textContent = "🏆 View Match Results";
   } else {
     const nextTeam = round.teamScores[nextIdx];
     if (durationWrap) durationWrap.style.display = "";
     updateTurnDurationButtons();
-    $("turnBreakNext").innerHTML = `Pass the phone to <strong>${escapeHtml(nextTeam.name)}</strong>!`;
+
+    let nextMsg = "";
+    if (isEndOfRound) {
+      nextMsg = `🔥 <strong>Round ${currentRnd} complete!</strong><br>Starting <strong>Round ${nextRnd} of ${totalRounds}</strong> — Pass the phone to <strong>${escapeHtml(nextTeam.name)}</strong>!`;
+    } else {
+      nextMsg = `Pass the phone to <strong>${escapeHtml(nextTeam.name)}</strong>!${totalRounds > 1 ? ` <span style="opacity:0.85; font-size:0.95em;">(Round ${nextRnd}/${totalRounds})</span>` : ''}`;
+    }
+    $("turnBreakNext").innerHTML = nextMsg;
     $("nextTeamBtn").textContent = `Start ${escapeHtml(nextTeam.name)}'s Turn`;
   }
 
   show("turnBreak");
 }
 
-function renderTurnBreakReview(teamIdx) {
+function renderTurnBreakReview(teamIdx, roundNum) {
   const round = S;
   if (!round) return;
   const cardsData = round.teamCards[teamIdx];
@@ -2390,7 +2518,10 @@ function renderTurnBreakReview(teamIdx) {
   const countsEl = $("turnReviewCounts");
   if (!listEl) return;
 
-  const history = (cardsData && cardsData.history) ? cardsData.history : [];
+  const roundIdx = (roundNum || round.currentRoundNum || 1) - 1;
+  const roundData = (cardsData && cardsData.rounds && cardsData.rounds[roundIdx]) ? cardsData.rounds[roundIdx] : null;
+  const history = roundData ? (roundData.history || []) : (cardsData.history || []);
+
   const rightCount = history.filter(h => h.kind === "right").length;
   const skipCount = history.filter(h => h.kind === "skipped").length;
 
@@ -2398,7 +2529,7 @@ function renderTurnBreakReview(teamIdx) {
     countsEl.textContent = `${rightCount} Got · ${skipCount} Skipped`;
   }
   $("turnBreakScore").textContent = rightCount;
-  $("turnBreakSub").textContent = `${rightCount} word${rightCount === 1 ? "" : "s"} guessed`;
+  $("turnBreakSub").textContent = `${rightCount} word${rightCount === 1 ? "" : "s"} guessed this turn`;
 
   if (!history.length) {
     listEl.innerHTML = `<p style="padding: 18px 12px; margin: 0; opacity: 0.6; font-size: 0.95rem; font-weight: 700;">No words played this turn.</p>`;
@@ -2432,24 +2563,27 @@ function toggleTurnWord(idx, isGot) {
   const round = S;
   if (!round || round.reviewedTeamIndex === undefined) return;
   const teamIdx = round.reviewedTeamIndex;
+  const roundIdx = (round.reviewedRoundNum || round.currentRoundNum || 1) - 1;
   const cardsData = round.teamCards[teamIdx];
-  if (!cardsData || !cardsData.history || !cardsData.history[idx]) return;
+  if (!cardsData || !cardsData.rounds || !cardsData.rounds[roundIdx]) return;
 
-  const item = cardsData.history[idx];
+  const roundData = cardsData.rounds[roundIdx];
+  if (!roundData.history || !roundData.history[idx]) return;
+
+  const item = roundData.history[idx];
   item.kind = isGot ? "right" : "skipped";
 
-  cardsData.right = cardsData.history.filter(h => h.kind === "right").map(h => h.card);
-  cardsData.skipped = cardsData.history.filter(h => h.kind === "skipped").map(h => h.card);
+  roundData.right = roundData.history.filter(h => h.kind === "right").map(h => h.card);
+  roundData.skipped = roundData.history.filter(h => h.kind === "skipped").map(h => h.card);
 
-  const team = round.teamScores[teamIdx];
-  team.score = cardsData.right.length;
+  recomputeTeamTotals(teamIdx);
 
-  const rightCount = cardsData.right.length;
-  const skipCount = cardsData.skipped.length;
-  $("turnBreakScore").textContent = rightCount;
-  $("turnBreakSub").textContent = `${rightCount} word${rightCount === 1 ? "" : "s"} guessed`;
+  const turnRightCount = roundData.right.length;
+  const turnSkipCount = roundData.skipped.length;
+  $("turnBreakScore").textContent = turnRightCount;
+  $("turnBreakSub").textContent = `${turnRightCount} word${turnRightCount === 1 ? "" : "s"} guessed this turn`;
   const countsEl = $("turnReviewCounts");
-  if (countsEl) countsEl.textContent = `${rightCount} Got · ${skipCount} Skipped`;
+  if (countsEl) countsEl.textContent = `${turnRightCount} Got · ${turnSkipCount} Skipped`;
 
   const listEl = $("turnBreakWordsList");
   if (listEl) {
@@ -2481,21 +2615,27 @@ function renderTurnBreakStandings(nextIndex) {
   const standingsEl = $("turnBreakStandings");
   if (!standingsEl) return;
 
+  const totalRounds = round.totalRounds || 1;
   const itemsHtml = round.teamScores.map((team, idx) => {
     let statusBadge = "";
     let itemClass = "standings-item";
-    if (team.played) {
-      statusBadge = `<span>${team.score} pts</span>`;
-    } else if (idx === nextIndex) {
+    const scoreText = team.played ? `<strong>${team.score} pts</strong>` : `<span style="opacity: 0.6;">0 pts</span>`;
+
+    if (idx === nextIndex) {
       itemClass += " up-next";
-      statusBadge = `<span class="standings-badge">Up next</span>`;
+      statusBadge = `<div style="display:flex; align-items:center; gap:8px;">${scoreText} <span class="standings-badge">Up next</span></div>`;
+    } else if (team.played) {
+      statusBadge = `<span>${scoreText}</span>`;
     } else {
-      statusBadge = `<span style="opacity: 0.6;">Waiting</span>`;
+      statusBadge = `<div style="display:flex; align-items:center; gap:8px;">${scoreText} <span style="opacity:0.6; font-size:0.82rem;">Waiting</span></div>`;
     }
     return `<li class="${itemClass}"><span>${idx + 1}. ${escapeHtml(team.name)}</span> ${statusBadge}</li>`;
   }).join("");
 
-  standingsEl.innerHTML = `<h4>Current Standings</h4><ul class="standings-list">${itemsHtml}</ul>`;
+  const headerText = totalRounds > 1
+    ? `Current Standings (Total Points)`
+    : `Current Standings`;
+  standingsEl.innerHTML = `<h4>${headerText}</h4><ul class="standings-list">${itemsHtml}</ul>`;
 }
 
 function updateTurnDurationButtons() {
@@ -2527,7 +2667,10 @@ function finalResults() {
     const topScore = sorted[0].score;
     const winners = sorted.filter(t => t.score === topScore);
 
-    $("resultsHeading").textContent = "Match Results";
+    const totalRounds = round.totalRounds || 1;
+    $("resultsHeading").textContent = totalRounds > 1
+      ? `Match Results (${totalRounds} Rounds)`
+      : "Match Results";
     $("finalScore").style.display = "none";
     $("resultNote").textContent = winners.length > 1
       ? `It's a tie between ${winners.map(w => escapeHtml(w.name)).join(" & ")} with ${topScore} points!`
@@ -2564,7 +2707,7 @@ function finalResults() {
         <div class="team-breakdown-card">
           <div class="team-breakdown-header">
             <h3>${escapeHtml(team.name)}</h3>
-            <span class="badge">${team.score} point${team.score === 1 ? "" : "s"}</span>
+            <span class="badge">${team.score} total point${team.score === 1 ? "" : "s"}</span>
           </div>
           <div class="team-breakdown-words">
             <div>
@@ -2656,17 +2799,24 @@ document.querySelectorAll(".mode-options button").forEach(button => button.addEv
   store.set("gameMode", gameMode);
   document.querySelectorAll(".mode-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
   $("teamFields").classList.toggle("visible", gameMode === "team");
+  $("teamRoundsGroup").classList.toggle("visible", gameMode === "team");
+}));
+document.querySelectorAll(".rounds-options button").forEach(button => button.addEventListener("click", () => {
+  teamRounds = Number(button.dataset.rounds) || 1;
+  store.set("teamRounds", teamRounds);
+  document.querySelectorAll(".rounds-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
 }));
 $("nextTeamBtn").addEventListener("click", async () => {
   const round = S;
   if (!round) return;
 
-  if (round.isLastTeam || round.nextTeamIndex === null || round.nextTeamIndex === undefined) {
+  if (round.isLastMatchTurn || round.nextTeamIndex === null || round.nextTeamIndex === undefined) {
     finalResults();
     return;
   }
 
   round.teamIndex = round.nextTeamIndex;
+  round.currentRoundNum = round.nextRoundNum || 1;
   initAudio();
   await ensureMotion();
   if (!await requestLandscape()) {
@@ -2835,6 +2985,10 @@ function applySetupState() {
     button.setAttribute("aria-pressed", String(button.dataset.mode === gameMode));
   });
   $("teamFields").classList.toggle("visible", gameMode === "team");
+  if ($("teamRoundsGroup")) $("teamRoundsGroup").classList.toggle("visible", gameMode === "team");
+  document.querySelectorAll(".rounds-options button").forEach(button => {
+    button.setAttribute("aria-pressed", String(Number(button.dataset.rounds) === teamRounds));
+  });
   if (Array.isArray(teamNames)) {
     if (teamNames[0]) $("teamA").value = teamNames[0];
     if (teamNames[1]) $("teamB").value = teamNames[1];
