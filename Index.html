@@ -1264,6 +1264,327 @@ body.high-contrast .toggle-switch:checked {
 }
 #turnBreak .actions { width: min(540px, 100%); margin: 0 auto; }
 
+/* ---------- Team Ready Screen (Straight / Upright) ---------- */
+#teamReady {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+}
+.team-ready-box {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.team-ready-steps {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 16px;
+  text-align: left;
+}
+.team-step-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--espresso);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 14px;
+  padding: 12px 16px;
+}
+.team-step-card .step-num {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.team-step-card strong {
+  display: block;
+  font-size: 1.05rem;
+  color: var(--chalk);
+}
+.team-step-card small {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(245, 239, 228, 0.72);
+  margin-top: 2px;
+}
+.team-ready-duration-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--amber);
+  background: rgba(242, 167, 27, 0.12);
+  border: 1px solid rgba(242, 167, 27, 0.35);
+  border-radius: 999px;
+  padding: 6px 16px;
+}
+
+/* ---------- Team Game Checklist Screen (Straight / Upright) ---------- */
+#teamGame {
+  padding: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: none;
+  flex-direction: column;
+  background: var(--charcoal);
+  color: var(--chalk);
+  overflow: hidden;
+}
+#teamGame.active {
+  display: flex;
+}
+.team-game-header {
+  flex-shrink: 0;
+  background: rgba(30, 23, 20, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1.5px solid var(--espresso-border);
+  padding: max(12px, env(safe-area-inset-top)) 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10;
+}
+.team-game-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.team-game-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.team-turn-pill {
+  font-size: 0.95rem;
+  font-weight: 900;
+  background: var(--amber);
+  color: var(--charcoal);
+  border-radius: 999px;
+  padding: 4px 14px;
+  letter-spacing: 0.02em;
+}
+.team-round-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(245, 239, 228, 0.75);
+}
+.team-game-end-btn {
+  background: rgba(193, 39, 45, 0.2);
+  border: 1px solid rgba(193, 39, 45, 0.5);
+  color: #ff858a;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  min-height: 34px;
+  padding: 0 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.team-game-end-btn:hover {
+  background: var(--shuka-red);
+  color: #FFFFFF;
+}
+
+/* HUD Timer & Score */
+.team-game-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.team-hud-block {
+  background: var(--espresso);
+  border: 1px solid var(--espresso-border);
+  border-radius: 14px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.team-hud-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(245, 239, 228, 0.65);
+}
+.team-hud-val {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1.1;
+  font-family: monospace;
+}
+.team-timer-val {
+  color: var(--chalk);
+}
+.team-timer-val.urgent {
+  color: #ff4d4d;
+  animation: pulseTimer 0.6s infinite alternate;
+}
+@keyframes pulseTimer {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+.team-hud-val small {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(245, 239, 228, 0.65);
+}
+.team-score-val {
+  color: var(--amber);
+}
+
+/* Progress track */
+.team-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(245, 239, 228, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.team-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--nganya-blue) 0%, var(--amber) 100%);
+  border-radius: 999px;
+  transition: width 0.1s linear;
+}
+.team-progress-bar.urgent {
+  background: var(--shuka-red);
+}
+
+.team-game-instruction {
+  font-size: 0.82rem;
+  color: rgba(245, 239, 228, 0.8);
+  font-weight: 700;
+  text-align: center;
+  padding: 2px 0 0;
+}
+
+/* Scroll Area */
+.team-game-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 16px;
+}
+.team-words-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(560px, 100%);
+  margin-inline: auto;
+}
+.team-word-row {
+  background: var(--espresso);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 3px 0 var(--espresso-dark);
+}
+.team-word-row:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--espresso-dark);
+}
+.team-word-row.is-checked {
+  background: rgba(30, 95, 191, 0.22);
+  border-color: var(--nganya-blue);
+  box-shadow: 0 0 14px rgba(30, 95, 191, 0.35), 0 3px 0 var(--nganya-blue-dark);
+}
+.team-word-label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  pointer-events: none; /* row handles the click */
+}
+.team-word-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.team-checkbox-box {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(245, 239, 228, 0.35);
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 14px;
+  background: rgba(26, 21, 18, 0.5);
+  transition: all 0.15s ease;
+}
+.team-word-row.is-checked .team-checkbox-box {
+  background: var(--nganya-blue);
+  border-color: var(--nganya-blue);
+  color: #FFFFFF;
+}
+.team-word-row.is-checked .team-checkbox-box::after {
+  content: "✓";
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+}
+.team-word-text {
+  flex: 1 1 auto;
+  font-size: clamp(1.15rem, 4.2vmin, 1.45rem);
+  font-weight: 800;
+  color: var(--chalk);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.team-word-cat {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--amber);
+  background: rgba(242, 167, 27, 0.12);
+  border: 1px solid rgba(242, 167, 27, 0.3);
+  border-radius: 999px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* Bottom bar */
+.team-game-footer {
+  flex-shrink: 0;
+  background: rgba(30, 23, 20, 0.96);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1.5px solid var(--espresso-border);
+  padding: 12px 16px max(14px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+.team-game-footer button {
+  width: min(560px, 100%);
+}
+
 /* ---------- results ---------- */
 #results {
   background: var(--charcoal);
@@ -1491,6 +1812,97 @@ body.high-contrast .toggle-switch:checked {
       <h2 id="word"></h2>
     </div>
     <p id="hint"></p>
+  </section>
+
+  <!-- Team Ready Screen (Held Straight / Upright) -->
+  <section id="teamReady" class="screen">
+    <div class="spacer"></div>
+    <div class="team-ready-box">
+      <span id="teamReadyBadge" class="standings-badge">Team 1</span>
+      <h2 id="teamReadyHeading" style="font-size: clamp(2rem, 6vmin, 3rem); margin: 6px 0;">Get Ready!</h2>
+      <p id="teamReadyRounds" style="color: var(--amber); font-weight: 800; margin: 0 0 16px; font-size: 1.05rem;">Round 1 of 3</p>
+      
+      <div class="team-ready-steps">
+        <div class="team-step-card">
+          <span class="step-num" aria-hidden="true">📱</span>
+          <div>
+            <strong>Hold phone straight</strong>
+            <small>Facing you so you can clearly see the words</small>
+          </div>
+        </div>
+        <div class="team-step-card">
+          <span class="step-num" aria-hidden="true">🗣️</span>
+          <div>
+            <strong>Describe without saying the word</strong>
+            <small>Your team shouts guesses</small>
+          </div>
+        </div>
+        <div class="team-step-card">
+          <span class="step-num" aria-hidden="true">☑️</span>
+          <div>
+            <strong>Tap checkbox when they get it</strong>
+            <small>Check the box for each word guessed correctly</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-ready-duration-badge">
+        ⏱️ <span id="teamReadyDurationText">60</span> seconds on the clock
+      </div>
+
+      <button id="teamReadyStartBtn" class="primary" type="button" style="margin-top: 18px; width: 100%;">Start Turn</button>
+      <button id="teamReadyCancelBtn" class="ghost" type="button" style="margin-top: 8px;">Cancel</button>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- Team Game Checklist Screen (Held Straight / Upright) -->
+  <section id="teamGame" class="screen">
+    <header class="team-game-header">
+      <div class="team-game-top-bar">
+        <div class="team-game-info">
+          <span id="teamGameBadge" class="team-turn-pill">Team 1</span>
+          <span id="teamGameRound" class="team-round-label">Round 1/3</span>
+        </div>
+        <button id="teamGameEndBtn" class="team-game-end-btn" type="button">Finish early</button>
+      </div>
+
+      <div class="team-game-hud">
+        <div class="team-hud-block">
+          <span class="team-hud-label">Time Remaining</span>
+          <div class="team-hud-val team-timer-val">
+            <span aria-hidden="true">⏱️</span>
+            <span id="teamGameTimer">60</span>
+            <small>s</small>
+          </div>
+        </div>
+        <div class="team-hud-block">
+          <span class="team-hud-label">Words Checked</span>
+          <div class="team-hud-val team-score-val">
+            <span id="teamGameScore">0</span>
+            <small id="teamGameScoreSub">guessed</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="team-progress-track">
+        <div id="teamGameProgress" class="team-progress-bar"></div>
+      </div>
+
+      <div class="team-game-instruction">
+        Describe words · Tap checkbox when your team gets it right:
+      </div>
+    </header>
+
+    <div class="team-game-scroll">
+      <ul id="teamGameList" class="team-words-checklist" role="list">
+        <!-- Rendered dynamically -->
+      </ul>
+    </div>
+
+    <footer class="team-game-footer">
+      <button id="teamGameDoneBtn" class="primary" type="button">Done / Finish Turn</button>
+    </footer>
   </section>
 
   <section id="turnBreak" class="screen">
@@ -2254,8 +2666,163 @@ function initMatch() {
   };
 }
 
+/* ============================================================
+   Team Game (Checklist Mode, Held Straight / Portrait)
+   ============================================================ */
+function showTeamReady() {
+  const round = S;
+  if (!round) return;
+  const currentTeam = round.teamScores[round.teamIndex];
+  const totalRounds = round.totalRounds || 1;
+  const currentRnd = round.currentRoundNum || 1;
+
+  $("teamReadyBadge").textContent = currentTeam.name;
+  $("teamReadyHeading").textContent = `Pass phone to ${currentTeam.name}!`;
+  $("teamReadyRounds").textContent = totalRounds > 1
+    ? `Round ${currentRnd} of ${totalRounds}`
+    : `Team Match`;
+  $("teamReadyDurationText").textContent = roundSecs;
+
+  show("teamReady");
+}
+
+function startTeamGameRound() {
+  if (!S) initMatch();
+  const round = S;
+  const currentTeam = round.teamScores[round.teamIndex];
+  const totalRounds = round.totalRounds || 1;
+  const currentRnd = round.currentRoundNum || 1;
+
+  const pool = round.cards || round.deck.cards || [];
+  if (!round.queue || round.queue.length < 20) {
+    round.queue = shuffle(pool);
+    round.i = 0;
+  }
+
+  const batch = [];
+  const countToTake = Math.min(25, pool.length || 25);
+  for (let k = 0; k < countToTake; k++) {
+    if (round.i >= round.queue.length) {
+      round.queue = shuffle(pool);
+      round.i = 0;
+    }
+    const card = round.queue[round.i++];
+    batch.push({ card, checked: false });
+  }
+  round.teamWordsList = batch;
+
+  $("teamGameBadge").textContent = currentTeam.name;
+  $("teamGameRound").textContent = totalRounds > 1 ? `Round ${currentRnd}/${totalRounds}` : "Match";
+  $("teamGameTimer").textContent = roundSecs;
+  $("teamGameTimer").classList.remove("urgent");
+  $("teamGameProgress").classList.remove("urgent");
+  $("teamGameProgress").style.width = "100%";
+  $("teamGameScore").textContent = "0";
+
+  renderTeamWordsList();
+  show("teamGame");
+
+  round.total = roundSecs * 1000;
+  round.endAt = Date.now() + round.total;
+  round.running = true;
+  round.lastBeepSec = -1;
+  requestWake();
+
+  tone(660, 860, 0.2, "triangle", 0.12);
+  clearInterval(round.timer);
+  round.timer = setInterval(teamGameTick, 100);
+}
+
+function teamGameTick() {
+  const round = S;
+  if (!round || !round.running) return;
+  const left = Math.max(0, round.endAt - Date.now());
+  const secs = Math.ceil(left / 1000);
+  $("teamGameTimer").textContent = secs;
+
+  const pct = Math.max(0, Math.min(100, (left / round.total) * 100));
+  $("teamGameProgress").style.width = `${pct}%`;
+
+  if (secs <= 10) {
+    $("teamGameTimer").classList.add("urgent");
+    $("teamGameProgress").classList.add("urgent");
+  } else {
+    $("teamGameTimer").classList.remove("urgent");
+    $("teamGameProgress").classList.remove("urgent");
+  }
+
+  if (secs <= 5 && secs > 0 && Math.floor(left / 1000) !== round.lastBeepSec) {
+    round.lastBeepSec = Math.floor(left / 1000);
+    playCountdownSound();
+  }
+
+  if (left <= 0) {
+    endTeamTurn();
+  }
+}
+
+function renderTeamWordsList() {
+  const round = S;
+  if (!round || !round.teamWordsList) return;
+  const listEl = $("teamGameList");
+  if (!listEl) return;
+
+  listEl.innerHTML = round.teamWordsList.map((item, idx) => {
+    const text = cardText(item.card);
+    const cat = cardMeta(item.card);
+    const checked = item.checked;
+    return `
+      <li class="team-word-row ${checked ? 'is-checked' : ''}" data-idx="${idx}">
+        <label class="team-word-label">
+          <input type="checkbox" class="team-word-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}>
+          <span class="team-checkbox-box" aria-hidden="true"></span>
+          <span class="team-word-text">${escapeHtml(text)}</span>
+          ${cat ? `<span class="team-word-cat">${escapeHtml(cat)}</span>` : ''}
+        </label>
+      </li>
+    `;
+  }).join("");
+}
+
+function appendMoreTeamWords() {
+  const round = S;
+  if (!round || !round.teamWordsList) return;
+  const pool = round.cards || round.deck.cards || [];
+  const listEl = $("teamGameList");
+  for (let k = 0; k < 10; k++) {
+    if (round.i >= round.queue.length) {
+      round.queue = shuffle(pool);
+      round.i = 0;
+    }
+    const card = round.queue[round.i++];
+    const idx = round.teamWordsList.length;
+    const item = { card, checked: false };
+    round.teamWordsList.push(item);
+
+    const text = cardText(card);
+    const cat = cardMeta(card);
+    const li = document.createElement("li");
+    li.className = "team-word-row";
+    li.dataset.idx = idx;
+    li.innerHTML = `
+      <label class="team-word-label">
+        <input type="checkbox" class="team-word-checkbox" data-idx="${idx}">
+        <span class="team-checkbox-box" aria-hidden="true"></span>
+        <span class="team-word-text">${escapeHtml(text)}</span>
+        ${cat ? `<span class="team-word-cat">${escapeHtml(cat)}</span>` : ''}
+      </label>
+    `;
+    listEl.appendChild(li);
+  }
+}
+
 async function startSelectedDeck() {
   initAudio();
+  if (gameMode === "team") {
+    if (!S || S.finalized) initMatch();
+    showTeamReady();
+    return;
+  }
   await ensureMotion();                         // permission prompt on iOS must follow a tap
   if (!await requestLandscape()) {
     pendingStart = true;
@@ -2435,9 +3002,23 @@ function endTeamTurn() {
   const currentRnd = round.currentRoundNum || 1;
   const roundIdx = currentRnd - 1;
 
-  const turnRight = [...round.right];
-  const turnSkipped = [...round.skipped];
-  const turnHistory = [...(round.turnHistory || [])];
+  let turnRight = [];
+  let turnSkipped = [];
+  let turnHistory = [];
+
+  if (gameMode === "team" && round.teamWordsList) {
+    const words = round.teamWordsList;
+    turnRight = words.filter(w => w.checked).map(w => w.card);
+    turnSkipped = words.filter(w => !w.checked).map(w => w.card);
+    turnHistory = words.map(w => ({
+      card: w.card,
+      kind: w.checked ? "right" : "skipped"
+    }));
+  } else {
+    turnRight = [...round.right];
+    turnSkipped = [...round.skipped];
+    turnHistory = [...(round.turnHistory || [])];
+  }
 
   if (!round.teamCards[currentIdx].rounds) round.teamCards[currentIdx].rounds = [];
   round.teamCards[currentIdx].rounds[roundIdx] = {
@@ -2817,6 +3398,12 @@ $("nextTeamBtn").addEventListener("click", async () => {
   round.teamIndex = round.nextTeamIndex;
   round.currentRoundNum = round.nextRoundNum || 1;
   initAudio();
+
+  if (gameMode === "team") {
+    showTeamReady();
+    return;
+  }
+
   await ensureMotion();
   if (!await requestLandscape()) {
     pendingStart = true;
@@ -2959,6 +3546,7 @@ function resumeRound() {
 }
 
 function handleOrientationChange() {
+  if (gameMode === "team") return; // Team mode is played straight (portrait)
   if (!isLandscape()) {
     if (S && S.running && !S.pausedAt) {
       S.pausedAt = Date.now();
@@ -2978,6 +3566,56 @@ function handleOrientationChange() {
 
 window.addEventListener("orientationchange", handleOrientationChange);
 window.addEventListener("resize", handleOrientationChange);
+
+/* Team Ready Screen Listeners */
+$("teamReadyStartBtn")?.addEventListener("click", () => {
+  startTeamGameRound();
+});
+$("teamReadyCancelBtn")?.addEventListener("click", () => {
+  show("setup");
+});
+
+/* Team Game Checklist Listeners */
+$("teamGameEndBtn")?.addEventListener("click", () => {
+  endTeamTurn();
+});
+$("teamGameDoneBtn")?.addEventListener("click", () => {
+  endTeamTurn();
+});
+
+const teamGameList = $("teamGameList");
+if (teamGameList) {
+  teamGameList.addEventListener("click", (e) => {
+    const row = e.target.closest(".team-word-row");
+    if (!row) return;
+    const idx = Number(row.dataset.idx);
+    const round = S;
+    if (!round || !round.teamWordsList || !round.teamWordsList[idx]) return;
+
+    const item = round.teamWordsList[idx];
+    const newChecked = !item.checked;
+    item.checked = newChecked;
+
+    row.classList.toggle("is-checked", newChecked);
+    const checkbox = row.querySelector(".team-word-checkbox");
+    if (checkbox) checkbox.checked = newChecked;
+
+    const score = round.teamWordsList.filter(w => w.checked).length;
+    $("teamGameScore").textContent = score;
+
+    if (newChecked) {
+      playRightSound();
+      vibe(35);
+    } else {
+      tone(380, 260, 0.08, "triangle", 0.08);
+      vibe(20);
+    }
+
+    if (score >= round.teamWordsList.length - 5) {
+      appendMoreTeamWords();
+    }
+  });
+}
 
 function applySetupState() {
   document.querySelectorAll(".mode-options button").forEach(button => {
