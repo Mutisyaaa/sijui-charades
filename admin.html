@@ -77,9 +77,9 @@
                 <label for="cardText">Card text</label>
                 <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic">
               </div>
-              <div class="field-row">
-                <div class="field"><label for="cardCategory">Category</label><input id="cardCategory" maxlength="60" placeholder="People, places, actions…"></div>
-                <div class="field"><label for="cardDifficulty">Difficulty</label><select id="cardDifficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+              <div class="field">
+                <label for="cardCategory">Category</label>
+                <input id="cardCategory" maxlength="60" placeholder="People, places, actions…">
               </div>
               <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
               <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
@@ -95,9 +95,9 @@
                 <textarea id="bulkCardText" rows="7" placeholder="Paste your words here!&#10;One word per line, or comma-separated:&#10;&#10;Heart&#10;Brain&#10;Lungs&#10;Stomach&#10;Skeleton" style="font-family: inherit; font-size: 0.95rem; resize: vertical; line-height: 1.5;"></textarea>
                 <small style="color: var(--chalk-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Supports bullet points (- or •) and numbering (1. 2.). It cleans them up automatically!</small>
               </div>
-              <div class="field-row">
-                <div class="field"><label for="bulkCardCategory">Default Category</label><input id="bulkCardCategory" maxlength="60" placeholder="e.g. Anatomy"></div>
-                <div class="field"><label for="bulkCardDifficulty">Default Difficulty</label><select id="bulkCardDifficulty"><option value="medium" selected>Medium</option><option value="easy">Easy</option><option value="hard">Hard</option></select></div>
+              <div class="field">
+                <label for="bulkCardCategory">Default Category</label>
+                <input id="bulkCardCategory" maxlength="60" placeholder="e.g. Anatomy">
               </div>
             </div>
 
@@ -249,7 +249,7 @@
               <li class="card-row ${card.is_active ? "" : "inactive"}">
                 <div class="card-main">
                   <span class="card-num">${cardIdx + 1}</span>
-                  <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")} · ${escapeHtml(card.difficulty || "medium")}</small></span>
+                  <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")}</small></span>
                 </div>
                 <span class="card-actions">
                   <button class="small-button" data-action="edit-card" data-id="${card.id}" type="button">Edit</button>
@@ -328,7 +328,6 @@
       $("cardText").value = "";
       $("cardActive").checked = true;
       if (!$("cardCategory").value) $("cardCategory").value = "General";
-      $("cardDifficulty").value = "medium";
       $("cardModeSwitch").hidden = false;
       $("cancelCardEdit").hidden = true;
       switchCardMode(state.cardMode || "single");
@@ -377,13 +376,11 @@
           const cardsList = getBulkCardsList();
           if (!cardsList.length) throw new Error("Please enter at least one card in the text area.");
           const category = $("bulkCardCategory").value.trim() || "General";
-          const difficulty = $("bulkCardDifficulty").value || "medium";
 
           setStatus("cardStatus", `Saving ${cardsList.length} cards…`);
           const payload = {
-            cards: cardsList.map(text => ({ text, category, difficulty })),
-            category,
-            difficulty
+            cards: cardsList.map(text => ({ text, category })),
+            category
           };
           const res = await api(`/api/admin/decks/${deckId}/cards`, {
             method: "POST",
@@ -400,7 +397,6 @@
         const payload = {
           text: $("cardText").value,
           category: $("cardCategory").value,
-          difficulty: $("cardDifficulty").value,
           sortOrder: state.editingCardSortOrder ?? 0,
           isActive: $("cardActive").checked
         };
@@ -436,7 +432,6 @@
           $("cardDeck").value = card.deck_id;
           $("cardText").value = card.text;
           $("cardCategory").value = card.category || "General";
-          $("cardDifficulty").value = card.difficulty || "medium";
           $("cardActive").checked = card.is_active;
           switchCardMode("single");
           $("cardModeSwitch").hidden = true;
@@ -463,7 +458,7 @@
 
     $("cancelDeckEdit").addEventListener("click", resetDeckForm);
     $("cancelCardEdit").addEventListener("click", resetCardForm);
-    ["cardText", "cardCategory", "cardDifficulty"].forEach(id => $(id).addEventListener("input", renderCardPreview));
+    ["cardText", "cardCategory"].forEach(id => $(id).addEventListener("input", renderCardPreview));
     $("deckCover").addEventListener("change", event => {
       const file = event.target.files[0];
       if (!file) return;
@@ -477,8 +472,7 @@
     function renderCardPreview() {
       const text = $("cardText").value.trim() || "Your card text";
       const category = $("cardCategory").value.trim() || "General";
-      const difficulty = $("cardDifficulty").value;
-      $("cardPreview").innerHTML = `<b>${escapeHtml(text)}</b><small>${escapeHtml(category)} · ${escapeHtml(difficulty)}</small>`;
+      $("cardPreview").innerHTML = `<b>${escapeHtml(text)}</b><small>${escapeHtml(category)}</small>`;
     }
 
     let currentPreviewAudio = null;

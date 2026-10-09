@@ -727,7 +727,6 @@ body.high-contrast .toggle-switch:checked {
   font-weight: 900;
 }
 .deck .deck-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.deck .difficulty { font-size: 0.72rem; text-transform: capitalize; opacity: 0.75; }
 .deck.has-cover::after {
   background: linear-gradient(to bottom, rgba(26,21,18,.25) 15%, rgba(26,21,18,.92) 100%), var(--deck-cover, inherit);
   background-size: cover;
@@ -799,57 +798,6 @@ body.high-contrast .toggle-switch:checked {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--chalk-muted);
-}
-.difficulty-options {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.difficulty-options button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 8px 4px;
-  background: var(--espresso);
-  border: 1px solid var(--espresso-border);
-  color: var(--chalk);
-  font-size: 0.95rem;
-  font-weight: 800;
-  border-radius: 14px;
-  box-shadow: 0 4px 0 var(--espresso-dark);
-  cursor: pointer;
-  transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
-}
-.difficulty-options button small {
-  font-size: 0.72rem;
-  font-weight: 600;
-  opacity: 0.75;
-}
-.difficulty-options button[aria-pressed="true"] {
-  background: var(--amber);
-  color: #1A1512;
-  border-color: var(--amber);
-  box-shadow: 0 4px 0 var(--amber-dark);
-}
-.difficulty-options button[aria-pressed="true"] small {
-  opacity: 0.9;
-  font-weight: 800;
-}
-.difficulty-options button:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-@media (max-width: 480px) {
-  .difficulty-options {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 .duration-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; margin: 0; padding: 0; border: 0; }
 .duration-options button {
@@ -1381,28 +1329,6 @@ body.high-contrast .toggle-switch:checked {
     <h2 style="font-size: clamp(2rem, 7vmin, 3.2rem); margin-bottom: 2px;">Round Setup</h2>
     <p id="selectedDeckName" style="margin: 0.2rem 0 1.2rem;"></p>
 
-    <div class="setup-group">
-      <span class="setup-label">Difficulty Mode</span>
-      <fieldset class="difficulty-options" aria-label="Card difficulty">
-        <button type="button" data-diff="all" aria-pressed="true">
-          <span>All</span>
-          <small>All cards</small>
-        </button>
-        <button type="button" data-diff="easy" aria-pressed="false">
-          <span>🟢 Easy</span>
-          <small>0 cards</small>
-        </button>
-        <button type="button" data-diff="medium" aria-pressed="false">
-          <span>🟡 Medium</span>
-          <small>0 cards</small>
-        </button>
-        <button type="button" data-diff="hard" aria-pressed="false">
-          <span>🌶️ Hard</span>
-          <small>0 cards</small>
-        </button>
-      </fieldset>
-    </div>
-
     <div class="setup-group" style="margin-top: 6px;">
       <span class="setup-label">Round Duration</span>
       <fieldset class="duration-options" aria-label="Round length">
@@ -1792,7 +1718,6 @@ function onMotion(e) {
 let S = null;                                  // current round
 let currentDeckId = null;
 let roundSecs = store.get("roundSecs", 60);
-let difficultyMode = store.get("difficultyMode", "all");
 let best = store.get("best", 0);
 let readyTimer = null;
 let pendingStart = false;
@@ -1803,10 +1728,7 @@ let teamRounds = Number(store.get("teamRounds", 1)) || 1;
 function cardText(card) { return typeof card === "string" ? card : card.text; }
 function cardMeta(card) {
   if (!card) return "";
-  const cat = typeof card === "object" ? card.category || "General" : "General";
-  const diff = typeof card === "object" ? card.difficulty || "medium" : "medium";
-  const badge = diff === "easy" ? "🟢 Easy" : diff === "hard" ? "🌶️ Hard" : "🟡 Medium";
-  return `${cat} · ${badge}`;
+  return typeof card === "object" ? card.category || "" : "";
 }
 function escapeHtml(value) {
   return String(value).replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
@@ -1876,26 +1798,26 @@ const FALLBACK_DECKS = [
     icon: "🍲",
     theme: "sunset",
     cards: [
-      { text: "Ugali", category: "Food and drink", difficulty: "easy" },
-      { text: "Sukuma wiki", category: "Food and drink", difficulty: "easy" },
-      { text: "Nyama choma", category: "Food and drink", difficulty: "easy" },
-      { text: "Chapati", category: "Food and drink", difficulty: "easy" },
-      { text: "Mandazi", category: "Food and drink", difficulty: "easy" },
-      { text: "Githeri", category: "Food and drink", difficulty: "easy" },
-      { text: "Pilau", category: "Food and drink", difficulty: "easy" },
-      { text: "Mutura", category: "Food and drink", difficulty: "medium" },
-      { text: "Samosa", category: "Food and drink", difficulty: "easy" },
-      { text: "Kachumbari", category: "Food and drink", difficulty: "easy" },
-      { text: "Irio", category: "Food and drink", difficulty: "medium" },
-      { text: "Mukimo", category: "Food and drink", difficulty: "medium" },
-      { text: "Smokie na kachumbari", category: "Food and drink", difficulty: "medium" },
-      { text: "Chai ya tangawizi", category: "Food and drink", difficulty: "easy" },
-      { text: "Mahindi choma", category: "Food and drink", difficulty: "easy" },
-      { text: "Uji", category: "Food and drink", difficulty: "easy" },
-      { text: "Mahamri", category: "Food and drink", difficulty: "medium" },
-      { text: "Viazi karai", category: "Food and drink", difficulty: "medium" },
-      { text: "Ugali na fish", category: "Food and drink", difficulty: "easy" },
-      { text: "Matoke", category: "Food and drink", difficulty: "medium" }
+      { text: "Ugali", category: "Food and drink" },
+      { text: "Sukuma wiki", category: "Food and drink" },
+      { text: "Nyama choma", category: "Food and drink" },
+      { text: "Chapati", category: "Food and drink" },
+      { text: "Mandazi", category: "Food and drink" },
+      { text: "Githeri", category: "Food and drink" },
+      { text: "Pilau", category: "Food and drink" },
+      { text: "Mutura", category: "Food and drink" },
+      { text: "Samosa", category: "Food and drink" },
+      { text: "Kachumbari", category: "Food and drink" },
+      { text: "Irio", category: "Food and drink" },
+      { text: "Mukimo", category: "Food and drink" },
+      { text: "Smokie na kachumbari", category: "Food and drink" },
+      { text: "Chai ya tangawizi", category: "Food and drink" },
+      { text: "Mahindi choma", category: "Food and drink" },
+      { text: "Uji", category: "Food and drink" },
+      { text: "Mahamri", category: "Food and drink" },
+      { text: "Viazi karai", category: "Food and drink" },
+      { text: "Ugali na fish", category: "Food and drink" },
+      { text: "Matoke", category: "Food and drink" }
     ]
   },
   {
@@ -1905,23 +1827,23 @@ const FALLBACK_DECKS = [
     icon: "🚌",
     theme: "mint",
     cards: [
-      { text: "Matatu", category: "Transport", difficulty: "easy" },
-      { text: "Boda boda", category: "Transport", difficulty: "easy" },
-      { text: "Tuk tuk", category: "Transport", difficulty: "easy" },
-      { text: "Nganya", category: "Transport", difficulty: "medium" },
-      { text: "Makanga", category: "Transport", difficulty: "easy" },
-      { text: "Bus stage", category: "Transport", difficulty: "easy" },
-      { text: "Madaraka Express", category: "Transport", difficulty: "medium" },
-      { text: "Nairobi Expressway", category: "Transport", difficulty: "medium" },
-      { text: "Thika Road traffic", category: "Transport", difficulty: "medium" },
-      { text: "Kenya Airways", category: "Transport", difficulty: "easy" },
-      { text: "Bolt ride", category: "Transport", difficulty: "easy" },
-      { text: "Likoni Ferry", category: "Transport", difficulty: "medium" },
-      { text: "JKIA", category: "Transport", difficulty: "easy" },
-      { text: "Pikipiki", category: "Transport", difficulty: "easy" },
-      { text: "Squeezed into a full matatu", category: "Transport", difficulty: "hard" },
-      { text: "Window seat", category: "Transport", difficulty: "easy" },
-      { text: "Traffic police", category: "Transport", difficulty: "medium" }
+      { text: "Matatu", category: "Transport" },
+      { text: "Boda boda", category: "Transport" },
+      { text: "Tuk tuk", category: "Transport" },
+      { text: "Nganya", category: "Transport" },
+      { text: "Makanga", category: "Transport" },
+      { text: "Bus stage", category: "Transport" },
+      { text: "Madaraka Express", category: "Transport" },
+      { text: "Nairobi Expressway", category: "Transport" },
+      { text: "Thika Road traffic", category: "Transport" },
+      { text: "Kenya Airways", category: "Transport" },
+      { text: "Bolt ride", category: "Transport" },
+      { text: "Likoni Ferry", category: "Transport" },
+      { text: "JKIA", category: "Transport" },
+      { text: "Pikipiki", category: "Transport" },
+      { text: "Squeezed into a full matatu", category: "Transport" },
+      { text: "Window seat", category: "Transport" },
+      { text: "Traffic police", category: "Transport" }
     ]
   },
   {
@@ -1931,25 +1853,25 @@ const FALLBACK_DECKS = [
     icon: "🗣️",
     theme: "berry",
     cards: [
-      { text: "Msee", category: "Sheng", difficulty: "easy" },
-      { text: "Manzi", category: "Sheng", difficulty: "easy" },
-      { text: "Ganji", category: "Sheng", difficulty: "easy" },
-      { text: "Chapaa", category: "Sheng", difficulty: "easy" },
-      { text: "Mbogi", category: "Sheng", difficulty: "easy" },
-      { text: "Mtaa", category: "Sheng", difficulty: "easy" },
-      { text: "Kejani", category: "Sheng", difficulty: "easy" },
-      { text: "Buda", category: "Sheng", difficulty: "easy" },
-      { text: "Fiti", category: "Sheng", difficulty: "easy" },
-      { text: "Poa", category: "Sheng", difficulty: "easy" },
-      { text: "Sherehe", category: "Sheng", difficulty: "easy" },
-      { text: "Kuchill", category: "Sheng", difficulty: "easy" },
-      { text: "Niaje", category: "Sheng", difficulty: "easy" },
-      { text: "Wueh!", category: "Sheng", difficulty: "easy" },
-      { text: "Aki wewe!", category: "Sheng", difficulty: "easy" },
-      { text: "Kubonga", category: "Sheng", difficulty: "medium" },
-      { text: "Jobless corner", category: "Sheng", difficulty: "hard" },
-      { text: "Mtoi", category: "Sheng", difficulty: "medium" },
-      { text: "Kuna form?", category: "Sheng", difficulty: "medium" }
+      { text: "Msee", category: "Sheng" },
+      { text: "Manzi", category: "Sheng" },
+      { text: "Ganji", category: "Sheng" },
+      { text: "Chapaa", category: "Sheng" },
+      { text: "Mbogi", category: "Sheng" },
+      { text: "Mtaa", category: "Sheng" },
+      { text: "Kejani", category: "Sheng" },
+      { text: "Buda", category: "Sheng" },
+      { text: "Fiti", category: "Sheng" },
+      { text: "Poa", category: "Sheng" },
+      { text: "Sherehe", category: "Sheng" },
+      { text: "Kuchill", category: "Sheng" },
+      { text: "Niaje", category: "Sheng" },
+      { text: "Wueh!", category: "Sheng" },
+      { text: "Aki wewe!", category: "Sheng" },
+      { text: "Kubonga", category: "Sheng" },
+      { text: "Jobless corner", category: "Sheng" },
+      { text: "Mtoi", category: "Sheng" },
+      { text: "Kuna form?", category: "Sheng" }
     ]
   },
   {
@@ -1959,21 +1881,21 @@ const FALLBACK_DECKS = [
     icon: "🌍",
     theme: "classic",
     cards: [
-      { text: "M-Pesa", category: "Everyday life", difficulty: "easy" },
-      { text: "Power blackout", category: "Everyday life", difficulty: "easy" },
-      { text: "Mama mboga", category: "Everyday life", difficulty: "easy" },
-      { text: "Mitumba shopping", category: "Everyday life", difficulty: "easy" },
-      { text: "Chama meeting", category: "Everyday life", difficulty: "medium" },
-      { text: "Harambee", category: "Everyday life", difficulty: "easy" },
-      { text: "Going to shags", category: "Everyday life", difficulty: "easy" },
-      { text: "Kiosk", category: "Everyday life", difficulty: "easy" },
-      { text: "Buying airtime", category: "Everyday life", difficulty: "easy" },
-      { text: "Ruracio", category: "Everyday life", difficulty: "medium" },
-      { text: "Sunday service", category: "Everyday life", difficulty: "easy" },
-      { text: "Side hustle", category: "Everyday life", difficulty: "easy" },
-      { text: "Jiko", category: "Everyday life", difficulty: "easy" },
-      { text: "Tea break", category: "Everyday life", difficulty: "easy" },
-      { text: "Fuel price hike", category: "Everyday life", difficulty: "medium" }
+      { text: "M-Pesa", category: "Everyday life" },
+      { text: "Power blackout", category: "Everyday life" },
+      { text: "Mama mboga", category: "Everyday life" },
+      { text: "Mitumba shopping", category: "Everyday life" },
+      { text: "Chama meeting", category: "Everyday life" },
+      { text: "Harambee", category: "Everyday life" },
+      { text: "Going to shags", category: "Everyday life" },
+      { text: "Kiosk", category: "Everyday life" },
+      { text: "Buying airtime", category: "Everyday life" },
+      { text: "Ruracio", category: "Everyday life" },
+      { text: "Sunday service", category: "Everyday life" },
+      { text: "Side hustle", category: "Everyday life" },
+      { text: "Jiko", category: "Everyday life" },
+      { text: "Tea break", category: "Everyday life" },
+      { text: "Fuel price hike", category: "Everyday life" }
     ]
   },
   {
@@ -1983,21 +1905,21 @@ const FALLBACK_DECKS = [
     icon: "🇰🇪",
     theme: "sunset",
     cards: [
-      { text: "Maasai Mara", category: "Kenya", difficulty: "easy" },
-      { text: "Mount Kenya", category: "Kenya", difficulty: "easy" },
-      { text: "Diani Beach", category: "Kenya", difficulty: "easy" },
-      { text: "Lamu", category: "Kenya", difficulty: "medium" },
-      { text: "Fort Jesus", category: "Kenya", difficulty: "easy" },
-      { text: "Great Rift Valley", category: "Kenya", difficulty: "easy" },
-      { text: "Lake Nakuru", category: "Kenya", difficulty: "easy" },
-      { text: "KICC", category: "Kenya", difficulty: "easy" },
-      { text: "Uhuru Park", category: "Kenya", difficulty: "easy" },
-      { text: "Karura Forest", category: "Kenya", difficulty: "easy" },
-      { text: "Nairobi National Park", category: "Kenya", difficulty: "easy" },
-      { text: "Safaricom", category: "Kenya", difficulty: "easy" },
-      { text: "Eliud Kipchoge", category: "Kenya", difficulty: "easy" },
-      { text: "Mombasa", category: "Kenya", difficulty: "easy" },
-      { text: "Kisumu", category: "Kenya", difficulty: "easy" }
+      { text: "Maasai Mara", category: "Kenya" },
+      { text: "Mount Kenya", category: "Kenya" },
+      { text: "Diani Beach", category: "Kenya" },
+      { text: "Lamu", category: "Kenya" },
+      { text: "Fort Jesus", category: "Kenya" },
+      { text: "Great Rift Valley", category: "Kenya" },
+      { text: "Lake Nakuru", category: "Kenya" },
+      { text: "KICC", category: "Kenya" },
+      { text: "Uhuru Park", category: "Kenya" },
+      { text: "Karura Forest", category: "Kenya" },
+      { text: "Nairobi National Park", category: "Kenya" },
+      { text: "Safaricom", category: "Kenya" },
+      { text: "Eliud Kipchoge", category: "Kenya" },
+      { text: "Mombasa", category: "Kenya" },
+      { text: "Kisumu", category: "Kenya" }
     ]
   },
   {
@@ -2007,42 +1929,42 @@ const FALLBACK_DECKS = [
     icon: "🫀",
     theme: "berry",
     cards: [
-      { text: "Heart", category: "Anatomy", difficulty: "easy" },
-      { text: "Brain", category: "Anatomy", difficulty: "easy" },
-      { text: "Lungs", category: "Anatomy", difficulty: "easy" },
-      { text: "Stomach", category: "Anatomy", difficulty: "easy" },
-      { text: "Skeleton", category: "Anatomy", difficulty: "easy" },
-      { text: "Tongue", category: "Anatomy", difficulty: "easy" },
-      { text: "Teeth / Wisdom tooth", category: "Anatomy", difficulty: "easy" },
-      { text: "Backbone / Spine", category: "Anatomy", difficulty: "easy" },
-      { text: "Kneecap (Patella)", category: "Anatomy", difficulty: "easy" },
-      { text: "Eyebrows", category: "Anatomy", difficulty: "easy" },
-      { text: "Adam's Apple", category: "Anatomy", difficulty: "medium" },
-      { text: "Funny bone", category: "Anatomy", difficulty: "medium" },
-      { text: "Rib cage", category: "Anatomy", difficulty: "medium" },
-      { text: "Kidneys", category: "Anatomy", difficulty: "medium" },
-      { text: "Liver", category: "Anatomy", difficulty: "medium" },
-      { text: "Skull", category: "Anatomy", difficulty: "medium" },
-      { text: "Collarbone", category: "Anatomy", difficulty: "medium" },
-      { text: "Tonsils", category: "Anatomy", difficulty: "medium" },
-      { text: "Biceps", category: "Anatomy", difficulty: "medium" },
-      { text: "Achilles tendon", category: "Anatomy", difficulty: "medium" },
-      { text: "Appendix", category: "Anatomy", difficulty: "medium" },
-      { text: "Intestines", category: "Anatomy", difficulty: "medium" },
-      { text: "Goosebumps", category: "Anatomy", difficulty: "hard" },
-      { text: "Vocal cords", category: "Anatomy", difficulty: "hard" },
-      { text: "Eardrum", category: "Anatomy", difficulty: "hard" },
-      { text: "Femur", category: "Anatomy", difficulty: "hard" },
-      { text: "Diaphragm", category: "Anatomy", difficulty: "hard" },
-      { text: "Pulse", category: "Anatomy", difficulty: "hard" },
-      { text: "Bladder", category: "Anatomy", difficulty: "hard" },
-      { text: "Sprained ankle", category: "Anatomy", difficulty: "hard" },
-      { text: "Muscle cramp", category: "Anatomy", difficulty: "hard" },
-      { text: "Reflex", category: "Anatomy", difficulty: "hard" },
-      { text: "Kitambi", category: "Anatomy", difficulty: "easy" },
-      { text: "Upara", category: "Anatomy", difficulty: "easy" },
-      { text: "Kisogo", category: "Anatomy", difficulty: "medium" },
-      { text: "Kupaliwa", category: "Anatomy", difficulty: "medium" }
+      { text: "Heart", category: "Anatomy" },
+      { text: "Brain", category: "Anatomy" },
+      { text: "Lungs", category: "Anatomy" },
+      { text: "Stomach", category: "Anatomy" },
+      { text: "Skeleton", category: "Anatomy" },
+      { text: "Tongue", category: "Anatomy" },
+      { text: "Teeth / Wisdom tooth", category: "Anatomy" },
+      { text: "Backbone / Spine", category: "Anatomy" },
+      { text: "Kneecap (Patella)", category: "Anatomy" },
+      { text: "Eyebrows", category: "Anatomy" },
+      { text: "Adam's Apple", category: "Anatomy" },
+      { text: "Funny bone", category: "Anatomy" },
+      { text: "Rib cage", category: "Anatomy" },
+      { text: "Kidneys", category: "Anatomy" },
+      { text: "Liver", category: "Anatomy" },
+      { text: "Skull", category: "Anatomy" },
+      { text: "Collarbone", category: "Anatomy" },
+      { text: "Tonsils", category: "Anatomy" },
+      { text: "Biceps", category: "Anatomy" },
+      { text: "Achilles tendon", category: "Anatomy" },
+      { text: "Appendix", category: "Anatomy" },
+      { text: "Intestines", category: "Anatomy" },
+      { text: "Goosebumps", category: "Anatomy" },
+      { text: "Vocal cords", category: "Anatomy" },
+      { text: "Eardrum", category: "Anatomy" },
+      { text: "Femur", category: "Anatomy" },
+      { text: "Diaphragm", category: "Anatomy" },
+      { text: "Pulse", category: "Anatomy" },
+      { text: "Bladder", category: "Anatomy" },
+      { text: "Sprained ankle", category: "Anatomy" },
+      { text: "Muscle cramp", category: "Anatomy" },
+      { text: "Reflex", category: "Anatomy" },
+      { text: "Kitambi", category: "Anatomy" },
+      { text: "Upara", category: "Anatomy" },
+      { text: "Kisogo", category: "Anatomy" },
+      { text: "Kupaliwa", category: "Anatomy" }
     ]
   }
 ];
@@ -2055,7 +1977,7 @@ async function loadPublishedDecks() {
     const published = remote.filter(deck => Array.isArray(deck.cards) && deck.cards.length).map(deck => ({
       ...deck,
       sub: deck.description || "",
-      cards: deck.cards.map(card => ({ text: card.text, category: card.category, difficulty: card.difficulty }))
+      cards: deck.cards.map(card => ({ text: card.text, category: card.category }))
     }));
     ALL_DECKS = published.length ? published.concat([{
       id: "mix", name: "Everything", sub: "",
@@ -2086,29 +2008,6 @@ function renderDuration() {
   const deck = ALL_DECKS.find(d => d.id === currentDeckId);
   if (!deck) return;
   $("selectedDeckName").textContent = deck.name;
-
-  const easyCount = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === "easy").length;
-  const medCount = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === "medium").length;
-  const hardCount = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === "hard").length;
-  const totalCount = deck.cards.length;
-
-  const counts = { all: totalCount, easy: easyCount, medium: medCount, hard: hardCount };
-
-  if (counts[difficultyMode] === 0) {
-    difficultyMode = "all";
-    store.set("difficultyMode", "all");
-  }
-
-  document.querySelectorAll(".difficulty-options button").forEach(b => {
-    const diff = b.dataset.diff;
-    const count = counts[diff] ?? 0;
-    b.setAttribute("aria-pressed", String(diff === difficultyMode));
-    b.disabled = count === 0;
-    const small = b.querySelector("small");
-    if (small) {
-      small.textContent = count === 0 ? "0 cards" : `${count} card${count === 1 ? "" : "s"}`;
-    }
-  });
 
   document.querySelectorAll(".duration-options button").forEach(b => {
     b.setAttribute("aria-pressed", String(Number(b.dataset.secs) === roundSecs));
@@ -2212,17 +2111,9 @@ function initMatch() {
   const activeTeams = gameMode === "team" ? teamNames : ["Solo"];
   const totalRounds = gameMode === "team" ? (teamRounds || 1) : 1;
 
-  let playableCards = deck.cards;
-  if (difficultyMode && difficultyMode !== "all") {
-    const filtered = deck.cards.filter(c => (typeof c === "object" ? c.difficulty : "medium") === difficultyMode);
-    if (filtered.length > 0) {
-      playableCards = filtered;
-    }
-  }
-
   S = {
     deck,
-    cards: playableCards,
+    cards: deck.cards,
     teamIndex: 0,
     currentRoundNum: 1,
     totalRounds: totalRounds,
@@ -2539,8 +2430,6 @@ function renderTurnBreakReview(teamIdx, roundNum) {
   listEl.innerHTML = history.map((item, idx) => {
     const isGot = item.kind === "right";
     const text = cardText(item.card);
-    const diff = typeof item.card === "object" ? item.card.difficulty || "medium" : "medium";
-    const diffBadge = diff === "easy" ? "🟢 Easy" : diff === "hard" ? "🌶️ Hard" : "🟡 Med";
     const rowClass = isGot ? "turn-word-row is-got" : "turn-word-row is-skipped";
     const pillText = isGot ? "Got it ✨" : "Skipped ↷";
 
@@ -2550,7 +2439,6 @@ function renderTurnBreakReview(teamIdx, roundNum) {
           <input type="checkbox" class="turn-word-checkbox" data-word-idx="${idx}" ${isGot ? "checked" : ""} aria-label="Mark ${escapeHtml(text)} as Got it">
           <div class="turn-word-info">
             <span class="turn-word-text">${escapeHtml(text)}</span>
-            <span class="turn-word-meta">${diffBadge}</span>
           </div>
         </div>
         <span class="turn-word-pill">${pillText}</span>
@@ -2690,18 +2578,10 @@ function finalResults() {
     breakdowns.innerHTML = round.teamScores.map((team, idx) => {
       const cards = round.teamCards[idx];
       const rightItems = cards.right.length
-        ? cards.right.map(c => {
-            const diff = typeof c === "object" ? c.difficulty || "medium" : "medium";
-            const badge = diff === "easy" ? "🟢" : diff === "hard" ? "🌶️" : "🟡";
-            return `<li>${escapeHtml(cardText(c))} <span style="opacity:0.75; font-size:0.85em; margin-left:4px;">${badge}</span></li>`;
-          }).join("")
+        ? cards.right.map(c => `<li>${escapeHtml(cardText(c))}</li>`).join("")
         : "<li>None</li>";
       const skipItems = cards.skipped.length
-        ? cards.skipped.map(c => {
-            const diff = typeof c === "object" ? c.difficulty || "medium" : "medium";
-            const badge = diff === "easy" ? "🟢" : diff === "hard" ? "🌶️" : "🟡";
-            return `<li>${escapeHtml(cardText(c))} <span style="opacity:0.75; font-size:0.85em; margin-left:4px;">${badge}</span></li>`;
-          }).join("")
+        ? cards.skipped.map(c => `<li>${escapeHtml(cardText(c))}</li>`).join("")
         : "<li>None</li>";
       return `
         <div class="team-breakdown-card">
@@ -2753,9 +2633,7 @@ function fillList(ul, items) {
   }
   items.forEach(t => {
     const li = document.createElement("li");
-    const diff = typeof t === "object" ? t.difficulty || "medium" : "medium";
-    const badge = diff === "easy" ? "🟢" : diff === "hard" ? "🌶️" : "🟡";
-    li.innerHTML = `${escapeHtml(cardText(t))} <span style="opacity:0.75; font-size:0.85em; margin-left:4px;">${badge}</span>`;
+    li.textContent = cardText(t);
     ul.appendChild(li);
   });
 }
@@ -2763,14 +2641,6 @@ function fillList(ul, items) {
 /* ============================================================
    Wiring
    ============================================================ */
-document.querySelectorAll(".difficulty-options button").forEach(b => {
-  b.addEventListener("click", () => {
-    if (b.disabled) return;
-    difficultyMode = b.dataset.diff;
-    store.set("difficultyMode", difficultyMode);
-    renderDuration();
-  });
-});
 document.querySelectorAll(".duration-options button").forEach(b => {
   b.addEventListener("click", () => {
     roundSecs = Number(b.dataset.secs);
