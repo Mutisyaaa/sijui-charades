@@ -683,7 +683,7 @@ body.high-contrast .toggle-switch:checked {
 .team-rounds-group.visible {
   display: flex;
 }
-.rounds-options {
+.rounds-options, .team-words-options {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
@@ -692,7 +692,10 @@ body.high-contrast .toggle-switch:checked {
   padding: 0;
   border: 0;
 }
-.rounds-options button {
+.team-words-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.rounds-options button, .team-words-options button {
   background: var(--espresso);
   border: 1px solid var(--espresso-border);
   color: var(--chalk);
@@ -704,10 +707,10 @@ body.high-contrast .toggle-switch:checked {
   cursor: pointer;
   transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
 }
-.rounds-options button:hover {
+.rounds-options button:hover, .team-words-options button:hover {
   border-color: var(--amber);
 }
-.rounds-options button[aria-pressed="true"] {
+.rounds-options button[aria-pressed="true"], .team-words-options button[aria-pressed="true"] {
   background: var(--amber);
   color: #1A1512;
   border-color: var(--amber);
@@ -1780,6 +1783,13 @@ body.high-contrast .toggle-switch:checked {
         <button type="button" data-rounds="5" aria-pressed="false">5 Rounds</button>
       </fieldset>
     </div>
+    <div id="teamWordsGroup" class="team-rounds-group">
+      <span class="setup-label">Words per turn</span>
+      <fieldset class="team-words-options" aria-label="Words per turn">
+        <button type="button" data-team-words="10" aria-pressed="true">10 Words</button>
+        <button type="button" data-team-words="15" aria-pressed="false">15 Words</button>
+      </fieldset>
+    </div>
     <button id="setupStart" class="primary" type="button">Start round</button>
     <button id="setupBack" class="ghost" type="button">Back</button>
   </section>
@@ -1847,7 +1857,7 @@ body.high-contrast .toggle-switch:checked {
       </div>
 
       <div class="team-ready-duration-badge">
-        ⏱️ <span id="teamReadyDurationText">60</span> seconds on the clock
+        ⏱️ <span id="teamReadyDurationText">60</span>s · <span id="teamReadyWordsText">10</span> words to guess
       </div>
 
       <button id="teamReadyStartBtn" class="primary" type="button" style="margin-top: 18px; width: 100%;">Start Turn</button>
@@ -2265,6 +2275,7 @@ let pendingStart = false;
 let gameMode = store.get("gameMode", "solo");
 let teamNames = store.get("teamNames", ["Team A", "Team B"]);
 let teamRounds = Number(store.get("teamRounds", 1)) || 1;
+let teamWordsCount = Number(store.get("teamWordsCount", 10)) || 10;
 
 function cardText(card) { return typeof card === "string" ? card : card.text; }
 function cardMeta(card) {
@@ -2682,6 +2693,7 @@ function showTeamReady() {
     ? `Round ${currentRnd} of ${totalRounds}`
     : `Team Match`;
   $("teamReadyDurationText").textContent = roundSecs;
+  if ($("teamReadyWordsText")) $("teamReadyWordsText").textContent = teamWordsCount || 10;
 
   show("teamReady");
 }
@@ -2699,8 +2711,9 @@ function startTeamGameRound() {
     round.i = 0;
   }
 
+  const targetCount = teamWordsCount || 10;
+  const countToTake = Math.min(targetCount, pool.length || targetCount);
   const batch = [];
-  const countToTake = Math.min(25, pool.length || 25);
   for (let k = 0; k < countToTake; k++) {
     if (round.i >= round.queue.length) {
       round.queue = shuffle(pool);
@@ -2718,6 +2731,7 @@ function startTeamGameRound() {
   $("teamGameProgress").classList.remove("urgent");
   $("teamGameProgress").style.width = "100%";
   $("teamGameScore").textContent = "0";
+  if ($("teamGameScoreSub")) $("teamGameScoreSub").textContent = `/ ${batch.length}`;
 
   renderTeamWordsList();
   show("teamGame");
@@ -2782,38 +2796,6 @@ function renderTeamWordsList() {
       </li>
     `;
   }).join("");
-}
-
-function appendMoreTeamWords() {
-  const round = S;
-  if (!round || !round.teamWordsList) return;
-  const pool = round.cards || round.deck.cards || [];
-  const listEl = $("teamGameList");
-  for (let k = 0; k < 10; k++) {
-    if (round.i >= round.queue.length) {
-      round.queue = shuffle(pool);
-      round.i = 0;
-    }
-    const card = round.queue[round.i++];
-    const idx = round.teamWordsList.length;
-    const item = { card, checked: false };
-    round.teamWordsList.push(item);
-
-    const text = cardText(card);
-    const cat = cardMeta(card);
-    const li = document.createElement("li");
-    li.className = "team-word-row";
-    li.dataset.idx = idx;
-    li.innerHTML = `
-      <label class="team-word-label">
-        <input type="checkbox" class="team-word-checkbox" data-idx="${idx}">
-        <span class="team-checkbox-box" aria-hidden="true"></span>
-        <span class="team-word-text">${escapeHtml(text)}</span>
-        ${cat ? `<span class="team-word-cat">${escapeHtml(cat)}</span>` : ''}
-      </label>
-    `;
-    listEl.appendChild(li);
-  }
 }
 
 async function startSelectedDeck() {
@@ -3380,11 +3362,18 @@ document.querySelectorAll(".mode-options button").forEach(button => button.addEv
   document.querySelectorAll(".mode-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
   $("teamFields").classList.toggle("visible", gameMode === "team");
   $("teamRoundsGroup").classList.toggle("visible", gameMode === "team");
+  if ($("teamWordsGroup")) $("teamWordsGroup").classList.toggle("visible", gameMode === "team");
 }));
 document.querySelectorAll(".rounds-options button").forEach(button => button.addEventListener("click", () => {
   teamRounds = Number(button.dataset.rounds) || 1;
   store.set("teamRounds", teamRounds);
   document.querySelectorAll(".rounds-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+}));
+document.querySelectorAll(".team-words-options button").forEach(button => button.addEventListener("click", () => {
+  teamWordsCount = Number(button.dataset.teamWords) || 10;
+  store.set("teamWordsCount", teamWordsCount);
+  document.querySelectorAll(".team-words-options button").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+  if ($("teamReadyWordsText")) $("teamReadyWordsText").textContent = teamWordsCount;
 }));
 $("nextTeamBtn").addEventListener("click", async () => {
   const round = S;
@@ -3611,8 +3600,11 @@ if (teamGameList) {
       vibe(20);
     }
 
-    if (score >= round.teamWordsList.length - 5) {
-      appendMoreTeamWords();
+    if (score === round.teamWordsList.length && round.teamWordsList.length > 0) {
+      showMoment(`🎉 All ${score} words checked!`);
+      setTimeout(() => {
+        if (S && S.running) endTeamTurn();
+      }, 700);
     }
   });
 }
@@ -3623,8 +3615,12 @@ function applySetupState() {
   });
   $("teamFields").classList.toggle("visible", gameMode === "team");
   if ($("teamRoundsGroup")) $("teamRoundsGroup").classList.toggle("visible", gameMode === "team");
+  if ($("teamWordsGroup")) $("teamWordsGroup").classList.toggle("visible", gameMode === "team");
   document.querySelectorAll(".rounds-options button").forEach(button => {
     button.setAttribute("aria-pressed", String(Number(button.dataset.rounds) === teamRounds));
+  });
+  document.querySelectorAll(".team-words-options button").forEach(button => {
+    button.setAttribute("aria-pressed", String(Number(button.dataset.teamWords) === teamWordsCount));
   });
   if (Array.isArray(teamNames)) {
     if (teamNames[0]) $("teamA").value = teamNames[0];
