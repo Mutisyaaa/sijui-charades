@@ -1086,7 +1086,7 @@ body.high-contrast .toggle-switch:checked {
 .low { color: var(--shuka-red); }
 #game.ok .low, #game.skip .low { color: inherit; }
 
-/* ---------- turn break (team intermission & review) ---------- */
+/* ---------- turn break (team time's up prompt & pass phone) ---------- */
 #turnBreak {
   background: var(--charcoal);
   color: var(--chalk);
@@ -1095,39 +1095,127 @@ body.high-contrast .toggle-switch:checked {
   text-align: center;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 1.5rem 1rem 2.5rem;
+  padding: max(16px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom));
 }
-#turnBreak h2 { font-size: clamp(1.8rem, 6vmin, 2.8rem); color: var(--chalk); margin: 0 0 4px; }
+.turn-prompt-card {
+  width: min(520px, 100%);
+  margin: auto;
+  background: var(--espresso);
+  border: 2px solid var(--espresso-border);
+  border-radius: 22px;
+  padding: 20px 18px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 4px 0 var(--espresso-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.turn-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(193, 39, 45, 0.22);
+  color: #ff858a;
+  border: 1.5px solid rgba(193, 39, 45, 0.55);
+}
+.turn-status-pill.early-finish {
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ECC71;
+  border-color: rgba(46, 204, 113, 0.45);
+}
+#turnBreak h2 {
+  font-size: clamp(1.65rem, 5.5vmin, 2.3rem);
+  color: var(--chalk);
+  margin: 0;
+  line-height: 1.1;
+}
+.turn-score-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(242, 167, 27, 0.3);
+  border-radius: 14px;
+  padding: 8px 20px;
+}
 .turn-break-score {
-  font-size: clamp(3.2rem, 12vmin, 5rem);
+  font-size: clamp(2.2rem, 8vmin, 3.2rem);
   font-weight: 900;
   color: var(--amber);
   line-height: 1;
-  margin: 0.2rem 0 0.1rem;
-  text-shadow: 0 0 35px rgba(242, 167, 27, 0.35);
+  text-shadow: 0 0 25px rgba(242, 167, 27, 0.35);
 }
-.turn-break-sub { font-size: 1.05rem; opacity: 0.85; margin: 0 0 4px; color: var(--chalk); }
+.turn-break-sub {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--chalk);
+  margin: 0;
+}
 .turn-break-review {
-  width: min(540px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  text-align: left;
+}
+.turn-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 2px 8px;
+  gap: 8px;
+}
+.turn-review-title {
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--amber);
+}
+.turn-edit-toggle-btn {
+  background: rgba(245, 239, 228, 0.08);
+  border: 1px solid rgba(245, 239, 228, 0.22);
+  color: var(--chalk);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 4px 11px;
+  min-height: 28px;
+  cursor: pointer;
+}
+.turn-edit-toggle-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
 }
 .turn-words-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-height: 270px;
+  gap: 7px;
+  max-height: 220px;
   overflow-y: auto;
-  padding: 6px;
+  padding: 8px;
   border-radius: 14px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--espresso-border);
+}
+.turn-empty-got {
+  padding: 16px 12px;
+  margin: 0;
+  text-align: center;
+  color: rgba(245, 239, 228, 0.7);
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 .turn-word-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 9px 13px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   border: 1.5px solid rgba(255, 255, 255, 0.08);
@@ -1140,8 +1228,8 @@ body.high-contrast .toggle-switch:checked {
   transform: scale(0.99);
 }
 .turn-word-row.is-got {
-  background: rgba(46, 204, 113, 0.13);
-  border-color: rgba(46, 204, 113, 0.45);
+  background: rgba(46, 204, 113, 0.15);
+  border-color: rgba(46, 204, 113, 0.5);
 }
 .turn-word-row.is-skipped {
   background: rgba(231, 76, 60, 0.08);
@@ -1151,13 +1239,13 @@ body.high-contrast .toggle-switch:checked {
 .turn-word-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
   text-align: left;
 }
 .turn-word-checkbox {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   accent-color: #2ECC71;
   cursor: pointer;
   flex-shrink: 0;
@@ -1169,66 +1257,104 @@ body.high-contrast .toggle-switch:checked {
   min-width: 0;
 }
 .turn-word-text {
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   font-weight: 800;
   color: var(--chalk);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.turn-word-meta {
-  font-size: 0.78rem;
-  color: var(--chalk-muted);
-}
 .turn-word-pill {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 800;
   padding: 3px 10px;
   border-radius: 99px;
   flex-shrink: 0;
 }
 .turn-word-row.is-got .turn-word-pill {
-  background: rgba(46, 204, 113, 0.2);
+  background: rgba(46, 204, 113, 0.22);
   color: #2ECC71;
-  border: 1px solid rgba(46, 204, 113, 0.35);
+  border: 1px solid rgba(46, 204, 113, 0.4);
 }
 .turn-word-row.is-skipped .turn-word-pill {
   background: rgba(231, 76, 60, 0.15);
   color: #FFAAA6;
   border: 1px solid rgba(231, 76, 60, 0.25);
 }
+
+/* Pass the Phone Callout Banner */
+.turn-pass-banner {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(242, 167, 27, 0.22) 0%, rgba(30, 95, 191, 0.22) 100%);
+  border: 2px solid var(--amber);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  box-shadow: 0 0 24px rgba(242, 167, 27, 0.2);
+}
+.turn-pass-icon {
+  font-size: 2.1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.turn-pass-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.turn-pass-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+}
+.turn-pass-copy strong {
+  font-size: clamp(1.1rem, 4vmin, 1.35rem);
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+.turn-pass-copy small {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(245, 239, 228, 0.8);
+}
+
 .turn-break-standings {
-  width: min(540px, 100%);
-  background: var(--espresso);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--espresso-border);
   border-radius: 14px;
-  padding: 12px 18px;
-  margin: 12px auto 0;
+  padding: 10px 14px;
   font-weight: 800;
   text-align: left;
 }
-.turn-break-standings h4 { margin: 0 0 8px; font-size: 0.85rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.04em; color: var(--amber); }
-.standings-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.standings-item { display: flex; justify-content: space-between; align-items: center; font-size: 1.02rem; }
+.turn-break-standings h4 { margin: 0 0 6px; font-size: 0.78rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.04em; color: var(--amber); }
+.standings-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.standings-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.96rem; }
 .standings-item.up-next { color: var(--amber); font-weight: 900; }
 .standings-badge { font-size: 0.8rem; padding: 2px 8px; border-radius: 99px; background: var(--amber); color: var(--charcoal); font-weight: 900; }
 .turn-break-duration {
-  width: min(540px, 100%);
-  margin: 14px auto 0;
-  background: var(--espresso);
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--espresso-border);
   border-radius: 14px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   text-align: left;
 }
 .turn-break-duration-label {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   opacity: 0.85;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--amber);
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1243,10 +1369,11 @@ body.high-contrast .toggle-switch:checked {
   background: rgba(0, 0, 0, 0.28);
   border: 1.5px solid var(--espresso-border);
   color: var(--chalk);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  border-radius: 12px;
-  padding: 8px 0;
+  border-radius: 10px;
+  padding: 6px 0;
+  min-height: 36px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -1259,13 +1386,7 @@ body.high-contrast .toggle-switch:checked {
   border-color: var(--amber);
   box-shadow: 0 3px 0 var(--amber-dark);
 }
-.turn-break-next {
-  font-size: 1.18rem;
-  font-weight: 800;
-  margin: 14px 0 12px;
-  color: var(--chalk);
-}
-#turnBreak .actions { width: min(540px, 100%); margin: 0 auto; }
+#turnBreak .actions { width: 100%; margin: 2px 0 0; }
 
 /* ---------- Team Ready Screen (Straight / Upright) ---------- */
 #teamReady {
@@ -1326,6 +1447,23 @@ body.high-contrast .toggle-switch:checked {
   border-radius: 999px;
   padding: 6px 16px;
 }
+.team-ready-countdown {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0;
+}
+.team-ready-countdown.active {
+  display: flex;
+}
+.team-ready-count-num {
+  font-size: clamp(5rem, 22vmin, 9rem);
+  font-weight: 900;
+  color: var(--amber);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(242, 167, 27, 0.45);
+}
 
 /* ---------- Team Game Checklist Screen (Straight / Upright) ---------- */
 #teamGame {
@@ -1337,26 +1475,28 @@ body.high-contrast .toggle-switch:checked {
   background: var(--charcoal);
   color: var(--chalk);
   overflow: hidden;
+  position: relative;
 }
 #teamGame.active {
   display: flex;
 }
 .team-game-header {
   flex-shrink: 0;
-  background: rgba(30, 23, 20, 0.96);
+  background: rgba(30, 23, 20, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1.5px solid var(--espresso-border);
   padding: max(12px, env(safe-area-inset-top)) 16px 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   z-index: 10;
 }
 .team-game-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 .team-game-info {
   display: flex;
@@ -1364,22 +1504,22 @@ body.high-contrast .toggle-switch:checked {
   gap: 8px;
 }
 .team-turn-pill {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 900;
   background: var(--amber);
   color: var(--charcoal);
   border-radius: 999px;
-  padding: 4px 14px;
+  padding: 4px 13px;
   letter-spacing: 0.02em;
 }
 .team-round-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: rgba(245, 239, 228, 0.75);
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: rgba(245, 239, 228, 0.8);
 }
 .team-game-end-btn {
   background: rgba(193, 39, 45, 0.2);
-  border: 1px solid rgba(193, 39, 45, 0.5);
+  border: 1.5px solid rgba(193, 39, 45, 0.55);
   color: #ff858a;
   border-radius: 999px;
   font-weight: 800;
@@ -1394,15 +1534,15 @@ body.high-contrast .toggle-switch:checked {
   color: #FFFFFF;
 }
 
-/* HUD Timer & Score */
+/* HUD Timer & Score (Matches main game timer prominence) */
 .team-game-hud {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.15fr 0.85fr;
   gap: 10px;
 }
 .team-hud-block {
   background: var(--espresso);
-  border: 1px solid var(--espresso-border);
+  border: 1.5px solid var(--espresso-border);
   border-radius: 14px;
   padding: 8px 14px;
   display: flex;
@@ -1410,28 +1550,36 @@ body.high-contrast .toggle-switch:checked {
   align-items: center;
   justify-content: center;
 }
+.team-hud-block.timer-block {
+  border-color: rgba(242, 167, 27, 0.45);
+  background: linear-gradient(180deg, rgba(242, 167, 27, 0.12) 0%, rgba(44, 34, 30, 0.95) 100%);
+}
+.team-hud-block.timer-block.urgent {
+  border-color: var(--shuka-red);
+  background: linear-gradient(180deg, rgba(193, 39, 45, 0.28) 0%, rgba(44, 34, 30, 0.95) 100%);
+}
 .team-hud-label {
-  font-size: 0.72rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(245, 239, 228, 0.65);
+  letter-spacing: 0.06em;
+  color: rgba(245, 239, 228, 0.72);
 }
 .team-hud-val {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 900;
-  line-height: 1.1;
-  font-family: monospace;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
 }
 .team-timer-val {
-  color: var(--chalk);
+  color: var(--amber);
 }
 .team-timer-val.urgent {
   color: #ff4d4d;
-  animation: pulseTimer 0.6s infinite alternate;
+  animation: pulseTimer 0.5s infinite alternate;
 }
 @keyframes pulseTimer {
   from { transform: scale(1); }
@@ -1439,25 +1587,25 @@ body.high-contrast .toggle-switch:checked {
 }
 .team-hud-val small {
   font-size: 0.85rem;
-  font-weight: 700;
-  color: rgba(245, 239, 228, 0.65);
+  font-weight: 800;
+  color: rgba(245, 239, 228, 0.7);
 }
 .team-score-val {
-  color: var(--amber);
+  color: var(--chalk);
 }
 
-/* Progress track */
+/* Progress track (like .bar > #barFill in the main game) */
 .team-progress-track {
   width: 100%;
-  height: 6px;
-  background: rgba(245, 239, 228, 0.12);
+  height: 10px;
+  background: rgba(245, 239, 228, 0.14);
   border-radius: 999px;
   overflow: hidden;
 }
 .team-progress-bar {
   height: 100%;
   width: 100%;
-  background: linear-gradient(90deg, var(--nganya-blue) 0%, var(--amber) 100%);
+  background: var(--amber);
   border-radius: 999px;
   transition: width 0.1s linear;
 }
@@ -1467,18 +1615,18 @@ body.high-contrast .toggle-switch:checked {
 
 .team-game-instruction {
   font-size: 0.82rem;
-  color: rgba(245, 239, 228, 0.8);
+  color: rgba(245, 239, 228, 0.82);
   font-weight: 700;
   text-align: center;
   padding: 2px 0 0;
 }
 
-/* Scroll Area */
+/* Scroll Area & Locked State */
 .team-game-scroll {
   flex: 1 1 auto;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 14px 16px;
+  padding: 12px 16px;
 }
 .team-words-checklist {
   list-style: none;
@@ -1489,6 +1637,11 @@ body.high-contrast .toggle-switch:checked {
   gap: 10px;
   width: min(560px, 100%);
   margin-inline: auto;
+}
+.team-words-checklist.is-locked {
+  pointer-events: none;
+  opacity: 0.55;
+  filter: grayscale(0.25);
 }
 .team-word-row {
   background: var(--espresso);
@@ -1508,7 +1661,7 @@ body.high-contrast .toggle-switch:checked {
   box-shadow: 0 1px 0 var(--espresso-dark);
 }
 .team-word-row.is-checked {
-  background: rgba(30, 95, 191, 0.22);
+  background: rgba(30, 95, 191, 0.24);
   border-color: var(--nganya-blue);
   box-shadow: 0 0 14px rgba(30, 95, 191, 0.35), 0 3px 0 var(--nganya-blue-dark);
 }
@@ -1529,14 +1682,14 @@ body.high-contrast .toggle-switch:checked {
 .team-checkbox-box {
   width: 32px;
   height: 32px;
-  border: 2px solid rgba(245, 239, 228, 0.35);
+  border: 2.5px solid rgba(245, 239, 228, 0.4);
   border-radius: 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   margin-right: 14px;
-  background: rgba(26, 21, 18, 0.5);
+  background: rgba(26, 21, 18, 0.6);
   transition: all 0.15s ease;
 }
 .team-word-row.is-checked .team-checkbox-box {
@@ -1570,6 +1723,44 @@ body.high-contrast .toggle-switch:checked {
   letter-spacing: 0.04em;
   flex-shrink: 0;
   margin-left: 8px;
+}
+
+/* Time's Up Lock Banner inside #teamGame */
+.team-timeup-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 21, 18, 0.84);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  text-align: center;
+  padding: 24px;
+}
+.team-timeup-overlay.active {
+  display: flex;
+}
+.team-timeup-box {
+  background: var(--espresso);
+  border: 2.5px solid var(--shuka-red);
+  border-radius: 22px;
+  padding: 24px 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+  animation: pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.team-timeup-box h3 {
+  margin: 0 0 6px;
+  font-size: clamp(1.8rem, 6vmin, 2.5rem);
+  color: #ff6b70;
+}
+.team-timeup-box p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--chalk);
 }
 
 /* Bottom bar */
@@ -1832,36 +2023,43 @@ body.high-contrast .toggle-switch:checked {
       <h2 id="teamReadyHeading" style="font-size: clamp(2rem, 6vmin, 3rem); margin: 6px 0;">Get Ready!</h2>
       <p id="teamReadyRounds" style="color: var(--amber); font-weight: 800; margin: 0 0 16px; font-size: 1.05rem;">Round 1 of 3</p>
       
-      <div class="team-ready-steps">
-        <div class="team-step-card">
-          <span class="step-num" aria-hidden="true">📱</span>
-          <div>
-            <strong>Hold phone straight</strong>
-            <small>Facing you so you can clearly see the words</small>
+      <div id="teamReadyContent" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <div class="team-ready-steps">
+          <div class="team-step-card">
+            <span class="step-num" aria-hidden="true">📱</span>
+            <div>
+              <strong>Hold phone straight</strong>
+              <small>Facing you so you can clearly see the words</small>
+            </div>
+          </div>
+          <div class="team-step-card">
+            <span class="step-num" aria-hidden="true">🗣️</span>
+            <div>
+              <strong>Describe without saying the word</strong>
+              <small>Your team shouts guesses before the timer ends</small>
+            </div>
+          </div>
+          <div class="team-step-card">
+            <span class="step-num" aria-hidden="true">☑️</span>
+            <div>
+              <strong>Tap checkbox when they get it</strong>
+              <small>When the timer is up, the list locks automatically</small>
+            </div>
           </div>
         </div>
-        <div class="team-step-card">
-          <span class="step-num" aria-hidden="true">🗣️</span>
-          <div>
-            <strong>Describe without saying the word</strong>
-            <small>Your team shouts guesses</small>
-          </div>
+
+        <div class="team-ready-duration-badge">
+          ⏱️ <span id="teamReadyDurationText">60</span>s timer · <span id="teamReadyWordsText">10</span> words
         </div>
-        <div class="team-step-card">
-          <span class="step-num" aria-hidden="true">☑️</span>
-          <div>
-            <strong>Tap checkbox when they get it</strong>
-            <small>Check the box for each word guessed correctly</small>
-          </div>
-        </div>
+
+        <button id="teamReadyStartBtn" class="primary" type="button" style="margin-top: 18px; width: 100%;">Start Turn</button>
+        <button id="teamReadyCancelBtn" class="ghost" type="button" style="margin-top: 8px;">Cancel</button>
       </div>
 
-      <div class="team-ready-duration-badge">
-        ⏱️ <span id="teamReadyDurationText">60</span>s · <span id="teamReadyWordsText">10</span> words to guess
+      <div id="teamReadyCountdown" class="team-ready-countdown" aria-live="polite">
+        <p style="margin: 0 0 8px; font-weight: 800; color: var(--chalk);">Starting in…</p>
+        <div id="teamReadyCountNum" class="team-ready-count-num">3</div>
       </div>
-
-      <button id="teamReadyStartBtn" class="primary" type="button" style="margin-top: 18px; width: 100%;">Start Turn</button>
-      <button id="teamReadyCancelBtn" class="ghost" type="button" style="margin-top: 8px;">Cancel</button>
     </div>
     <div class="spacer"></div>
   </section>
@@ -1878,19 +2076,19 @@ body.high-contrast .toggle-switch:checked {
       </div>
 
       <div class="team-game-hud">
-        <div class="team-hud-block">
-          <span class="team-hud-label">Time Remaining</span>
-          <div class="team-hud-val team-timer-val">
+        <div id="teamTimerBlock" class="team-hud-block timer-block">
+          <span class="team-hud-label">Timer</span>
+          <div id="teamGameTimerWrap" class="team-hud-val team-timer-val">
             <span aria-hidden="true">⏱️</span>
             <span id="teamGameTimer">60</span>
             <small>s</small>
           </div>
         </div>
         <div class="team-hud-block">
-          <span class="team-hud-label">Words Checked</span>
+          <span class="team-hud-label">Answers Got</span>
           <div class="team-hud-val team-score-val">
             <span id="teamGameScore">0</span>
-            <small id="teamGameScoreSub">guessed</small>
+            <small id="teamGameScoreSub">/ 10</small>
           </div>
         </div>
       </div>
@@ -1899,7 +2097,7 @@ body.high-contrast .toggle-switch:checked {
         <div id="teamGameProgress" class="team-progress-bar"></div>
       </div>
 
-      <div class="team-game-instruction">
+      <div id="teamGameInstruction" class="team-game-instruction">
         Describe words · Tap checkbox when your team gets it right:
       </div>
     </header>
@@ -1910,6 +2108,13 @@ body.high-contrast .toggle-switch:checked {
       </ul>
     </div>
 
+    <div id="teamTimeUpOverlay" class="team-timeup-overlay" aria-live="assertive">
+      <div class="team-timeup-box">
+        <h3>⏰ Time's Up!</h3>
+        <p>Pencils down — you can't play anymore!</p>
+      </div>
+    </div>
+
     <footer class="team-game-footer">
       <button id="teamGameDoneBtn" class="primary" type="button">Done / Finish Turn</button>
     </footer>
@@ -1917,37 +2122,58 @@ body.high-contrast .toggle-switch:checked {
 
   <section id="turnBreak" class="screen">
     <div class="spacer"></div>
-    <span id="turnBreakTeamBadge" class="standings-badge" style="font-size: 0.95rem; padding: 5px 16px; margin: 0 auto 8px; display: inline-block;">Team 1</span>
-    <h2 id="turnBreakTitle">Turn Over!</h2>
-    <div id="turnBreakScore" class="turn-break-score">0</div>
-    <p id="turnBreakSub" class="turn-break-sub">words guessed</p>
-
-    <!-- Interactive Turn Review Checklist -->
-    <div class="turn-break-review">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 4px 6px;">
-        <span style="font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--amber);">Answers Review (Tap to toggle)</span>
-        <span id="turnReviewCounts" style="font-size: 0.82rem; color: var(--chalk-muted); font-weight: 700;">0 Got · 0 Skipped</span>
+    <div class="turn-prompt-card" role="region" aria-labelledby="turnBreakTitle">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;">
+        <span id="turnStatusPill" class="turn-status-pill">⏰ Time's Up · Turn Locked</span>
+        <span id="turnBreakTeamBadge" class="standings-badge" style="font-size: 0.85rem; padding: 4px 12px;">Team 1</span>
       </div>
-      <div id="turnBreakWordsList" class="turn-words-list" role="list"></div>
-    </div>
 
-    <!-- Standings -->
-    <div id="turnBreakStandings" class="turn-break-standings"></div>
+      <h2 id="turnBreakTitle">Time's Up!</h2>
 
-    <!-- Next Turn Duration Selector -->
-    <div id="turnBreakDurationWrap" class="turn-break-duration">
-      <span class="turn-break-duration-label">⏱️ Next Turn Duration</span>
-      <div id="turnDurationOptions" class="turn-duration-options" role="group" aria-label="Next turn duration">
-        <button type="button" data-turn-secs="60" aria-pressed="true">60s</button>
-        <button type="button" data-turn-secs="90" aria-pressed="false">90s</button>
-        <button type="button" data-turn-secs="120" aria-pressed="false">120s</button>
+      <div class="turn-score-summary">
+        <div id="turnBreakScore" class="turn-break-score">0</div>
+        <p id="turnBreakSub" class="turn-break-sub">answers got</p>
       </div>
-    </div>
 
-    <p id="turnBreakNext" class="turn-break-next"></p>
-    <div class="actions">
-      <button id="nextTeamBtn" class="primary" type="button">Start Next Turn</button>
-      <button id="turnBreakEndMatchBtn" class="ghost" type="button">End Match Early</button>
+      <!-- Answers You Got Prompt -->
+      <div class="turn-break-review">
+        <div class="turn-review-header">
+          <span id="turnReviewTitle" class="turn-review-title">✅ Answers You Got</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="turnReviewCounts" style="font-size: 0.78rem; color: var(--chalk-muted); font-weight: 800;">0 Got</span>
+            <button id="turnEditToggleBtn" class="turn-edit-toggle-btn" type="button">Wrong mark? Edit</button>
+          </div>
+        </div>
+        <div id="turnBreakWordsList" class="turn-words-list" role="list"></div>
+      </div>
+
+      <!-- Pass the Phone Callout Banner -->
+      <div id="turnBreakPassBox" class="turn-pass-banner">
+        <div id="turnBreakPassIcon" class="turn-pass-icon" aria-hidden="true">📲</div>
+        <div class="turn-pass-copy">
+          <span id="turnBreakPassEyebrow" class="turn-pass-eyebrow">Next Team Up</span>
+          <strong id="turnBreakNext">Pass the phone to Team B!</strong>
+          <small id="turnBreakNextSub">Hand the phone to the next team to start their turn</small>
+        </div>
+      </div>
+
+      <!-- Standings -->
+      <div id="turnBreakStandings" class="turn-break-standings"></div>
+
+      <!-- Next Turn Duration Selector -->
+      <div id="turnBreakDurationWrap" class="turn-break-duration">
+        <span class="turn-break-duration-label">⏱️ Next Turn Timer</span>
+        <div id="turnDurationOptions" class="turn-duration-options" role="group" aria-label="Next turn duration">
+          <button type="button" data-turn-secs="60" aria-pressed="true">60s</button>
+          <button type="button" data-turn-secs="90" aria-pressed="false">90s</button>
+          <button type="button" data-turn-secs="120" aria-pressed="false">120s</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="nextTeamBtn" class="primary" type="button">Start Next Team's Turn</button>
+        <button id="turnBreakEndMatchBtn" class="ghost" type="button">End Match Early</button>
+      </div>
     </div>
     <div class="spacer"></div>
   </section>
@@ -2680,9 +2906,14 @@ function initMatch() {
 /* ============================================================
    Team Game (Checklist Mode, Held Straight / Portrait)
    ============================================================ */
+let teamReadyTimer = null;
+
 function showTeamReady() {
   const round = S;
   if (!round) return;
+  clearInterval(teamReadyTimer);
+  teamReadyTimer = null;
+
   const currentTeam = round.teamScores[round.teamIndex];
   const totalRounds = round.totalRounds || 1;
   const currentRnd = round.currentRoundNum || 1;
@@ -2695,12 +2926,51 @@ function showTeamReady() {
   $("teamReadyDurationText").textContent = roundSecs;
   if ($("teamReadyWordsText")) $("teamReadyWordsText").textContent = teamWordsCount || 10;
 
+  if ($("teamReadyContent")) $("teamReadyContent").style.display = "flex";
+  if ($("teamReadyCountdown")) $("teamReadyCountdown").classList.remove("active");
+
   show("teamReady");
+}
+
+function beginTeamReadyCountdown() {
+  initAudio();
+  clearInterval(teamReadyTimer);
+  if ($("teamReadyContent")) $("teamReadyContent").style.display = "none";
+  const wrap = $("teamReadyCountdown");
+  const numEl = $("teamReadyCountNum");
+  if (!wrap || !numEl) {
+    startTeamGameRound();
+    return;
+  }
+  wrap.classList.add("active");
+  let n = 3;
+  const paint = () => {
+    numEl.textContent = n;
+    numEl.classList.remove("pop");
+    void numEl.offsetWidth;
+    numEl.classList.add("pop");
+  };
+  paint();
+  playCountdownSound();
+  teamReadyTimer = setInterval(() => {
+    n--;
+    if (n <= 0) {
+      clearInterval(teamReadyTimer);
+      teamReadyTimer = null;
+      startTeamGameRound();
+      return;
+    }
+    playCountdownSound();
+    paint();
+  }, 850);
 }
 
 function startTeamGameRound() {
   if (!S) initMatch();
   const round = S;
+  clearInterval(teamReadyTimer);
+  teamReadyTimer = null;
+
   const currentTeam = round.teamScores[round.teamIndex];
   const totalRounds = round.totalRounds || 1;
   const currentRnd = round.currentRoundNum || 1;
@@ -2727,24 +2997,48 @@ function startTeamGameRound() {
   $("teamGameBadge").textContent = currentTeam.name;
   $("teamGameRound").textContent = totalRounds > 1 ? `Round ${currentRnd}/${totalRounds}` : "Match";
   $("teamGameTimer").textContent = roundSecs;
-  $("teamGameTimer").classList.remove("urgent");
+  $("teamGameTimerWrap")?.classList.remove("urgent");
+  $("teamTimerBlock")?.classList.remove("urgent");
   $("teamGameProgress").classList.remove("urgent");
   $("teamGameProgress").style.width = "100%";
   $("teamGameScore").textContent = "0";
   if ($("teamGameScoreSub")) $("teamGameScoreSub").textContent = `/ ${batch.length}`;
-
-  renderTeamWordsList();
-  show("teamGame");
+  if ($("teamGameInstruction")) {
+    $("teamGameInstruction").textContent = "Describe words · Tap checkbox when your team gets it right:";
+  }
+  if ($("teamTimeUpOverlay")) $("teamTimeUpOverlay").classList.remove("active");
+  if ($("teamGameList")) $("teamGameList").classList.remove("is-locked");
+  if ($("teamGameEndBtn")) $("teamGameEndBtn").disabled = false;
+  if ($("teamGameDoneBtn")) $("teamGameDoneBtn").disabled = false;
 
   round.total = roundSecs * 1000;
   round.endAt = Date.now() + round.total;
   round.running = true;
+  round.locked = false;
   round.lastBeepSec = -1;
+
+  renderTeamWordsList();
+  show("teamGame");
   requestWake();
 
   tone(660, 860, 0.2, "triangle", 0.12);
   clearInterval(round.timer);
   round.timer = setInterval(teamGameTick, 100);
+}
+
+function lockTeamGameBoard() {
+  const listEl = $("teamGameList");
+  if (listEl) {
+    listEl.classList.add("is-locked");
+    listEl.querySelectorAll(".team-word-checkbox").forEach(cb => {
+      cb.disabled = true;
+    });
+  }
+  if ($("teamGameEndBtn")) $("teamGameEndBtn").disabled = true;
+  if ($("teamGameDoneBtn")) $("teamGameDoneBtn").disabled = true;
+  if ($("teamGameInstruction")) {
+    $("teamGameInstruction").textContent = "⏰ Time's up! Turn locked — you can't play anymore.";
+  }
 }
 
 function teamGameTick() {
@@ -2758,10 +3052,12 @@ function teamGameTick() {
   $("teamGameProgress").style.width = `${pct}%`;
 
   if (secs <= 10) {
-    $("teamGameTimer").classList.add("urgent");
+    $("teamGameTimerWrap")?.classList.add("urgent");
+    $("teamTimerBlock")?.classList.add("urgent");
     $("teamGameProgress").classList.add("urgent");
   } else {
-    $("teamGameTimer").classList.remove("urgent");
+    $("teamGameTimerWrap")?.classList.remove("urgent");
+    $("teamTimerBlock")?.classList.remove("urgent");
     $("teamGameProgress").classList.remove("urgent");
   }
 
@@ -2771,7 +3067,18 @@ function teamGameTick() {
   }
 
   if (left <= 0) {
-    endTeamTurn();
+    // Immediately lock the checklist so they cannot play anymore
+    round.running = false;
+    round.locked = true;
+    clearInterval(round.timer);
+    round.timer = null;
+    lockTeamGameBoard();
+    if ($("teamTimeUpOverlay")) $("teamTimeUpOverlay").classList.add("active");
+    vibe([160, 80, 220]);
+    setTimeout(() => {
+      if ($("teamTimeUpOverlay")) $("teamTimeUpOverlay").classList.remove("active");
+      endTeamTurn("timeup", true);
+    }, 850);
   }
 }
 
@@ -2780,6 +3087,8 @@ function renderTeamWordsList() {
   if (!round || !round.teamWordsList) return;
   const listEl = $("teamGameList");
   if (!listEl) return;
+  const isLocked = !round.running || round.locked;
+  listEl.classList.toggle("is-locked", isLocked);
 
   listEl.innerHTML = round.teamWordsList.map((item, idx) => {
     const text = cardText(item.card);
@@ -2788,7 +3097,7 @@ function renderTeamWordsList() {
     return `
       <li class="team-word-row ${checked ? 'is-checked' : ''}" data-idx="${idx}">
         <label class="team-word-label">
-          <input type="checkbox" class="team-word-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''}>
+          <input type="checkbox" class="team-word-checkbox" data-idx="${idx}" ${checked ? 'checked' : ''} ${isLocked ? 'disabled' : ''}>
           <span class="team-checkbox-box" aria-hidden="true"></span>
           <span class="team-word-text">${escapeHtml(text)}</span>
           ${cat ? `<span class="team-word-cat">${escapeHtml(cat)}</span>` : ''}
@@ -2944,7 +3253,7 @@ function tick() {
   $("timeLeft").textContent = Math.ceil(left / 1000);
   $("timeLeft").classList.toggle("low", left <= 10000);
   $("barFill").style.transform = "scaleX(" + (left / S.total) + ")";
-  if (left <= 0) endTeamTurn();
+  if (left <= 0) endTeamTurn("timeup");
 }
 
 function recomputeTeamTotals(teamIdx) {
@@ -2968,14 +3277,15 @@ function recomputeTeamTotals(teamIdx) {
   team.score = totalRight.length;
 }
 
-function endTeamTurn() {
+function endTeamTurn(reason = "done", forceFromTimeup = false) {
   const round = S;
-  if (!round || !round.running) return;
+  if (!round || (!round.running && !forceFromTimeup)) return;
   round.running = false;
   round.locked = true;
   round.armed = false;
   clearInterval(round.timer);
   round.timer = null;
+  lockTeamGameBoard();
   releaseWake();
   $("game").classList.remove("ok", "skip");
 
@@ -3014,21 +3324,24 @@ function endTeamTurn() {
 
   playEndSound(turnRight.length);
   if (turnRight.length >= 10) celebrate();
-  vibe(turnRight.length >= 10 ? [80, 60, 120] : [140, 100, 200]);
+  if (!forceFromTimeup) {
+    vibe(turnRight.length >= 10 ? [80, 60, 120] : [140, 100, 200]);
+  }
 
   if (gameMode === "team") {
-    showTurnBreak(currentIdx);
+    showTurnBreak(currentIdx, reason);
   } else {
     finalResults();
   }
 }
 
-function showTurnBreak(reviewedIdx) {
+function showTurnBreak(reviewedIdx, reason = "timeup") {
   const round = S;
   if (!round) return;
 
   round.reviewedTeamIndex = reviewedIdx;
   round.reviewedRoundNum = round.currentRoundNum || 1;
+  round.turnReviewEditMode = false;
 
   const currentTeam = round.teamScores[reviewedIdx];
   const numTeams = round.teamScores.length;
@@ -3056,6 +3369,17 @@ function showTurnBreak(reviewedIdx) {
   round.nextTeamIndex = nextIdx;
   round.nextRoundNum = nextRnd;
 
+  const statusPill = $("turnStatusPill");
+  if (statusPill) {
+    if (reason === "timeup") {
+      statusPill.textContent = "⏰ Time's Up · Turn Locked";
+      statusPill.classList.remove("early-finish");
+    } else {
+      statusPill.textContent = "✅ Turn Finished · Locked";
+      statusPill.classList.add("early-finish");
+    }
+  }
+
   const badgeEl = $("turnBreakTeamBadge");
   if (badgeEl) {
     badgeEl.textContent = totalRounds > 1
@@ -3063,31 +3387,43 @@ function showTurnBreak(reviewedIdx) {
       : currentTeam.name;
   }
 
-  $("turnBreakTitle").textContent = totalRounds > 1
-    ? `${currentTeam.name}'s Round ${currentRnd} Done!`
+  $("turnBreakTitle").textContent = reason === "timeup"
+    ? `Time's Up, ${currentTeam.name}!`
     : `${currentTeam.name}'s Turn Done!`;
 
   renderTurnBreakReview(reviewedIdx, currentRnd);
   renderTurnBreakStandings(nextIdx);
 
   const durationWrap = $("turnBreakDurationWrap");
+  const passIcon = $("turnBreakPassIcon");
+  const passEyebrow = $("turnBreakPassEyebrow");
+  const passSub = $("turnBreakNextSub");
+
   if (isLastMatchTurn) {
     if (durationWrap) durationWrap.style.display = "none";
-    $("turnBreakNext").innerHTML = `🎉 <strong>Match Finished! (${totalRounds} Round${totalRounds === 1 ? '' : 's'})</strong><br><small style="opacity: 0.82; font-size: 0.95rem;">Review and adjust any answers above, then view the final results.</small>`;
+    if (passIcon) passIcon.textContent = "🏆";
+    if (passEyebrow) passEyebrow.textContent = `Match Complete (${totalRounds} Round${totalRounds === 1 ? "" : "s"})`;
+    $("turnBreakNext").textContent = "All turns finished!";
+    if (passSub) passSub.textContent = "Check the answers above, then tap below to reveal the winner.";
     $("nextTeamBtn").textContent = "🏆 View Match Results";
   } else {
     const nextTeam = round.teamScores[nextIdx];
     if (durationWrap) durationWrap.style.display = "";
     updateTurnDurationButtons();
 
-    let nextMsg = "";
-    if (isEndOfRound) {
-      nextMsg = `🔥 <strong>Round ${currentRnd} complete!</strong><br>Starting <strong>Round ${nextRnd} of ${totalRounds}</strong> — Pass the phone to <strong>${escapeHtml(nextTeam.name)}</strong>!`;
-    } else {
-      nextMsg = `Pass the phone to <strong>${escapeHtml(nextTeam.name)}</strong>!${totalRounds > 1 ? ` <span style="opacity:0.85; font-size:0.95em;">(Round ${nextRnd}/${totalRounds})</span>` : ''}`;
+    if (passIcon) passIcon.textContent = "📲";
+    if (passEyebrow) {
+      passEyebrow.textContent = isEndOfRound
+        ? `Round ${currentRnd} Complete · Starting Round ${nextRnd}`
+        : `Next Team Up`;
     }
-    $("turnBreakNext").innerHTML = nextMsg;
-    $("nextTeamBtn").textContent = `Start ${escapeHtml(nextTeam.name)}'s Turn`;
+    $("turnBreakNext").textContent = `Pass the phone to ${nextTeam.name}!`;
+    if (passSub) {
+      passSub.textContent = totalRounds > 1
+        ? `Hand the phone to ${nextTeam.name} for Round ${nextRnd} of ${totalRounds}`
+        : `Hand the phone to ${nextTeam.name} to start their turn`;
+    }
+    $("nextTeamBtn").textContent = `📲 Start ${nextTeam.name}'s Turn`;
   }
 
   show("turnBreak");
@@ -3099,34 +3435,55 @@ function renderTurnBreakReview(teamIdx, roundNum) {
   const cardsData = round.teamCards[teamIdx];
   const listEl = $("turnBreakWordsList");
   const countsEl = $("turnReviewCounts");
+  const titleEl = $("turnReviewTitle");
+  const editBtn = $("turnEditToggleBtn");
+  const currentTeam = round.teamScores[teamIdx];
   if (!listEl) return;
 
   const roundIdx = (roundNum || round.currentRoundNum || 1) - 1;
   const roundData = (cardsData && cardsData.rounds && cardsData.rounds[roundIdx]) ? cardsData.rounds[roundIdx] : null;
   const history = roundData ? (roundData.history || []) : (cardsData.history || []);
+  const editMode = Boolean(round.turnReviewEditMode);
 
   const rightCount = history.filter(h => h.kind === "right").length;
-  const skipCount = history.filter(h => h.kind === "skipped").length;
+  const totalCount = history.length;
 
+  if (titleEl) {
+    titleEl.textContent = editMode
+      ? `✏️ Edit ${currentTeam ? currentTeam.name + "'s" : ""} Answers`
+      : `✅ Answers ${currentTeam ? currentTeam.name : "You"} Got`;
+  }
   if (countsEl) {
-    countsEl.textContent = `${rightCount} Got · ${skipCount} Skipped`;
+    countsEl.textContent = `${rightCount} / ${totalCount}`;
+  }
+  if (editBtn) {
+    editBtn.textContent = editMode ? "Done editing" : "Wrong mark? Edit";
   }
   $("turnBreakScore").textContent = rightCount;
-  $("turnBreakSub").textContent = `${rightCount} word${rightCount === 1 ? "" : "s"} guessed this turn`;
+  $("turnBreakSub").textContent = `of ${totalCount} answer${totalCount === 1 ? "" : "s"} got this turn`;
 
   if (!history.length) {
-    listEl.innerHTML = `<p style="padding: 18px 12px; margin: 0; opacity: 0.6; font-size: 0.95rem; font-weight: 700;">No words played this turn.</p>`;
+    listEl.innerHTML = `<p class="turn-empty-got">No words played this turn.</p>`;
     return;
   }
 
-  listEl.innerHTML = history.map((item, idx) => {
+  const itemsToRender = editMode
+    ? history.map((item, idx) => ({ item, idx }))
+    : history.map((item, idx) => ({ item, idx })).filter(entry => entry.item.kind === "right");
+
+  if (!itemsToRender.length) {
+    listEl.innerHTML = `<p class="turn-empty-got">0 answers got before the timer ran out.<br><small style="opacity: 0.8;">Forgot to check one? Tap "Wrong mark? Edit" above.</small></p>`;
+    return;
+  }
+
+  listEl.innerHTML = itemsToRender.map(({ item, idx }) => {
     const isGot = item.kind === "right";
     const text = cardText(item.card);
     const rowClass = isGot ? "turn-word-row is-got" : "turn-word-row is-skipped";
-    const pillText = isGot ? "Got it ✨" : "Skipped ↷";
+    const pillText = isGot ? "Got it ✓" : "Missed";
 
     return `
-      <div class="${rowClass}" data-word-idx="${idx}" role="button" tabindex="0" aria-label="Toggle ${escapeHtml(text)}: currently ${isGot ? 'Got it' : 'Skipped'}">
+      <div class="${rowClass}" data-word-idx="${idx}" role="button" tabindex="0" aria-label="Toggle ${escapeHtml(text)}: currently ${isGot ? 'Got it' : 'Missed'}">
         <div class="turn-word-left">
           <input type="checkbox" class="turn-word-checkbox" data-word-idx="${idx}" ${isGot ? "checked" : ""} aria-label="Mark ${escapeHtml(text)} as Got it">
           <div class="turn-word-info">
@@ -3143,7 +3500,8 @@ function toggleTurnWord(idx, isGot) {
   const round = S;
   if (!round || round.reviewedTeamIndex === undefined) return;
   const teamIdx = round.reviewedTeamIndex;
-  const roundIdx = (round.reviewedRoundNum || round.currentRoundNum || 1) - 1;
+  const roundNum = round.reviewedRoundNum || round.currentRoundNum || 1;
+  const roundIdx = roundNum - 1;
   const cardsData = round.teamCards[teamIdx];
   if (!cardsData || !cardsData.rounds || !cardsData.rounds[roundIdx]) return;
 
@@ -3157,28 +3515,7 @@ function toggleTurnWord(idx, isGot) {
   roundData.skipped = roundData.history.filter(h => h.kind === "skipped").map(h => h.card);
 
   recomputeTeamTotals(teamIdx);
-
-  const turnRightCount = roundData.right.length;
-  const turnSkipCount = roundData.skipped.length;
-  $("turnBreakScore").textContent = turnRightCount;
-  $("turnBreakSub").textContent = `${turnRightCount} word${turnRightCount === 1 ? "" : "s"} guessed this turn`;
-  const countsEl = $("turnReviewCounts");
-  if (countsEl) countsEl.textContent = `${turnRightCount} Got · ${turnSkipCount} Skipped`;
-
-  const listEl = $("turnBreakWordsList");
-  if (listEl) {
-    const row = listEl.querySelector(`.turn-word-row[data-word-idx="${idx}"]`);
-    if (row) {
-      row.classList.toggle("is-got", isGot);
-      row.classList.toggle("is-skipped", !isGot);
-      row.setAttribute("aria-label", `Toggle ${escapeHtml(cardText(item.card))}: currently ${isGot ? 'Got it' : 'Skipped'}`);
-      const pill = row.querySelector(".turn-word-pill");
-      if (pill) pill.textContent = isGot ? "Got it ✨" : "Skipped ↷";
-      const cb = row.querySelector(".turn-word-checkbox");
-      if (cb) cb.checked = isGot;
-    }
-  }
-
+  renderTurnBreakReview(teamIdx, roundNum);
   renderTurnBreakStandings(round.nextTeamIndex);
 
   if (isGot) {
@@ -3414,6 +3751,13 @@ document.querySelectorAll("#turnDurationOptions button").forEach(btn => {
   });
 });
 
+$("turnEditToggleBtn")?.addEventListener("click", () => {
+  const round = S;
+  if (!round || round.reviewedTeamIndex === undefined) return;
+  round.turnReviewEditMode = !round.turnReviewEditMode;
+  renderTurnBreakReview(round.reviewedTeamIndex, round.reviewedRoundNum || round.currentRoundNum || 1);
+});
+
 const turnBreakWordsList = $("turnBreakWordsList");
 if (turnBreakWordsList) {
   turnBreakWordsList.addEventListener("click", (e) => {
@@ -3558,28 +3902,31 @@ window.addEventListener("resize", handleOrientationChange);
 
 /* Team Ready Screen Listeners */
 $("teamReadyStartBtn")?.addEventListener("click", () => {
-  startTeamGameRound();
+  beginTeamReadyCountdown();
 });
 $("teamReadyCancelBtn")?.addEventListener("click", () => {
+  clearInterval(teamReadyTimer);
+  teamReadyTimer = null;
   show("setup");
 });
 
 /* Team Game Checklist Listeners */
 $("teamGameEndBtn")?.addEventListener("click", () => {
-  endTeamTurn();
+  endTeamTurn("done");
 });
 $("teamGameDoneBtn")?.addEventListener("click", () => {
-  endTeamTurn();
+  endTeamTurn("done");
 });
 
 const teamGameList = $("teamGameList");
 if (teamGameList) {
   teamGameList.addEventListener("click", (e) => {
+    const round = S;
+    if (!round || !round.running || round.locked) return;
     const row = e.target.closest(".team-word-row");
     if (!row) return;
     const idx = Number(row.dataset.idx);
-    const round = S;
-    if (!round || !round.teamWordsList || !round.teamWordsList[idx]) return;
+    if (!round.teamWordsList || !round.teamWordsList[idx]) return;
 
     const item = round.teamWordsList[idx];
     const newChecked = !item.checked;
@@ -3601,10 +3948,15 @@ if (teamGameList) {
     }
 
     if (score === round.teamWordsList.length && round.teamWordsList.length > 0) {
+      round.running = false;
+      round.locked = true;
+      clearInterval(round.timer);
+      round.timer = null;
+      lockTeamGameBoard();
       showMoment(`🎉 All ${score} words checked!`);
       setTimeout(() => {
-        if (S && S.running) endTeamTurn();
-      }, 700);
+        endTeamTurn("done", true);
+      }, 650);
     }
   });
 }

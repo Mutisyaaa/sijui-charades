@@ -3,7 +3,7 @@
    Offline caching, fast loading, and standalone app support.
    ============================================================ */
 
-const CACHE_NAME = "sijui-pwa-v1";
+const CACHE_NAME = "sijui-pwa-v2";
 
 const PRECACHE_ASSETS = [
   "/",
@@ -143,3 +143,4 @@ self.addEventListener("message", event => {
     self.skipWaiting();
   }
 });
+
