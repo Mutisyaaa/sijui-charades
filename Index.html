@@ -1634,8 +1634,8 @@ body.high-contrast .toggle-switch:checked {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: min(560px, 100%);
+  gap: 6px;
+  width: min(520px, 100%);
   margin-inline: auto;
 }
 .team-words-checklist.is-locked {
@@ -1645,25 +1645,25 @@ body.high-contrast .toggle-switch:checked {
 }
 .team-word-row {
   background: var(--espresso);
-  border: 1.5px solid var(--espresso-border);
-  border-radius: 16px;
-  padding: 12px 16px;
+  border: 1px solid var(--espresso-border);
+  border-radius: 10px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
   -webkit-user-select: none;
-  box-shadow: 0 3px 0 var(--espresso-dark);
+  box-shadow: 0 2px 0 var(--espresso-dark);
 }
 .team-word-row:active {
-  transform: translateY(2px);
+  transform: translateY(1px);
   box-shadow: 0 1px 0 var(--espresso-dark);
 }
 .team-word-row.is-checked {
-  background: rgba(30, 95, 191, 0.24);
+  background: rgba(30, 95, 191, 0.2);
   border-color: var(--nganya-blue);
-  box-shadow: 0 0 14px rgba(30, 95, 191, 0.35), 0 3px 0 var(--nganya-blue-dark);
+  box-shadow: 0 2px 0 var(--nganya-blue-dark);
 }
 .team-word-label {
   display: flex;
@@ -1680,15 +1680,15 @@ body.high-contrast .toggle-switch:checked {
   height: 0;
 }
 .team-checkbox-box {
-  width: 32px;
-  height: 32px;
-  border: 2.5px solid rgba(245, 239, 228, 0.4);
-  border-radius: 9px;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(245, 239, 228, 0.45);
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-right: 14px;
+  margin-right: 10px;
   background: rgba(26, 21, 18, 0.6);
   transition: all 0.15s ease;
 }
@@ -1699,26 +1699,33 @@ body.high-contrast .toggle-switch:checked {
 }
 .team-word-row.is-checked .team-checkbox-box::after {
   content: "✓";
-  font-size: 1.35rem;
+  font-size: 0.95rem;
   font-weight: 900;
   line-height: 1;
 }
 .team-word-text {
   flex: 1 1 auto;
-  font-size: clamp(1.15rem, 4.2vmin, 1.45rem);
-  font-weight: 800;
+  font-size: 0.96rem;
+  font-weight: 700;
   color: var(--chalk);
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   line-height: 1.25;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+.team-word-row.is-checked .team-word-text {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--amber);
+  opacity: 0.65;
 }
 .team-word-cat {
-  font-size: 0.76rem;
-  font-weight: 800;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--amber);
   background: rgba(242, 167, 27, 0.12);
   border: 1px solid rgba(242, 167, 27, 0.3);
   border-radius: 999px;
-  padding: 3px 10px;
+  padding: 2px 8px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   flex-shrink: 0;
