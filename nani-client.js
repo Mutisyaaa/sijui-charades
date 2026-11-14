@@ -324,20 +324,9 @@ function renderNaniPlay(myPlayer, room) {
     $n("naniPlayRosterProgress").textContent = `${guessedCount} / ${totalCount} Guessed`;
   }
 
-  // Populate card details
+  // Populate card image only (no name/category/hint to keep the pressure on other players!)
   const imgEl = $n("naniCardImage");
   const fallbackEl = $n("naniCardAvatarFallback");
-  const nameEl = $n("naniCardName");
-  const catEl = $n("naniCardCategory");
-  const hintEl = $n("naniCardHint");
-  const fbEmoji = $n("naniCardAvatarEmoji");
-  const fbName = $n("naniCardAvatarName");
-
-  if (nameEl) nameEl.textContent = card.name;
-  if (catEl) catEl.textContent = card.category;
-  if (hintEl) hintEl.textContent = card.hint || "";
-  if (fbEmoji) fbEmoji.textContent = card.avatar || "👤";
-  if (fbName) fbName.textContent = card.name;
 
   if (imgEl && fallbackEl) {
     imgEl.style.display = "block";

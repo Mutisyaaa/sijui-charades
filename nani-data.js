@@ -1,362 +1,363 @@
 // Curated Character Card Packs for Nani Huyu? (Who Am I? Sticky Forehead)
+// All characters have local, fast-loading, verified HD portraits in /assets/characters/
 module.exports = [
   {
     id: "kenya",
     name: "Kenyan Celebs & Icons",
-    description: "Famous Kenyan musicians, athletes, actors, media personalities & legends",
+    description: "Presidents, politicians, world champions, artists & legends",
     icon: "🇰🇪",
     cards: [
       {
         id: "kipchoge",
         name: "Eliud Kipchoge",
         category: "Marathon Legend",
-        hint: "Sub-2-hour marathon · No human is limited",
+        hint: "Sub-2-hour marathon · 'No human is limited' · 2x Olympic Gold",
         avatar: "🏃‍♂️",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Eliud_Kipchoge_after_breaking_the_world_marathon_record_in_Berlin%2C_2022.jpg/500px-Eliud_Kipchoge_after_breaking_the_world_marathon_record_in_Berlin%2C_2022.jpg"
+        image: "/assets/characters/kipchoge.jpg"
       },
       {
         id: "lupita",
         name: "Lupita Nyong'o",
         category: "Oscar-Winning Actress",
-        hint: "Black Panther · 12 Years a Slave",
+        hint: "Black Panther (Nakia) · 12 Years a Slave · Hollywood star",
         avatar: "👑",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Lupita_Nyong%27o_Deauville_2024.jpg/500px-Lupita_Nyong%27o_Deauville_2024.jpg"
+        image: "/assets/characters/lupita.jpg"
+      },
+      {
+        id: "ruto",
+        name: "William Ruto",
+        category: "President of Kenya",
+        hint: "5th President · 'The Hustler' · Sugoi",
+        avatar: "🇰🇪",
+        image: "/assets/characters/ruto.jpg"
+      },
+      {
+        id: "raila",
+        name: "Raila Odinga",
+        category: "Political Icon (Baba)",
+        hint: "Former Prime Minister · Agwambo · Bondo",
+        avatar: "🧢",
+        image: "/assets/characters/raila.jpg"
+      },
+      {
+        id: "uhuru",
+        name: "Uhuru Kenyatta",
+        category: "Former President",
+        hint: "4th President · Son of Jomo · Ichaweri",
+        avatar: "🏛️",
+        image: "/assets/characters/uhuru.jpg"
+      },
+      {
+        id: "kibaki",
+        name: "Mwai Kibaki",
+        category: "Former President & Economist",
+        hint: "3rd President · Free Primary Education · Thika Superhighway",
+        avatar: "👓",
+        image: "/assets/characters/kibaki.jpg"
+      },
+      {
+        id: "jomo",
+        name: "Jomo Kenyatta",
+        category: "Founding Father (Mzee)",
+        hint: "1st President of Kenya · Fly-whisk · Harambee motto",
+        avatar: "🦁",
+        image: "/assets/characters/jomo.jpg"
       },
       {
         id: "wangari",
         name: "Wangari Maathai",
         category: "Nobel Peace Laureate",
-        hint: "Green Belt Movement · Environmental hero",
+        hint: "Green Belt Movement · Environmental hero · First African woman Nobelist",
         avatar: "🌳",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Wangari_Maathai_2001.jpg/500px-Wangari_Maathai_2001.jpg"
+        image: "/assets/characters/wangari.jpg"
       },
       {
         id: "omanyala",
         name: "Ferdinand Omanyala",
         category: "Sprint Champion",
-        hint: "Africa's fastest man · 100m sprint",
+        hint: "Africa's fastest man · 100m sprint · 9.77 seconds",
         avatar: "⚡",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Ferdinand_Omanyala.jpg/500px-Ferdinand_Omanyala.jpg"
+        image: "/assets/characters/omanyala.jpg"
+      },
+      {
+        id: "rudisha",
+        name: "David Rudisha",
+        category: "800m World Record Legend",
+        hint: "London 2012 1:40.91 · King David · Unbroken world record",
+        avatar: "🥇",
+        image: "/assets/characters/rudisha.jpg"
+      },
+      {
+        id: "kipyegon",
+        name: "Faith Kipyegon",
+        category: "Track Queen & 1500m GOAT",
+        hint: "3x Olympic Champion · Multiple world records · Keringet hero",
+        avatar: "🏃‍♀️",
+        image: "/assets/characters/kipyegon.jpg"
       },
       {
         id: "wanyama",
         name: "Victor Wanyama",
         category: "Football Star",
-        hint: "Former Harambee Stars Captain · Tottenham & Celtic",
+        hint: "Former Harambee Stars Captain · Tottenham & Celtic midfielder · 'Spaghetti tweet'",
         avatar: "⚽",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Victor_Wanyama.jpg/500px-Victor_Wanyama.jpg"
+        image: "/assets/characters/wanyama.jpg"
       },
       {
-        id: "ericomondi",
-        name: "Eric Omondi",
-        category: "Comedy King & Activist",
-        hint: "President of Comedy Africa · Street stunts & charity",
-        avatar: "🎤",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Eric_Omondi.jpg/500px-Eric_Omondi.jpg"
+        id: "mariga",
+        name: "McDonald Mariga",
+        category: "Champions League Winner",
+        hint: "Inter Milan UEFA Champions League 2010 · Victor Wanyama's brother",
+        avatar: "🏆",
+        image: "/assets/characters/mariga.jpg"
       },
       {
-        id: "bien",
-        name: "Bien-Aimé Baraza",
-        category: "Musician (Sauti Sol)",
-        hint: "Sauti Sol frontman · Baldman · 'Inauma'",
-        avatar: "🎸",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Bien-Aime_Baraza.jpg/500px-Bien-Aime_Baraza.jpg"
+        id: "oliech",
+        name: "Dennis Oliech",
+        category: "Legendary Striker (The Menace)",
+        hint: "Harambee Stars all-time top scorer · Nantes & Auxerre hero",
+        avatar: "🎯",
+        image: "/assets/characters/oliech.jpg"
       },
       {
         id: "khaligraph",
         name: "Khaligraph Jones",
         category: "The OG Rapper",
-        hint: "Kayole 1960 · Mazishi · 'Yego'",
+        hint: "Kayole 1960 · Mazishi · 'Yego' · SoundCity MVP",
         avatar: "🎙️",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Khaligraph_Jones.jpg/500px-Khaligraph_Jones.jpg"
-      },
-      {
-        id: "churchill",
-        name: "Churchill (Daniel Ndambuki)",
-        category: "Godfather of Kenyan Comedy",
-        hint: "Churchill Show · Classic 105 host",
-        avatar: "🎭",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Daniel_%22Churchill%22_Ndambuki.jpg/500px-Daniel_%22Churchill%22_Ndambuki.jpg"
+        image: "/assets/characters/khaligraph.jpg"
       },
       {
         id: "larrymadowo",
         name: "Larry Madowo",
         category: "Global Journalist",
-        hint: "CNN International Correspondent · Former NTV host",
+        hint: "CNN International Correspondent · Former BBC & The Trend host",
         avatar: "📺",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/Larry_Madowo_2019.jpg/500px-Larry_Madowo_2019.jpg"
+        image: "/assets/characters/larrymadowo.jpg"
       },
       {
-        id: "mejja",
-        name: "Mejja (Okwonkwo)",
-        category: "Gengetone Legend",
-        hint: "Always holds a tumbler cup · 'Siskii' · Genge icon",
-        avatar: "🥤",
-        image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500&auto=format&fit=crop"
+        id: "ndereba",
+        name: "Catherine Ndereba",
+        category: "Marathon Queen (Catherine the Great)",
+        hint: "4x Boston Marathon Champion · 2x World Champion · Olympic silver medalist",
+        avatar: "🏅",
+        image: "/assets/characters/ndereba.jpg"
       },
       {
-        id: "kennar",
-        name: "Crazy Kennar",
-        category: "Digital Content King",
-        hint: "Tales of Crazy Kennar · Stand-up & sketches",
-        avatar: "🎬",
-        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop"
-      },
-      {
-        id: "njugush",
-        name: "Njugush (Timothy Kimani)",
-        category: "Comedian & Creator",
-        hint: "Real Househelps of Kawangware · 'Through Thick & Thin'",
-        avatar: "😂",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop"
-      },
-      {
-        id: "verasidika",
-        name: "Vera Sidika",
-        category: "Socialite & Entrepreneur",
-        hint: "Shikwekwe · Nairobi Diaries · Business mogul",
-        avatar: "💅",
-        image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop"
-      },
-      {
-        id: "nadiamukami",
-        name: "Nadia Mukami",
-        category: "African Pop Star",
-        hint: "African Popstar · 'Radio Love' · 'Si Rahisi'",
-        avatar: "🎶",
-        image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&auto=format&fit=crop"
-      },
-      {
-        id: "otilebrown",
-        name: "Otile Brown",
-        category: "R&B / Bongo Sensation",
-        hint: "Bad Man Shivo · 'Chaguo La Moyo' · 'Dusuma'",
-        avatar: "🕶️",
-        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop"
-      },
-      {
-        id: "juacali",
-        name: "Jua Cali",
-        category: "Genge Pioneer",
-        hint: "Calif Records pioneer · 'Ngeli ya Genge' · 'Kwaheri'",
-        avatar: "🧢",
-        image: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=500&auto=format&fit=crop"
-      },
-      {
-        id: "akothee",
-        name: "Akothee (Madam Boss)",
-        category: "Musician & Philanthropist",
-        hint: "Madam Boss · Akothee Foundation · High energy",
-        avatar: "💃",
-        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop"
+        id: "ngugi",
+        name: "Ngũgĩ wa Thiong'o",
+        category: "World-Renowned Author",
+        hint: "Weep Not, Child · Decolonising the Mind · Petals of Blood",
+        avatar: "📚",
+        image: "/assets/characters/ngugi.jpg"
       }
     ]
   },
   {
     id: "global",
     name: "Global Icons & Stars",
-    description: "Famous world celebrities, world leaders, athletes & legends",
-    icon: "🌟",
+    description: "Athletes, world leaders, pop stars, actors & innovators",
+    icon: "🌍",
     cards: [
       {
         id: "messi",
         name: "Lionel Messi",
         category: "Football GOAT",
-        hint: "World Cup 2022 Champion · 8 Ballon d'Ors · Inter Miami",
-        avatar: "⚽",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg/500px-Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg"
+        hint: "World Cup 2022 Champion · 8 Ballon d'Ors · Argentina & Inter Miami",
+        avatar: "🐐",
+        image: "/assets/characters/messi.jpg"
       },
       {
         id: "ronaldo",
         name: "Cristiano Ronaldo",
-        category: "Football Icon (CR7)",
-        hint: "SIUUU! · Real Madrid & Portugal · 5 Champions Leagues",
-        avatar: "🐐",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Cristiano_Ronaldo_playing_for_Al_Nassr_FC_against_Persepolis%2C_September_2023_%28cropped%29.jpg/500px-Cristiano_Ronaldo_playing_for_Al_Nassr_FC_against_Persepolis%2C_September_2023_%28cropped%29.jpg"
+        category: "Football Superstar",
+        hint: "CR7 · 'Siuuu!' · Real Madrid, Man United & Al-Nassr icon",
+        avatar: "⚽",
+        image: "/assets/characters/ronaldo.jpg"
       },
       {
         id: "obama",
         name: "Barack Obama",
         category: "44th US President",
-        hint: "'Yes We Can' · Kogelo roots · Nobel Peace Prize",
+        hint: "'Yes We Can' · Nobel Peace Prize · Roots in Kogelo, Kenya",
         avatar: "🇺🇸",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/President_Barack_Obama.jpg/500px-President_Barack_Obama.jpg"
+        image: "/assets/characters/obama.jpg"
       },
       {
         id: "beyonce",
         name: "Beyoncé",
-        category: "Queen of Music (Queen Bey)",
-        hint: "Destiny's Child · 'Single Ladies' · Renaissance",
+        category: "Queen Bey / Pop Icon",
+        hint: "Destiny's Child · 'Single Ladies' · Renaissance · Most Grammy wins in history",
         avatar: "🐝",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Beyonc%C3%A9_at_The_Lion_King_European_Premiere_2019.png/500px-Beyonc%C3%A9_at_The_Lion_King_European_Premiere_2019.png"
+        image: "/assets/characters/beyonce.jpg"
       },
       {
         id: "mj",
         name: "Michael Jackson",
         category: "King of Pop",
-        hint: "Moonwalk · 'Thriller' · 'Billie Jean'",
+        hint: "Moonwalk · Thriller · White fedora & single glove",
         avatar: "🕺",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Michael_Jackson_in_1988.jpg/500px-Michael_Jackson_in_1988.jpg"
+        image: "/assets/characters/mj.jpg"
       },
       {
         id: "rihanna",
         name: "Rihanna",
         category: "Pop Superstar & Mogul",
-        hint: "Fenty Beauty · 'Umbrella' · 'Diamonds'",
+        hint: "Barbados billionaire · Fenty Beauty · 'Umbrella' · 'Diamonds'",
         avatar: "💎",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Rihanna_Fenty_2018.png/500px-Rihanna_Fenty_2018.png"
+        image: "/assets/characters/rihanna.jpg"
       },
       {
-        id: "elon",
+        id: "musk",
         name: "Elon Musk",
         category: "Tech Billionaire",
-        hint: "Tesla · SpaceX · Owner of X (Twitter)",
+        hint: "Tesla · SpaceX rockets · Cybertruck · X (Twitter)",
         avatar: "🚀",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Elon_Musk_Colorado_2022_%28cropped2%29.jpg/500px-Elon_Musk_Colorado_2022_%28cropped2%29.jpg"
+        image: "/assets/characters/musk.jpg"
       },
       {
-        id: "taylorswift",
+        id: "swift",
         name: "Taylor Swift",
         category: "Pop Phenomenon",
-        hint: "Eras Tour · 'Shake It Off' · Swifties",
-        avatar: "🎤",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_4.png/500px-Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_4.png"
+        hint: "The Eras Tour · 'Shake It Off' · Swifties army · 1989",
+        avatar: "✨",
+        image: "/assets/characters/swift.jpg"
       },
       {
         id: "jackiechan",
         name: "Jackie Chan",
-        category: "Martial Arts & Action Star",
-        hint: "Does his own stunts · Rush Hour · Drunken Master",
+        category: "Martial Arts & Action Icon",
+        hint: "Does all his own stunts · Rush Hour · Drunken Master · Kung Fu comedy",
         avatar: "🥋",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Jackie_Chan_July_2016.jpg/500px-Jackie_Chan_July_2016.jpg"
+        image: "/assets/characters/jackiechan.jpg"
       },
       {
         id: "serena",
         name: "Serena Williams",
         category: "Tennis GOAT",
-        hint: "23 Grand Slam singles titles · Tennis powerhouse",
+        hint: "23 Grand Slam singles titles · Dominant power serve · Olympic gold",
         avatar: "🎾",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Serena_Williams_at_2013_US_Open.jpg/500px-Serena_Williams_at_2013_US_Open.jpg"
+        image: "/assets/characters/serena.jpg"
       },
       {
         id: "haaland",
         name: "Erling Haaland",
-        category: "Man City Goal Machine",
-        hint: "Norwegian cyborg · Premier League record breaker",
-        avatar: "🤖",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Erling_Haaland_2023_%28cropped%29.jpg/500px-Erling_Haaland_2023_%28cropped%29.jpg"
+        category: "Goal Machine",
+        hint: "Manchester City viking striker · Premier League golden boot · Norway",
+        avatar: "⚡",
+        image: "/assets/characters/haaland.jpg"
       },
       {
         id: "mbappe",
         name: "Kylian Mbappé",
-        category: "Real Madrid & France Star",
-        hint: "World Cup final hat-trick · Blistering speed",
-        avatar: "⚡",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/2022_FIFA_World_Cup_France_4%E2%80%931_Australia_-_%287%29_%28cropped%29.jpg/500px-2022_FIFA_World_Cup_France_4%E2%80%931_Australia_-_%287%29_%28cropped%29.jpg"
+        category: "French Football Prodigy",
+        hint: "World Cup winner · Real Madrid superstar · Blistering speed",
+        avatar: "🐢",
+        image: "/assets/characters/mbappe.jpg"
       },
       {
         id: "hamilton",
         name: "Lewis Hamilton",
         category: "7x F1 World Champion",
-        hint: "Formula 1 Legend · Mercedes & Ferrari",
+        hint: "Mercedes F1 legend · Ferrari move · Record pole positions",
         avatar: "🏎️",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Lewis_Hamilton_2022_Silverstone_%28cropped%29.jpg/500px-Lewis_Hamilton_2022_Silverstone_%28cropped%29.jpg"
+        image: "/assets/characters/hamilton.jpg"
       },
       {
-        id: "usainbolt",
+        id: "bolt",
         name: "Usain Bolt",
-        category: "World's Fastest Human",
-        hint: "9.58s 100m World Record · Lightning Bolt pose ⚡",
+        category: "Fastest Man in History",
+        hint: "9.58s 100m World Record · Jamaica · Famous lightning bolt pose",
         avatar: "⚡",
-        image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&auto=format&fit=crop"
+        image: "/assets/characters/bolt.jpg"
       }
     ]
   },
   {
-    id: "characters",
+    id: "movies",
     name: "Movies, Cartoons & Memes",
-    description: "Famous fictional characters, superheroes & pop culture legends",
-    icon: "🦸‍♂️",
+    description: "Famous superheroes, fictional characters & animated legends",
+    icon: "🍿",
     cards: [
       {
         id: "spiderman",
         name: "Spider-Man",
         category: "Marvel Superhero",
-        hint: "Peter Parker · Web slinger · 'With great power...'",
+        hint: "Peter Parker · Web slinger · 'With great power comes great responsibility'",
         avatar: "🕷️",
-        image: "https://upload.wikimedia.org/wikipedia/en/thumb/2/21/Web_of_Spider-Man_Vol_1_129-1.png/500px-Web_of_Spider-Man_Vol_1_129-1.png"
+        image: "/assets/characters/spiderman.jpg"
       },
       {
         id: "batman",
         name: "Batman",
         category: "DC Dark Knight",
-        hint: "Bruce Wayne · Batmobile · Protects Gotham City",
+        hint: "Bruce Wayne · Batmobile · Gotham City protector · 'I am vengeance'",
         avatar: "🦇",
-        image: "https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Batman_Infobox.jpg/500px-Batman_Infobox.jpg"
+        image: "/assets/characters/batman.jpg"
       },
       {
         id: "mrbean",
         name: "Mr. Bean",
         category: "Comedy Legend",
-        hint: "Teddy bear · Green Mini car · Rarely speaks",
+        hint: "Brown tweed jacket · Teddy bear · Green Mini Cooper · Rowan Atkinson",
         avatar: "🧸",
-        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Rowan_Atkinson_2011.jpg/500px-Rowan_Atkinson_2011.jpg"
+        image: "/assets/characters/mrbean.jpg"
       },
       {
         id: "shrek",
         name: "Shrek",
-        category: "Swamp Ogre",
-        hint: "Lives in a swamp · Best friend Donkey · Green ogre",
+        category: "Animated Swamp Hero",
+        hint: "Green ogre · Donkey sidekick · 'Ogres are like onions' · Far Far Away",
         avatar: "🧅",
-        image: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4d/Shrek_%28character%29.png/500px-Shrek_%28character%29.png"
+        image: "/assets/characters/shrek.jpg"
       },
       {
         id: "spongebob",
         name: "SpongeBob SquarePants",
-        category: "Bikini Bottom Chef",
-        hint: "Lives in a pineapple under the sea · Krusty Krab chef",
+        category: "Bikini Bottom Icon",
+        hint: "Lives in a pineapple under the sea · Krusty Krab fry cook · Patrick's best friend",
         avatar: "🍍",
-        image: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/SpongeBob_SquarePants_character.svg/500px-SpongeBob_SquarePants_character.svg.png"
+        image: "/assets/characters/spongebob.jpg"
       },
       {
         id: "harrypotter",
         name: "Harry Potter",
-        category: "Boy Wizard",
-        hint: "Lightning bolt scar · Hogwarts Gryffindor · Wand",
+        category: "The Boy Who Lived",
+        hint: "Lightning scar · Round glasses · Gryffindor wand · Hogwarts hero",
         avatar: "⚡",
-        image: "https://images.unsplash.com/photo-1547756536-cde3673fa2e5?w=500&auto=format&fit=crop"
+        image: "/assets/characters/harrypotter.jpg"
       },
       {
         id: "ironman",
         name: "Iron Man",
-        category: "Marvel Avenger",
-        hint: "Tony Stark · Arc reactor suit · Billionaire genius",
-        avatar: "🦾",
-        image: "https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=500&auto=format&fit=crop"
+        category: "Avenger & Genius",
+        hint: "Tony Stark · Red & gold powered armor suit · 'I am Iron Man'",
+        avatar: "🤖",
+        image: "/assets/characters/ironman.jpg"
       },
       {
         id: "joker",
         name: "The Joker",
-        category: "Gotham Supervillain",
-        hint: "'Why so serious?' · Green hair & makeup · Batman's rival",
+        category: "Gotham Arch-Villain",
+        hint: "Green hair · Clown makeup · 'Why so serious?' · Batman's nemesis",
         avatar: "🃏",
-        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500&auto=format&fit=crop"
+        image: "/assets/characters/joker.jpg"
       },
       {
         id: "mickey",
         name: "Mickey Mouse",
         category: "Disney Mascot",
-        hint: "Famous round ears · Red shorts · Disney icon",
+        hint: "Round black ears · Red shorts with white buttons · Minnie's partner",
         avatar: "🐭",
-        image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop"
+        image: "/assets/characters/mickey.jpg"
       },
       {
         id: "pikachu",
         name: "Pikachu",
-        category: "Pokémon",
-        hint: "Yellow electric mouse · 'Pika Pika!' · Thunder shock",
+        category: "Electric Pokémon Mascot",
+        hint: "Yellow mouse · Lightning tail · 'Pika Pika!' · Ash Ketchum's partner",
         avatar: "⚡",
-        image: "https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?w=500&auto=format&fit=crop"
+        image: "/assets/characters/pikachu.jpg"
       }
     ]
   }

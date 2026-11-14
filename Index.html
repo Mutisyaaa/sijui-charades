@@ -2413,20 +2413,22 @@ body.high-contrast .toggle-switch:checked {
 }
 .nani-card-frame {
   width: 100%;
-  max-height: 100%;
-  background: var(--espresso);
-  border: 2.5px solid var(--amber);
-  border-radius: 24px;
+  max-width: 440px;
+  height: clamp(340px, 66vh, 520px);
+  background: #000000;
+  border: 3px solid var(--amber);
+  border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(242, 167, 27, 0.25);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 35px rgba(242, 167, 27, 0.35);
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  position: relative;
 }
 .nani-img-wrapper {
   width: 100%;
-  height: clamp(220px, 48vh, 360px);
+  height: 100%;
   background: #000000;
   position: relative;
   overflow: hidden;
@@ -2438,7 +2440,8 @@ body.high-contrast .toggle-switch:checked {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 15%;
+  transition: transform 0.2s ease;
 }
 .nani-avatar-fallback {
   display: none;
@@ -3219,7 +3222,7 @@ body.high-contrast .toggle-switch:checked {
 
   <section id="naniPlay" class="screen">
     <div class="nani-play-hud">
-      <span class="nani-facing-pill">👀 Point at friends</span>
+      <span class="nani-facing-pill">👀 Point phone at friends</span>
       <span id="naniPlayRosterProgress" class="nani-progress-pill">0 / 0 Guessed</span>
     </div>
     <div class="nani-card-display">
@@ -3227,14 +3230,9 @@ body.high-contrast .toggle-switch:checked {
         <div class="nani-img-wrapper">
           <img id="naniCardImage" class="nani-character-photo" src="" alt="Secret Character" />
           <div id="naniCardAvatarFallback" class="nani-avatar-fallback">
-            <span id="naniCardAvatarEmoji" class="nani-fallback-emoji">👤</span>
-            <span id="naniCardAvatarName" class="nani-fallback-name"></span>
+            <span class="nani-fallback-emoji">❓</span>
+            <span style="font-size:1.1rem; font-weight:800; color:var(--chalk);">Secret Identity</span>
           </div>
-        </div>
-        <div class="nani-card-footer">
-          <span id="naniCardCategory" class="nani-card-category-badge">Category</span>
-          <h2 id="naniCardName" class="nani-card-character-name">Character Name</h2>
-          <p id="naniCardHint" class="nani-card-hint-text">Hint</p>
         </div>
       </div>
     </div>
