@@ -612,4 +612,8 @@ function initNaniClient() {
   } catch (e) {}
 }
 
-window.addEventListener("DOMContentLoaded", initNaniClient);
+if (document.readyState === "loading") {
+  window.addEventListener("DOMContentLoaded", initNaniClient);
+} else {
+  initNaniClient();
+}
