@@ -346,13 +346,26 @@ router.post("/rooms/:code/start", async (req, res) => {
 
   if (deckId) room.deckId = deckId;
 
-  const pool = await getDeckCards(room.deckId);
+  let pool = await getDeckCards(room.deckId);
+  // If the chosen deck has fewer cards than players in the room,
+  // supplement from the full library so no two players EVER get the same character!
+  if (pool.length < room.players.length) {
+    const allCards = await getDeckCards("all");
+    const existingIds = new Set(pool.map(c => c.id || c.image));
+    for (const extraCard of shuffle(allCards)) {
+      if (!existingIds.has(extraCard.id || extraCard.image)) {
+        pool.push(extraCard);
+        existingIds.add(extraCard.id || extraCard.image);
+      }
+      if (pool.length >= room.players.length) break;
+    }
+  }
+
   const shuffled = shuffle(pool);
 
-  // Assign a distinct card to each player
+  // Assign a distinct card to each player - guaranteed unique per player
   room.players.forEach((player, idx) => {
-    const card = shuffled[idx % shuffled.length];
-    player.card = card;
+    player.card = shuffled[idx];
     player.guessed = false;
     player.rank = null;
     player.guessedAt = null;
@@ -416,11 +429,23 @@ router.post("/rooms/:code/restart", async (req, res) => {
 
   if (deckId) room.deckId = deckId;
 
-  const pool = await getDeckCards(room.deckId);
+  let pool = await getDeckCards(room.deckId);
+  if (pool.length < room.players.length) {
+    const allCards = await getDeckCards("all");
+    const existingIds = new Set(pool.map(c => c.id || c.image));
+    for (const extraCard of shuffle(allCards)) {
+      if (!existingIds.has(extraCard.id || extraCard.image)) {
+        pool.push(extraCard);
+        existingIds.add(extraCard.id || extraCard.image);
+      }
+      if (pool.length >= room.players.length) break;
+    }
+  }
+
   const shuffled = shuffle(pool);
 
   room.players.forEach((player, idx) => {
-    player.card = shuffled[idx % shuffled.length];
+    player.card = shuffled[idx];
     player.guessed = false;
     player.rank = null;
     player.guessedAt = null;
