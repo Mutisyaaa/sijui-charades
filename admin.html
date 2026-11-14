@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#F7EFDC">
-  <title>Admin · Sijui Charades</title>
+  <title>Admin Studio · Sijui Charades</title>
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,227 +23,295 @@
 <body>
   <main class="admin-shell">
     <header class="admin-header">
-      <a class="brand" href="Index.html"><img src="assets/images/logo.png" alt="" class="nav-logo"> Sijui Charades</a>
+      <a class="brand" href="Index.html"><img src="assets/images/logo.png" alt="" class="nav-logo"> Sijui Studio</a>
       <div class="user-tools">
         <span id="userName">Checking access…</span>
         <button id="logoutBtn" class="link-button" type="button">Log out</button>
       </div>
     </header>
 
-    <p class="eyebrow">Admin studio</p>
-    <h1>Build your decks.</h1>
-    <p class="intro">Add new categories and keep every card fresh. Changes here are saved directly to your PostgreSQL database.</p>
+    <div style="margin-bottom: 24px;">
+      <p class="eyebrow">Admin studio</p>
+      <h1>Manage your game.</h1>
+      <p class="intro">Create charades decks, upload photo packs for Nani Huyu, and customize winning &amp; losing fanfares.</p>
+    </div>
 
-    <div class="layout">
-      <div>
+    <!-- Studio Tabs Navigation -->
+    <nav class="admin-tabs" role="tablist" aria-label="Studio Sections">
+      <button type="button" id="tabBtnDecks" class="admin-tab-btn active" role="tab" aria-selected="true" data-tab="tabDecks">
+        <span>🗂️</span> Decks &amp; Cards
+      </button>
+      <button type="button" id="tabBtnNani" class="admin-tab-btn" role="tab" aria-selected="false" data-tab="tabNani">
+        <span>📸</span> Nani Huyu? Photos
+        <span id="naniTabBadge" class="tab-badge">0</span>
+      </button>
+      <button type="button" id="tabBtnSounds" class="admin-tab-btn" role="tab" aria-selected="false" data-tab="tabSounds">
+        <span>🎵</span> Game Sounds
+      </button>
+    </nav>
+
+    <!-- ============================================================
+         TAB 1: DECKS & CARDS
+         ============================================================ -->
+    <div id="tabDecks" class="admin-tab-content active" role="tabpanel">
+      <div class="layout">
+        <div>
+          <!-- Add a Deck -->
+          <section class="panel">
+            <h2 id="deckFormTitle">Add a deck</h2>
+            <form id="deckForm" class="form">
+              <div class="field">
+                <label for="deckName">Deck name</label>
+                <input id="deckName" name="name" maxlength="100" placeholder="e.g. Nairobi life" required>
+              </div>
+              <div class="field">
+                <label for="deckDescription">Description</label>
+                <textarea id="deckDescription" name="description" maxlength="240" placeholder="What kind of cards are in this deck?"></textarea>
+              </div>
+              <div class="field-row">
+                <div class="field"><label for="deckIcon">Deck icon</label><input id="deckIcon" maxlength="4" value="🎭" placeholder="🎭"></div>
+                <div class="field"><label for="deckTheme">Deck theme</label><select id="deckTheme"><option value="classic">Classic</option><option value="sunset">Sunset</option><option value="mint">Mint</option><option value="berry">Berry</option></select></div>
+              </div>
+              <div class="field">
+                <label for="deckCover">Cover image</label>
+                <input id="deckCover" type="file" accept="image/png,image/jpeg,image/webp">
+                <small class="field-help">Optional. Keep images under 700KB.</small>
+                <img id="deckCoverPreview" class="cover-preview" alt="Deck cover preview" hidden>
+              </div>
+              <label class="inline"><input id="deckPublished" type="checkbox" checked> Publish this deck in the game</label>
+              <div class="form-actions">
+                <button class="primary" type="submit">Save deck</button>
+                <button id="cancelDeckEdit" class="ghost" type="button" hidden>Cancel edit</button>
+              </div>
+            </form>
+            <p id="deckStatus" class="status" role="status"></p>
+          </section>
+
+          <!-- Add Cards -->
+          <section class="panel" style="margin-top: 24px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+              <h2 id="cardFormTitle" style="margin: 0;">Add cards</h2>
+              <div id="cardModeSwitch" class="card-mode-switch" style="display: inline-flex; gap: 4px; background: var(--paper-2); padding: 4px; border-radius: 12px; border: 2px solid var(--ink);">
+                <button type="button" id="tabSingleCard" class="small-button active" style="margin: 0; padding: 6px 14px;">Single Card</button>
+                <button type="button" id="tabBulkCards" class="small-button" style="margin: 0; padding: 6px 14px;">⚡ Bulk Paste</button>
+              </div>
+            </div>
+            <form id="cardForm" class="form">
+              <div class="field">
+                <label for="cardDeck">Deck</label>
+                <select id="cardDeck" required></select>
+              </div>
+
+              <!-- Single Card Mode -->
+              <div id="singleCardFields">
+                <div class="field">
+                  <label for="cardText">Card text</label>
+                  <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic">
+                </div>
+                <div class="field">
+                  <label for="cardCategory">Category</label>
+                  <input id="cardCategory" maxlength="60" placeholder="People, places, actions…">
+                </div>
+                <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
+                <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
+              </div>
+
+              <!-- Bulk Paste Mode -->
+              <div id="bulkCardFields" hidden>
+                <div class="field">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <label for="bulkCardText">Paste words / cards</label>
+                    <span id="bulkCountBadge" class="badge count">0 cards detected</span>
+                  </div>
+                  <textarea id="bulkCardText" rows="7" placeholder="Paste your words here!&#10;One word per line, or comma-separated:&#10;&#10;Heart&#10;Brain&#10;Lungs&#10;Stomach&#10;Skeleton" style="font-family: inherit; font-size: 0.95rem; resize: vertical; line-height: 1.5;"></textarea>
+                  <small style="color: var(--chalk-muted); font-size: 0.82rem; margin-top: 4px; display: block; font-weight: 600;">Supports bullet points (- or •) and numbering (1. 2.). It cleans them up automatically!</small>
+                </div>
+                <div class="field">
+                  <label for="bulkCardCategory">Default Category</label>
+                  <input id="bulkCardCategory" maxlength="60" placeholder="e.g. Anatomy">
+                </div>
+              </div>
+
+              <div class="form-actions" style="margin-top: 14px;">
+                <button id="saveCardBtn" class="primary" type="submit">Save card</button>
+                <button id="cancelCardEdit" class="ghost" type="button" hidden>Cancel edit</button>
+              </div>
+            </form>
+            <p id="cardStatus" class="status" role="status"></p>
+          </section>
+        </div>
+
+        <!-- Decks List Column -->
         <section class="panel">
-          <h2 id="deckFormTitle">Add a deck</h2>
-          <form id="deckForm" class="form">
-            <div class="field">
-              <label for="deckName">Deck name</label>
-              <input id="deckName" name="name" maxlength="100" placeholder="e.g. Nairobi life" required>
-            </div>
-            <div class="field">
-              <label for="deckDescription">Description</label>
-              <textarea id="deckDescription" name="description" maxlength="240" placeholder="What kind of cards are in this deck?"></textarea>
-            </div>
-            <div class="field-row">
-              <div class="field"><label for="deckIcon">Deck icon</label><input id="deckIcon" maxlength="4" value="🎭" placeholder="🎭"></div>
-              <div class="field"><label for="deckTheme">Deck theme</label><select id="deckTheme"><option value="classic">Classic</option><option value="sunset">Sunset</option><option value="mint">Mint</option><option value="berry">Berry</option></select></div>
-            </div>
-            <div class="field">
-              <label for="deckCover">Cover image</label>
-              <input id="deckCover" type="file" accept="image/png,image/jpeg,image/webp">
-              <small class="field-help">Optional. Keep images under 700KB.</small>
-              <img id="deckCoverPreview" class="cover-preview" alt="Deck cover preview" hidden>
-            </div>
-            <label class="inline"><input id="deckPublished" type="checkbox" checked> Publish this deck in the game</label>
-            <div class="form-actions">
-              <button class="primary" type="submit">Save deck</button>
-              <button id="cancelDeckEdit" class="ghost" type="button" hidden>Cancel edit</button>
-            </div>
-          </form>
-          <p id="deckStatus" class="status" role="status"></p>
-        </section>
-
-        <section class="panel" style="margin-top: 18px">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-            <h2 id="cardFormTitle" style="margin: 0;">Add cards</h2>
-            <div id="cardModeSwitch" class="card-mode-switch" style="display: inline-flex; gap: 4px; background: var(--espresso-dark); padding: 4px; border-radius: 12px; border: 1px solid var(--espresso-border);">
-              <button type="button" id="tabSingleCard" class="small-button active" style="margin: 0; padding: 6px 12px;">Single Card</button>
-              <button type="button" id="tabBulkCards" class="small-button" style="margin: 0; padding: 6px 12px;">⚡ Bulk Paste</button>
-            </div>
+          <div class="panel-header-row">
+            <h2>Your decks</h2>
+            <span id="deckCountBadge" class="badge count">Loading…</span>
           </div>
-          <form id="cardForm" class="form">
-            <div class="field">
-              <label for="cardDeck">Deck</label>
-              <select id="cardDeck" required></select>
-            </div>
-
-            <!-- Single Card Mode -->
-            <div id="singleCardFields">
-              <div class="field">
-                <label for="cardText">Card text</label>
-                <input id="cardText" maxlength="160" placeholder="e.g. Matatu traffic">
-              </div>
-              <div class="field">
-                <label for="cardCategory">Category</label>
-                <input id="cardCategory" maxlength="60" placeholder="People, places, actions…">
-              </div>
-              <div id="cardPreview" class="card-preview" aria-live="polite">Your card preview will appear here.</div>
-              <label class="inline"><input id="cardActive" type="checkbox" checked> Active in the game</label>
-            </div>
-
-            <!-- Bulk Paste Mode -->
-            <div id="bulkCardFields" hidden>
-              <div class="field">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <label for="bulkCardText">Paste words / cards</label>
-                  <span id="bulkCountBadge" class="badge count">0 cards detected</span>
-                </div>
-                <textarea id="bulkCardText" rows="7" placeholder="Paste your words here!&#10;One word per line, or comma-separated:&#10;&#10;Heart&#10;Brain&#10;Lungs&#10;Stomach&#10;Skeleton" style="font-family: inherit; font-size: 0.95rem; resize: vertical; line-height: 1.5;"></textarea>
-                <small style="color: var(--chalk-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Supports bullet points (- or •) and numbering (1. 2.). It cleans them up automatically!</small>
-              </div>
-              <div class="field">
-                <label for="bulkCardCategory">Default Category</label>
-                <input id="bulkCardCategory" maxlength="60" placeholder="e.g. Anatomy">
-              </div>
-            </div>
-
-            <div class="form-actions" style="margin-top: 14px;">
-              <button id="saveCardBtn" class="primary" type="submit">Save card</button>
-              <button id="cancelCardEdit" class="ghost" type="button" hidden>Cancel edit</button>
-            </div>
-          </form>
-          <p id="cardStatus" class="status" role="status"></p>
-        </section>
-
-        <section class="panel" style="margin-top: 18px">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-            <h2 style="margin: 0;">Game End Sounds</h2>
-            <span class="badge" style="background: rgba(242, 167, 27, 0.12); color: var(--amber); border-color: rgba(242, 167, 27, 0.35);">Threshold: 10 points</span>
-          </div>
-          <p style="color: var(--chalk-muted); font-size: 0.88rem; margin-bottom: 16px; line-height: 1.45;">
-            Upload multiple sounds for winning and losing. When a round ends, a sound will be <strong>randomly shuffled &amp; picked</strong>!
-            Scoring <strong>10 or more</strong> plays a winning celebration sound. Scoring <strong>under 10</strong> plays a comical losing / roast sound.
-          </p>
-
-          <div style="display: grid; gap: 16px;">
-            <!-- Winning Sounds Card -->
-            <div class="sound-card" style="background: var(--espresso-dark); border: 1.5px solid var(--espresso-border); border-radius: 14px; padding: 16px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <span style="font-size: 1.5rem;">🏆</span>
-                  <div>
-                    <strong style="color: var(--chalk); font-size: 0.98rem; display: block;">Winning Sounds (10+ pts)</strong>
-                    <small id="winSoundCount" style="color: var(--amber); font-size: 0.82rem;">Default Fanfare</small>
-                  </div>
-                </div>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" id="playWinSoundBtn" class="small-button" title="Test shuffle a winning sound">🎲 Test Shuffle</button>
-                  <button type="button" id="clearWinSoundsBtn" class="small-button danger" title="Remove all custom winning sounds" hidden>Clear All</button>
-                </div>
-              </div>
-
-              <!-- Winning sounds list -->
-              <div id="winSoundsList" style="margin: 10px 0; display: flex; flex-direction: column; gap: 6px;"></div>
-
-              <div class="field" style="margin-top: 12px; border-top: 1px dashed var(--espresso-border); padding-top: 10px;">
-                <label for="winSoundFile" style="font-size: 0.82rem; color: var(--chalk-muted); display: block; margin-bottom: 4px;">
-                  ➕ Add winning sounds (.mp3, .wav, .m4a — select one or multiple):
-                </label>
-                <input type="file" id="winSoundFile" accept="audio/*" multiple style="font-size: 0.85rem; padding: 8px 10px;">
-              </div>
-            </div>
-
-            <!-- Losing Sounds Card -->
-            <div class="sound-card" style="background: var(--espresso-dark); border: 1.5px solid var(--espresso-border); border-radius: 14px; padding: 16px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <span style="font-size: 1.5rem;">❌</span>
-                  <div>
-                    <strong style="color: var(--chalk); font-size: 0.98rem; display: block;">Losing Sounds (&lt; 10 pts)</strong>
-                    <small id="loseSoundCount" style="color: #FFAAA6; font-size: 0.82rem;">Default Wah-Wah Roast</small>
-                  </div>
-                </div>
-                <div style="display: flex; gap: 6px;">
-                  <button type="button" id="playLoseSoundBtn" class="small-button" title="Test shuffle a losing sound">🎲 Test Shuffle</button>
-                  <button type="button" id="clearLoseSoundsBtn" class="small-button danger" title="Remove all custom losing sounds" hidden>Clear All</button>
-                </div>
-              </div>
-
-              <!-- Losing sounds list -->
-              <div id="loseSoundsList" style="margin: 10px 0; display: flex; flex-direction: column; gap: 6px;"></div>
-
-              <div class="field" style="margin-top: 12px; border-top: 1px dashed var(--espresso-border); padding-top: 10px;">
-                <label for="loseSoundFile" style="font-size: 0.82rem; color: var(--chalk-muted); display: block; margin-bottom: 4px;">
-                  ➕ Add losing / roast sounds (.mp3, .wav, .m4a — select one or multiple):
-                </label>
-                <input type="file" id="loseSoundFile" accept="audio/*" multiple style="font-size: 0.85rem; padding: 8px 10px;">
-              </div>
-            </div>
-          </div>
-          <p id="soundStatus" class="status" role="status" style="margin-top: 12px;"></p>
+          <div id="deckList" class="deck-list"><p class="empty">Loading decks…</p></div>
         </section>
       </div>
+    </div>
 
+    <!-- ============================================================
+         TAB 2: NANI HUYU? PHOTO STUDIO
+         ============================================================ -->
+    <div id="tabNani" class="admin-tab-content" role="tabpanel">
       <section class="panel">
-        <h2>Your decks</h2>
-        <div id="deckList" class="deck-list"><p class="empty">Loading decks…</p></div>
+        <div class="nani-studio-header">
+          <div>
+            <h2 style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 1.85rem;">
+              📸 Nani Huyu? Photo Studio
+            </h2>
+            <p class="intro" style="margin: 8px 0 0; max-width: 80ch;">
+              Upload your own pictures for the sticky phone image game! No complicated details needed — just pick or type a category, select pictures, and hit upload.
+            </p>
+          </div>
+          <div class="nani-header-actions">
+            <span id="naniPhotosCount" class="badge count" style="font-size: 0.95rem; padding: 6px 14px;">0 custom photos</span>
+            <button id="clearAllNaniPhotosBtn" type="button" class="small-button danger" style="padding: 10px 16px;">
+              🗑️ Delete All Photos
+            </button>
+          </div>
+        </div>
+
+        <!-- Upload Box -->
+        <div class="nani-upload-box">
+          <h3 style="margin-top: 0; margin-bottom: 16px; font-size: 1.35rem;">➕ Add New Pictures</h3>
+          <div class="nani-upload-grid">
+            <div class="field">
+              <label for="naniCategory">Category Name</label>
+              <input id="naniCategory" list="naniCatPresets" placeholder="Type or choose category..." value="Friends &amp; Family">
+              <datalist id="naniCatPresets">
+                <option value="Friends &amp; Family">
+                <option value="Kenyan Celebs">
+                <option value="Politicians &amp; Leaders">
+                <option value="Global Superstars">
+                <option value="Footballers">
+                <option value="Musicians">
+                <option value="Movie Characters">
+                <option value="Memes">
+              </datalist>
+              <small class="field-help">Photos sharing the same category automatically form a playable pack in Nani Huyu!</small>
+            </div>
+
+            <div class="field">
+              <label for="naniPhotosInput">Pick Pictures (One or Multiple)</label>
+              <div class="file-drop-zone" id="naniDropZone">
+                <span style="font-size: 2.2rem;" aria-hidden="true">📁</span>
+                <div>
+                  <strong style="font-size: 1.05rem; display: block; color: var(--ink);">Choose photos or drag &amp; drop here</strong>
+                  <span style="display: block; opacity: 0.75; font-size: 0.85rem;">PNG, JPG, WEBP · Select 1 or dozens at once</span>
+                </div>
+                <input type="file" id="naniPhotosInput" accept="image/*" multiple>
+              </div>
+            </div>
+          </div>
+
+          <!-- Selection Previews Tray -->
+          <div id="naniPreviewTray" style="display: none; margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--ink);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong id="naniPreviewCount" style="font-size: 0.95rem;">0 pictures selected:</strong>
+              <button id="clearNaniSelectedBtn" type="button" class="link-button" style="padding: 4px 10px; font-size: 0.82rem;">Clear selection</button>
+            </div>
+            <div id="naniPreviewList" class="nani-preview-grid"></div>
+          </div>
+
+          <div style="margin-top: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <button id="uploadNaniPhotosBtn" class="primary" type="button" style="min-width: 220px;">
+              🚀 Upload Pictures
+            </button>
+            <p id="naniUploadStatus" class="status" role="status" style="margin: 0;"></p>
+          </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div style="margin-top: 28px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin: 0; font-size: 1.4rem;">Uploaded Picture Collection</h3>
+            <div id="naniCategoryFilter" class="nani-cat-filters"></div>
+          </div>
+          <div id="naniPhotosGallery" class="nani-gallery-grid">
+            <p class="empty">Loading photos…</p>
+          </div>
+        </div>
       </section>
     </div>
 
-    <!-- Dedicated Nani Huyu Photos Panel -->
-    <section class="panel" style="margin-top: 24px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
-        <div>
-          <h2 style="margin: 0; display: flex; align-items: center; gap: 8px;">📸 Nani Huyu? Photos</h2>
-          <p style="margin: 4px 0 0; color: var(--ink); opacity: 0.75; font-size: 0.95rem; font-weight: 600;">
-            Upload character pictures for the sticky phone party game. No extra details needed — just pick a category and upload!
-          </p>
+    <!-- ============================================================
+         TAB 3: GAME END SOUNDS
+         ============================================================ -->
+    <div id="tabSounds" class="admin-tab-content" role="tabpanel">
+      <section class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h2 style="margin: 0; font-size: 1.85rem;">🎵 Game End Sounds &amp; Fanfares</h2>
+            <p class="intro" style="margin: 8px 0 0; max-width: 75ch;">
+              Upload custom celebration or roast audio files. Scoring <strong>10 or more</strong> plays a winning fanfare. Scoring <strong>under 10</strong> plays a comical losing roast sound!
+            </p>
+          </div>
+          <span class="badge" style="background: var(--amber); color: var(--ink); font-size: 0.95rem; padding: 6px 14px;">
+            Threshold: 10 pts
+          </span>
         </div>
-        <span id="naniPhotosCount" class="badge count">0 custom photos</span>
-      </div>
 
-      <div style="background: var(--paper-2); border: var(--bw) solid var(--ink); border-radius: 18px; padding: 20px; margin-bottom: 20px;">
-        <div style="display: grid; grid-template-columns: minmax(200px, 1fr) minmax(240px, 1.4fr) auto; gap: 14px; align-items: end;">
-          <div class="field">
-            <label for="naniCategory">Category</label>
-            <input id="naniCategory" list="naniCatPresets" placeholder="e.g. Kenyan Celebs, Sports, Movies" value="Kenyan Celebs & Icons">
-            <datalist id="naniCatPresets">
-              <option value="Kenyan Celebs & Icons">
-              <option value="Global Icons & Stars">
-              <option value="Movies, Cartoons & Memes">
-              <option value="Sports Stars">
-              <option value="Musicians">
-              <option value="Presidents & Leaders">
-            </datalist>
+        <div class="sounds-layout">
+          <!-- Winning Sounds Card -->
+          <div class="sound-panel-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.8rem;">🏆</span>
+                <div>
+                  <strong style="font-size: 1.15rem; display: block; color: var(--ink);">Winning Fanfares (10+ pts)</strong>
+                  <small id="winSoundCount" style="color: var(--amber-deep); font-weight: 800; font-size: 0.88rem;">Default Fanfare</small>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="playWinSoundBtn" class="small-button" title="Test shuffle a winning sound">🎲 Test Shuffle</button>
+                <button type="button" id="clearWinSoundsBtn" class="small-button danger" title="Remove all custom winning sounds" hidden>Clear All</button>
+              </div>
+            </div>
+
+            <!-- Winning sounds list -->
+            <div id="winSoundsList" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;"></div>
+
+            <div class="field" style="margin-top: 14px; border-top: 2px dashed var(--ink); padding-top: 12px;">
+              <label for="winSoundFile" style="font-size: 0.9rem; color: var(--ink); font-weight: 800; display: block; margin-bottom: 6px;">
+                ➕ Add winning sounds (.mp3, .wav, .m4a — select one or multiple):
+              </label>
+              <input type="file" id="winSoundFile" accept="audio/*" multiple style="background: var(--white); font-size: 0.92rem; padding: 10px 12px;">
+            </div>
           </div>
 
-          <div class="field">
-            <label for="naniPhotosInput">Pick Pictures (One or Multiple)</label>
-            <input type="file" id="naniPhotosInput" accept="image/*" multiple style="background: var(--white); padding: 8px 12px; cursor: pointer;">
+          <!-- Losing Sounds Card -->
+          <div class="sound-panel-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.8rem;">❌</span>
+                <div>
+                  <strong style="font-size: 1.15rem; display: block; color: var(--ink);">Losing Roast Sounds (&lt; 10 pts)</strong>
+                  <small id="loseSoundCount" style="color: var(--red); font-weight: 800; font-size: 0.88rem;">Default Wah-Wah Roast</small>
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="playLoseSoundBtn" class="small-button" title="Test shuffle a losing sound">🎲 Test Shuffle</button>
+                <button type="button" id="clearLoseSoundsBtn" class="small-button danger" title="Remove all custom losing sounds" hidden>Clear All</button>
+              </div>
+            </div>
+
+            <!-- Losing sounds list -->
+            <div id="loseSoundsList" style="margin: 12px 0; display: flex; flex-direction: column; gap: 8px;"></div>
+
+            <div class="field" style="margin-top: 14px; border-top: 2px dashed var(--ink); padding-top: 12px;">
+              <label for="loseSoundFile" style="font-size: 0.9rem; color: var(--ink); font-weight: 800; display: block; margin-bottom: 6px;">
+                ➕ Add losing / roast sounds (.mp3, .wav, .m4a — select one or multiple):
+              </label>
+              <input type="file" id="loseSoundFile" accept="audio/*" multiple style="background: var(--white); font-size: 0.92rem; padding: 10px 12px;">
+            </div>
           </div>
-
-          <button id="uploadNaniPhotosBtn" class="primary" type="button" style="min-height: 50px; font-size: 1rem; white-space: nowrap;">
-            ➕ Upload Pictures
-          </button>
         </div>
-
-        <!-- Thumbnail Preview Tray -->
-        <div id="naniPreviewTray" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 2px dashed var(--ink);">
-          <strong style="font-size: 0.88rem; display: block; margin-bottom: 8px;">Selected pictures preview:</strong>
-          <div id="naniPreviewList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
-        </div>
-
-        <p id="naniUploadStatus" class="status" role="status" style="margin: 10px 0 0;"></p>
-      </div>
-
-      <!-- Uploaded Photos Grid -->
-      <div id="naniPhotosGallery" class="nani-gallery-grid">
-        <p class="empty">Loading photos…</p>
-      </div>
-    </section>
+        <p id="soundStatus" class="status" role="status" style="margin-top: 14px;"></p>
+      </section>
+    </div>
 
     <p class="admin-footer"><a href="Index.html">← Back to the game</a></p>
   </main>
@@ -270,11 +338,55 @@
     }
 
     function setStatus(id, message, kind = "") {
-      const el = $(id); el.textContent = message; el.className = "status" + (kind ? " " + kind : "");
+      const el = $(id);
+      if (!el) return;
+      el.textContent = message;
+      el.className = "status" + (kind ? " " + kind : "");
     }
 
+    /* ============================================================
+       Studio Tabs Navigation
+       ============================================================ */
+    function switchAdminTab(targetTabId) {
+      document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+        const isTarget = btn.dataset.tab === targetTabId;
+        btn.classList.toggle("active", isTarget);
+        btn.setAttribute("aria-selected", String(isTarget));
+      });
+      document.querySelectorAll(".admin-tab-content").forEach(content => {
+        content.classList.toggle("active", content.id === targetTabId);
+      });
+      try {
+        localStorage.setItem("sijui_admin_tab", targetTabId);
+        const hashTag = targetTabId === "tabDecks" ? "decks" : (targetTabId === "tabNani" ? "nani" : "sounds");
+        if (window.location.hash !== "#" + hashTag) {
+          window.history.replaceState(null, "", "#" + hashTag);
+        }
+      } catch (e) {}
+    }
+
+    document.querySelectorAll(".admin-tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => switchAdminTab(btn.dataset.tab));
+    });
+
+    (function initActiveTab() {
+      const hash = window.location.hash ? window.location.hash.toLowerCase() : "";
+      if (hash === "#nani" || hash === "#photos") {
+        switchAdminTab("tabNani");
+      } else if (hash === "#sounds") {
+        switchAdminTab("tabSounds");
+      } else {
+        const saved = localStorage.getItem("sijui_admin_tab");
+        if (saved && $(saved)) switchAdminTab(saved);
+      }
+    })();
+
+    /* ============================================================
+       Decks & Cards Management
+       ============================================================ */
     function renderDeckOptions() {
       const select = $("cardDeck");
+      if (!select) return;
       select.innerHTML = state.decks.length
         ? state.decks.map((deck, idx) => `<option value="${deck.id}">${idx + 1}. ${escapeHtml(deck.name)} (${deck.cards.length} card${deck.cards.length === 1 ? "" : "s"})</option>`).join("")
         : `<option value="">Create a deck first</option>`;
@@ -284,6 +396,10 @@
     function renderDecks() {
       renderDeckOptions();
       const list = $("deckList");
+      const badge = $("deckCountBadge");
+      if (badge) {
+        badge.textContent = `${state.decks.length} deck${state.decks.length === 1 ? "" : "s"}`;
+      }
       if (!state.decks.length) {
         list.innerHTML = `<p class="empty">No decks yet. Add your first one on the left.</p>`;
         return;
@@ -392,6 +508,12 @@
       $("cardModeSwitch").hidden = false;
       $("cancelCardEdit").hidden = true;
       switchCardMode(state.cardMode || "single");
+    }
+
+    function renderCardPreview() {
+      const text = $("cardText").value.trim() || "Your card text";
+      const category = $("cardCategory").value.trim() || "General";
+      $("cardPreview").innerHTML = `<b>${escapeHtml(text)}</b><small>${escapeHtml(category)}</small>`;
     }
 
     async function load() {
@@ -531,12 +653,9 @@
     });
     $("logoutBtn").addEventListener("click", async () => { await api("/api/logout", { method: "POST" }); window.location.href = "login.html"; });
 
-    function renderCardPreview() {
-      const text = $("cardText").value.trim() || "Your card text";
-      const category = $("cardCategory").value.trim() || "General";
-      $("cardPreview").innerHTML = `<b>${escapeHtml(text)}</b><small>${escapeHtml(category)}</small>`;
-    }
-
+    /* ============================================================
+       Game End Sounds Management
+       ============================================================ */
     let currentPreviewAudio = null;
     let adminAc = null;
 
@@ -644,18 +763,18 @@
 
     function renderSoundItems(type, list, container) {
       if (!list || !list.length) {
-        container.innerHTML = `<div style="font-size: 0.82rem; color: var(--chalk-muted); padding: 8px 12px; background: rgba(0,0,0,0.2); border-radius: 8px; font-style: italic;">No custom sounds uploaded yet. Built-in tone will play automatically.</div>`;
+        container.innerHTML = `<div style="font-size: 0.88rem; color: var(--chalk-muted); padding: 10px 14px; background: rgba(0,0,0,0.06); border-radius: 10px; font-style: italic;">No custom sounds uploaded yet. Built-in sound will play automatically.</div>`;
         return;
       }
       container.innerHTML = list.map(item => `
-        <div class="sound-item-row" data-id="${escapeHtml(item.id)}" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 6px 10px; gap: 8px;">
+        <div class="sound-item-row" data-id="${escapeHtml(item.id)}" style="display: flex; justify-content: space-between; align-items: center; background: var(--white); border: 2px solid var(--ink); border-radius: 10px; padding: 8px 12px; gap: 8px;">
           <div style="display: flex; align-items: center; gap: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">
-            <span style="font-size: 0.95rem; flex-shrink: 0;">🎵</span>
-            <span style="font-size: 0.86rem; color: var(--chalk); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
+            <span style="font-size: 1.1rem; flex-shrink: 0;">🎵</span>
+            <span style="font-size: 0.92rem; color: var(--ink); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <button type="button" class="small-button preview-btn" data-url="${escapeHtml(item.audio_url)}" style="padding: 3px 8px; font-size: 0.78rem;">▶️ Play</button>
-            <button type="button" class="small-button danger delete-btn" data-id="${escapeHtml(item.id)}" data-type="${type}" style="padding: 3px 8px; font-size: 0.78rem;" title="Delete this sound">🗑️</button>
+            <button type="button" class="small-button preview-btn" data-url="${escapeHtml(item.audio_url)}" style="padding: 4px 10px; font-size: 0.82rem;">▶️ Play</button>
+            <button type="button" class="small-button danger delete-btn" data-id="${escapeHtml(item.id)}" data-type="${type}" style="padding: 4px 10px; font-size: 0.82rem;" title="Delete this sound">🗑️</button>
           </div>
         </div>
       `).join("");
@@ -800,9 +919,11 @@
     });
 
     /* ============================================================
-       Nani Huyu? Photos Manager (No details, just pictures & categories)
+       Nani Huyu? Photos Studio (No details needed, just images & categories)
        ============================================================ */
     let selectedNaniFiles = [];
+    let allNaniPhotos = [];
+    let currentNaniFilter = "all";
 
     function compressImage(file, maxDim = 800, quality = 0.82) {
       return new Promise((resolve, reject) => {
@@ -836,34 +957,79 @@
       });
     }
 
+    function renderNaniGallery() {
+      const gallery = $("naniPhotosGallery");
+      if (!gallery) return;
+
+      const filtered = currentNaniFilter === "all"
+        ? allNaniPhotos
+        : allNaniPhotos.filter(p => (p.category || "").toLowerCase() === currentNaniFilter.toLowerCase());
+
+      if (!filtered.length) {
+        gallery.innerHTML = '<p class="empty" style="grid-column: 1 / -1;">No pictures uploaded in this category yet. Pick or drag photos above to add some!</p>';
+        return;
+      }
+
+      gallery.innerHTML = filtered.map(photo => `
+        <div class="nani-photo-card" id="nani-photo-${photo.id}">
+          <img class="nani-photo-img" src="${escapeHtml(photo.image_url)}" alt="${escapeHtml(photo.category)}" loading="lazy">
+          <div class="nani-photo-meta">
+            <span class="nani-photo-cat" title="${escapeHtml(photo.category)}">${escapeHtml(photo.category)}</span>
+            <button type="button" class="nani-photo-del-btn" onclick="deleteNaniPhoto('${photo.id}')" title="Delete picture">🗑️</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function renderCategoryFilters(photos) {
+      const container = $("naniCategoryFilter");
+      if (!container) return;
+
+      const categories = [...new Set(photos.map(p => (p.category || "General").trim()))].filter(Boolean);
+
+      if (categories.length <= 1) {
+        container.innerHTML = "";
+        return;
+      }
+
+      let html = `<button type="button" class="nani-cat-btn ${currentNaniFilter === 'all' ? 'active' : ''}" data-cat="all">All (${photos.length})</button>`;
+      categories.forEach(cat => {
+        const count = photos.filter(p => (p.category || "").toLowerCase() === cat.toLowerCase()).length;
+        html += `<button type="button" class="nani-cat-btn ${currentNaniFilter.toLowerCase() === cat.toLowerCase() ? 'active' : ''}" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)} (${count})</button>`;
+      });
+      container.innerHTML = html;
+
+      container.querySelectorAll(".nani-cat-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentNaniFilter = btn.dataset.cat;
+          container.querySelectorAll(".nani-cat-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderNaniGallery();
+        });
+      });
+    }
+
     async function loadNaniPhotos() {
       const gallery = $("naniPhotosGallery");
       const countBadge = $("naniPhotosCount");
+      const tabBadge = $("naniTabBadge");
       if (!gallery) return;
 
       try {
         const res = await fetch("/api/nani/custom-characters");
         if (!res.ok) throw new Error("Could not load photos");
         const photos = await res.json();
+        allNaniPhotos = photos;
 
         if (countBadge) {
           countBadge.textContent = `${photos.length} custom photo${photos.length === 1 ? '' : 's'}`;
         }
-
-        if (!photos.length) {
-          gallery.innerHTML = '<p class="empty" style="grid-column: 1 / -1;">No custom pictures uploaded yet. Select a category and upload pictures above!</p>';
-          return;
+        if (tabBadge) {
+          tabBadge.textContent = photos.length;
         }
 
-        gallery.innerHTML = photos.map(photo => `
-          <div class="nani-photo-card" id="nani-photo-${photo.id}">
-            <img class="nani-photo-img" src="${escapeHtml(photo.image_url)}" alt="${escapeHtml(photo.category)}" loading="lazy">
-            <div class="nani-photo-meta">
-              <span class="nani-photo-cat" title="${escapeHtml(photo.category)}">${escapeHtml(photo.category)}</span>
-              <button type="button" class="nani-photo-del-btn" onclick="deleteNaniPhoto('${photo.id}')" title="Delete picture">🗑️</button>
-            </div>
-          </div>
-        `).join("");
+        renderCategoryFilters(photos);
+        renderNaniGallery();
       } catch (err) {
         if (gallery) gallery.innerHTML = `<p class="empty" style="grid-column: 1 / -1; color: var(--red);">Error loading photos: ${escapeHtml(err.message)}</p>`;
       }
@@ -873,46 +1039,104 @@
       if (!confirm("Delete this character picture?")) return;
       try {
         await api(`/api/admin/nani/characters/${id}`, { method: "DELETE" });
-        const card = $(`nani-photo-${id}`);
-        if (card) card.remove();
+        allNaniPhotos = allNaniPhotos.filter(p => String(p.id) !== String(id));
         loadNaniPhotos();
       } catch (err) {
         alert("Error deleting photo: " + err.message);
       }
     };
 
+    $("clearAllNaniPhotosBtn")?.addEventListener("click", async () => {
+      if (!allNaniPhotos.length) {
+        alert("No photos to delete!");
+        return;
+      }
+      if (!confirm(`⚠️ Are you sure you want to delete ALL ${allNaniPhotos.length} character photos? This cannot be undone.`)) return;
+      try {
+        setStatus("naniUploadStatus", "Deleting all photos…");
+        await api("/api/admin/nani/characters/all", { method: "DELETE" });
+        allNaniPhotos = [];
+        currentNaniFilter = "all";
+        await loadNaniPhotos();
+        setStatus("naniUploadStatus", "All character photos have been deleted.", "success");
+      } catch (err) {
+        alert("Error clearing photos: " + err.message);
+      }
+    });
+
+    function handleNaniFileSelection(files) {
+      selectedNaniFiles = files;
+      const tray = $("naniPreviewTray");
+      const list = $("naniPreviewList");
+      const countLabel = $("naniPreviewCount");
+
+      if (!selectedNaniFiles.length) {
+        if (tray) tray.style.display = "none";
+        if (list) list.innerHTML = "";
+        return;
+      }
+
+      if (tray) tray.style.display = "block";
+      if (countLabel) countLabel.textContent = `${selectedNaniFiles.length} photo${selectedNaniFiles.length === 1 ? "" : "s"} selected:`;
+
+      if (list) {
+        list.innerHTML = "";
+        selectedNaniFiles.slice(0, 16).forEach(file => {
+          const img = document.createElement("img");
+          img.className = "nani-thumb-preview";
+          img.src = URL.createObjectURL(file);
+          list.appendChild(img);
+        });
+        if (selectedNaniFiles.length > 16) {
+          const more = document.createElement("span");
+          more.style.alignSelf = "center";
+          more.style.fontWeight = "800";
+          more.style.fontSize = "0.9rem";
+          more.textContent = `+${selectedNaniFiles.length - 16} more`;
+          list.appendChild(more);
+        }
+      }
+    }
+
     if ($("naniPhotosInput")) {
       $("naniPhotosInput").addEventListener("change", e => {
-        selectedNaniFiles = Array.from(e.target.files || []);
-        const tray = $("naniPreviewTray");
-        const list = $("naniPreviewList");
+        handleNaniFileSelection(Array.from(e.target.files || []));
+      });
+    }
 
-        if (!selectedNaniFiles.length) {
-          if (tray) tray.style.display = "none";
-          if (list) list.innerHTML = "";
-          return;
-        }
-
-        if (tray) tray.style.display = "block";
-        if (list) {
-          list.innerHTML = "";
-          selectedNaniFiles.slice(0, 12).forEach(file => {
-            const img = document.createElement("img");
-            img.className = "nani-thumb-preview";
-            img.src = URL.createObjectURL(file);
-            list.appendChild(img);
-          });
-          if (selectedNaniFiles.length > 12) {
-            const more = document.createElement("span");
-            more.style.alignSelf = "center";
-            more.style.fontWeight = "800";
-            more.style.fontSize = "0.85rem";
-            more.textContent = `+${selectedNaniFiles.length - 12} more`;
-            list.appendChild(more);
+    // Drag and Drop
+    const dropZone = $("naniDropZone");
+    if (dropZone) {
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          dropZone.style.borderColor = "var(--blue)";
+          dropZone.style.background = "#F0F5FF";
+        }, false);
+      });
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, e => {
+          e.preventDefault();
+          dropZone.style.borderColor = "";
+          dropZone.style.background = "";
+        }, false);
+      });
+      dropZone.addEventListener('drop', e => {
+        if (e.dataTransfer && e.dataTransfer.files) {
+          const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+          if (files.length) {
+            handleNaniFileSelection(files);
           }
         }
       });
     }
+
+    $("clearNaniSelectedBtn")?.addEventListener("click", () => {
+      selectedNaniFiles = [];
+      if ($("naniPhotosInput")) $("naniPhotosInput").value = "";
+      if ($("naniPreviewTray")) $("naniPreviewTray").style.display = "none";
+      if ($("naniPreviewList")) $("naniPreviewList").innerHTML = "";
+    });
 
     if ($("uploadNaniPhotosBtn")) {
       $("uploadNaniPhotosBtn").addEventListener("click", async () => {
@@ -921,7 +1145,7 @@
           return;
         }
 
-        const category = ($("naniCategory")?.value || "").trim() || "Kenyan Celebs & Icons";
+        const category = ($("naniCategory")?.value || "").trim() || "Friends & Family";
         const btn = $("uploadNaniPhotosBtn");
         btn.disabled = true;
 

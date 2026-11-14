@@ -86,15 +86,19 @@ setInterval(() => {
 // Helper: get card pool by deck ID (built-in + admin custom uploaded)
 async function getDeckCards(deckId) {
   const customCards = await fetchCustomCards();
-  const allCards = [...NANI_DECKS.flatMap(d => d.cards), ...customCards];
+  const allCards = [...NANI_DECKS.flatMap(d => d.cards || []), ...customCards];
+
+  if (!allCards.length) {
+    return [];
+  }
 
   if (!deckId || deckId === "all") {
-    return allCards.length ? allCards : NANI_DECKS[0].cards;
+    return allCards;
   }
 
   // Check if deckId matches built-in deck
   const builtin = NANI_DECKS.find(d => d.id === deckId);
-  if (builtin) {
+  if (builtin && builtin.cards) {
     const matchingCustom = customCards.filter(c => {
       const cat = (c.category || "").toLowerCase();
       const bName = (builtin.name || "").toLowerCase();
@@ -113,7 +117,7 @@ async function getDeckCards(deckId) {
     return matchingCustom;
   }
 
-  return allCards.length ? allCards : NANI_DECKS[0].cards;
+  return allCards;
 }
 
 // Helper: auto-advance countdown if 5s has elapsed
@@ -134,7 +138,7 @@ function serializeRoom(room, viewerPlayerId) {
     code: room.code,
     hostId: room.hostId,
     deckId: room.deckId,
-    deckName: (NANI_DECKS.find(d => d.id === room.deckId) || { name: "Kenyan Celebs & Icons" }).name,
+    deckName: (NANI_DECKS.find(d => d.id === room.deckId) || { name: room.deckName || "Nani Huyu?" }).name,
     status: room.status,
     countdownEndsAt: room.countdownEndsAt,
     startedAt: room.startedAt,
@@ -162,7 +166,7 @@ function serializeRoom(room, viewerPlayerId) {
 // 1. Get available Nani Huyu decks (built-in + admin custom)
 router.get("/decks", async (_req, res) => {
   const customCards = await fetchCustomCards();
-  const allBuiltinCount = NANI_DECKS.reduce((acc, d) => acc + d.cards.length, 0);
+  const allBuiltinCount = NANI_DECKS.reduce((acc, d) => acc + (d.cards ? d.cards.length : 0), 0);
 
   // Group any custom categories that don't match built-in decks
   const customGroupMap = new Map();
@@ -184,36 +188,39 @@ router.get("/decks", async (_req, res) => {
       customDecks.push({
         id: slug,
         name: catName,
-        description: `Custom photos added by admin (${cards.length} photos)`,
+        description: `${cards.length} character photo${cards.length === 1 ? '' : 's'}`,
         icon: "📸",
         count: cards.length
       });
     }
   }
 
-  const result = [
-    ...NANI_DECKS.map(d => {
-      const extraCount = customCards.filter(c => {
-        const cat = (c.category || "").toLowerCase();
-        return cat.includes(d.id.toLowerCase()) || d.name.toLowerCase().includes(cat);
-      }).length;
-      return {
-        id: d.id,
-        name: d.name,
-        description: d.description,
-        icon: d.icon,
-        count: d.cards.length + extraCount
-      };
-    }),
-    ...customDecks,
-    {
+  const builtinDecks = NANI_DECKS.filter(d => d.cards && d.cards.length > 0).map(d => {
+    const extraCount = customCards.filter(c => {
+      const cat = (c.category || "").toLowerCase();
+      return cat.includes(d.id.toLowerCase()) || d.name.toLowerCase().includes(cat);
+    }).length;
+    return {
+      id: d.id,
+      name: d.name,
+      description: d.description,
+      icon: d.icon,
+      count: d.cards.length + extraCount
+    };
+  });
+
+  const result = [...builtinDecks, ...customDecks];
+  const totalCount = allBuiltinCount + customCards.length;
+  if (result.length > 1 && totalCount > 0) {
+    result.push({
       id: "all",
       name: "Mix of Everything",
-      description: "A wild mix of Kenyan icons, global superstars, cartoon characters & custom photos!",
+      description: "A wild mix of all character pictures!",
       icon: "🌟",
-      count: allBuiltinCount + customCards.length
-    }
-  ];
+      count: totalCount
+    });
+  }
+
   res.json(result);
 });
 
@@ -347,6 +354,10 @@ router.post("/rooms/:code/start", async (req, res) => {
   if (deckId) room.deckId = deckId;
 
   let pool = await getDeckCards(room.deckId);
+  if (!pool || !pool.length) {
+    return res.status(400).json({ error: "No character pictures in this deck yet! Please upload photos in the Admin Studio." });
+  }
+
   // If the chosen deck has fewer cards than players in the room,
   // supplement from the full library so no two players EVER get the same character!
   if (pool.length < room.players.length) {
@@ -359,6 +370,12 @@ router.post("/rooms/:code/start", async (req, res) => {
       }
       if (pool.length >= room.players.length) break;
     }
+    // If still fewer cards than players, expand pool by repeating
+    let expanded = [...pool];
+    while (expanded.length < room.players.length) {
+      expanded = expanded.concat(pool);
+    }
+    pool = expanded;
   }
 
   const shuffled = shuffle(pool);

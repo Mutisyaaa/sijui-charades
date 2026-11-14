@@ -35,6 +35,21 @@ function renderNaniDeckSelector(decks) {
   const container = $n("naniDeckList");
   if (!container) return;
 
+  if (!decks || !decks.length) {
+    container.innerHTML = `
+      <div class="empty" style="grid-column: 1 / -1; padding: 24px; text-align: center; border: var(--bw) dashed var(--ink); border-radius: 18px; background: var(--paper-2);">
+        <p style="font-weight: 800; font-size: 1.15rem; margin-bottom: 6px;">📸 No character packs yet!</p>
+        <p style="opacity: 0.8; font-size: 0.92rem; margin: 0;">Upload your own pictures in the Admin Studio, and your custom packs will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Ensure selected deck is valid
+  if (!decks.some(d => d.id === naniState.deckId)) {
+    naniState.deckId = decks[0].id;
+  }
+
   container.innerHTML = decks.map((deck, idx) => `
     <div class="nani-deck-option ${deck.id === naniState.deckId ? 'selected' : ''}" data-deck-id="${deck.id}" role="radio" aria-checked="${deck.id === naniState.deckId}">
       <span class="nani-deck-opt-icon">${deck.icon}</span>

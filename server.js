@@ -39,6 +39,8 @@ async function initNaniTable() {
         updated_at timestamptz NOT NULL DEFAULT now()
       );
     `);
+    // Remove any test seed entries
+    await pool.query("DELETE FROM public.nani_characters WHERE name ~ '^[0-9a-f]{32}$'").catch(() => {});
   } catch (err) {
     console.warn("⚠️  Could not initialize public.nani_characters table:", err.message);
   }
@@ -393,6 +395,20 @@ app.delete("/api/admin/nani/characters/:id", requireAdmin, async (request, respo
     response.status(204).end();
   } catch (err) {
     response.status(500).json({ error: "Failed to delete character: " + err.message });
+  }
+});
+
+// Admin endpoint to delete all character images
+app.delete("/api/admin/nani/characters/all", requireAdmin, async (_request, response) => {
+  try {
+    await pool.query("DELETE FROM public.nani_characters");
+    const fallbackPath = path.join(__dirname, "nani-custom-cards.json");
+    if (fs.existsSync(fallbackPath)) {
+      fs.writeFileSync(fallbackPath, "[]");
+    }
+    response.status(204).end();
+  } catch (err) {
+    response.status(500).json({ error: "Failed to clear characters: " + err.message });
   }
 });
 
