@@ -3,7 +3,7 @@
    Offline caching, fast loading, and standalone app support.
    ============================================================ */
 
-const CACHE_NAME = "sijui-pwa-v6";
+const CACHE_NAME = "sijui-pwa-v7";
 
 const PRECACHE_ASSETS = [
   "/",

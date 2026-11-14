@@ -82,7 +82,7 @@ async function createNaniRoom() {
     store.set("naniPlayerName", hostName);
     store.set("naniLastRoom", data.roomCode);
 
-    show("naniLobby");
+    show("naniLobby", { replace: true });
     handleNaniRoomUpdate(data.room);
     startNaniPolling();
   } catch (err) {
@@ -132,7 +132,7 @@ async function joinNaniRoom() {
     store.set("naniPlayerName", playerName);
     store.set("naniLastRoom", data.roomCode);
 
-    show("naniLobby");
+    show("naniLobby", { replace: true });
     handleNaniRoomUpdate(data.room);
     startNaniPolling();
   } catch (err) {
@@ -166,7 +166,7 @@ async function pollNaniRoom() {
     if (res.status === 404) {
       stopNaniPolling();
       alert("Room was closed or expired.");
-      show("naniHome");
+      show("naniHome", { replace: true });
       return;
     }
     if (!res.ok) return;
@@ -188,7 +188,7 @@ function handleNaniRoomUpdate(room) {
   if (currentStatus === "lobby") {
     renderLobby(room);
     if (!$n("naniLobby")?.classList.contains("active")) {
-      show("naniLobby");
+      show("naniLobby", { replace: true });
     }
     return;
   }
@@ -211,13 +211,13 @@ function handleNaniRoomUpdate(room) {
       // Player already guessed, show revealed / waiting screen
       renderNaniRevealed(myPlayer, room);
       if (!$n("naniRevealed")?.classList.contains("active")) {
-        show("naniRevealed");
+        show("naniRevealed", { replace: true });
       }
     } else {
       // Player is still guessing - show their character card facing outward
       renderNaniPlay(myPlayer, room);
       if (!$n("naniPlay")?.classList.contains("active")) {
-        show("naniPlay");
+        show("naniPlay", { replace: true });
         requestWake();
       }
     }
@@ -231,7 +231,7 @@ function handleNaniRoomUpdate(room) {
     releaseWake();
     renderNaniLeaderboard(room);
     if (!$n("naniLeaderboard")?.classList.contains("active")) {
-      show("naniLeaderboard");
+      show("naniLeaderboard", { replace: true });
       celebrate();
       playEndSound(10);
     }
@@ -277,7 +277,7 @@ function renderLobby(room) {
 
 // 5-Second Countdown
 function startNaniCountdown(countdownEndsAt) {
-  show("naniCountdown");
+  show("naniCountdown", { replace: true });
   initAudio();
   playCountdownSound();
   vibe(60);
@@ -492,10 +492,10 @@ async function restartNaniRound() {
 }
 
 // Leave room
-async function leaveNaniRoom() {
+async function leaveNaniRoom(targetScreen = "naniHome") {
   if (naniState.roomCode && naniState.playerId) {
     try {
-      await fetch(`/api/nani/rooms/${naniState.roomCode}/leave`, {
+      fetch(`/api/nani/rooms/${naniState.roomCode}/leave`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ playerId: naniState.playerId })
@@ -506,7 +506,13 @@ async function leaveNaniRoom() {
   naniState.roomCode = null;
   naniState.playerId = null;
   naniState.room = null;
-  show("naniHome");
+  if (targetScreen) {
+    if (typeof navigateBack === "function" && targetScreen === "naniHome" && typeof navDepth !== "undefined" && navDepth > 0) {
+      navigateBack("naniHome");
+    } else {
+      show(targetScreen, { replace: true });
+    }
+  }
 }
 
 /* ============================================================
@@ -520,7 +526,10 @@ function initNaniClient() {
   });
 
   // Nani Home navigation
-  $n("naniHomeBack")?.addEventListener("click", () => show("home"));
+  $n("naniHomeBack")?.addEventListener("click", () => {
+    if (typeof navigateBack === "function") navigateBack("home");
+    else show("home");
+  });
   $n("naniGoHostBtn")?.addEventListener("click", () => {
     const savedName = store.get("naniPlayerName", "");
     if (savedName && $n("naniHostNameInput")) $n("naniHostNameInput").value = savedName;
@@ -535,11 +544,17 @@ function initNaniClient() {
   });
 
   // Host setup
-  $n("naniHostBack")?.addEventListener("click", () => show("naniHome"));
+  $n("naniHostBack")?.addEventListener("click", () => {
+    if (typeof navigateBack === "function") navigateBack("naniHome");
+    else show("naniHome");
+  });
   $n("naniCreateRoomBtn")?.addEventListener("click", createNaniRoom);
 
   // Join screen
-  $n("naniJoinBack")?.addEventListener("click", () => show("naniHome"));
+  $n("naniJoinBack")?.addEventListener("click", () => {
+    if (typeof navigateBack === "function") navigateBack("naniHome");
+    else show("naniHome");
+  });
   $n("naniSubmitJoinBtn")?.addEventListener("click", joinNaniRoom);
   $n("naniJoinCodeInput")?.addEventListener("input", e => {
     e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -549,7 +564,7 @@ function initNaniClient() {
   });
 
   // Lobby
-  $n("naniLobbyLeaveBtn")?.addEventListener("click", leaveNaniRoom);
+  $n("naniLobbyLeaveBtn")?.addEventListener("click", () => leaveNaniRoom("naniHome"));
   $n("naniCopyCodeBtn")?.addEventListener("click", () => {
     if (!naniState.roomCode) return;
     const shareUrl = `${window.location.origin}/?nani=${naniState.roomCode}`;
@@ -596,7 +611,7 @@ function initNaniClient() {
 
   // Leaderboard buttons
   $n("naniPlayAgainBtn")?.addEventListener("click", restartNaniRound);
-  $n("naniExitBtn")?.addEventListener("click", leaveNaniRoom);
+  $n("naniExitBtn")?.addEventListener("click", () => leaveNaniRoom("naniHome"));
 
   // Check URL query parameters for auto-join (e.g. ?nani=KUKU)
   try {

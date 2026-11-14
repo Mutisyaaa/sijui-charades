@@ -1545,13 +1545,57 @@ function shuffle(a) {
   return a;
 }
 let currentScreenId = "home";
-function show(id) {
+let navDepth = 0;
+let isHandlingPopState = false;
+let isClosingModalViaHistory = false;
+
+function show(id, options = {}) {
+  const push = options.push !== false;
+  const replace = options.replace === true;
+  if (!id || !$(id)) id = "home";
+
+  if (id === currentScreenId && $(id).classList.contains("active") && !isHandlingPopState) {
+    return;
+  }
+
   currentScreenId = id;
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   $(id).classList.add("active");
   window.scrollTo(0, 0);
+
   if (id === "home") startHomeBanter();
   else stopHomeBanter();
+
+  if (!isHandlingPopState && window.history && window.history.pushState) {
+    const hash = id === "home" ? "" : "#" + id;
+    const url = window.location.pathname + (window.location.search || "") + hash;
+
+    if (replace) {
+      if (id === "home") navDepth = 0;
+      window.history.replaceState({ screen: id, depth: navDepth }, "", url);
+    } else if (push) {
+      if (!window.history.state || window.history.state.screen !== id) {
+        navDepth++;
+        window.history.pushState({ screen: id, depth: navDepth }, "", url);
+      }
+    }
+  }
+}
+
+function navigateBack(fallback = "home") {
+  if ($("settingsModal")?.classList.contains("open")) {
+    closeSettings();
+    return;
+  }
+  if ($("pwaIosModal")?.classList.contains("open")) {
+    closeIosInstallModal();
+    return;
+  }
+  if (navDepth > 0) {
+    window.history.back();
+  } else {
+    show(fallback, { replace: true });
+  }
 }
 
 /* ============================================================
@@ -2249,7 +2293,7 @@ function startTeamGameRound() {
   round.lastBeepSec = -1;
 
   renderTeamWordsList();
-  show("teamGame");
+  show("teamGame", { replace: true });
   requestWake();
 
   tone(660, 860, 0.2, "triangle", 0.12);
@@ -2398,7 +2442,7 @@ function beginTeamTurn() {
   $("streak").textContent = "";
   $("hint").textContent = "";
   $("game").classList.remove("ok", "skip");
-  show("game");
+  show("game", { replace: true });
   nextCard();
   requestWake();
   tone(660, 860, 0.2, "triangle", 0.12);
@@ -2657,7 +2701,7 @@ function showTurnBreak(reviewedIdx, reason = "timeup") {
     $("nextTeamBtn").textContent = `📲 Start ${nextTeam.name}'s Turn`;
   }
 
-  show("turnBreak");
+  show("turnBreak", { replace: true });
 }
 
 function renderTurnBreakReview(teamIdx, roundNum) {
@@ -2880,7 +2924,7 @@ function finalResults() {
     fillList($("skipList"), round.skipped);
   }
   renderHome();
-  show("results");
+  show("results", { replace: true });
 }
 
 function fillList(ul, items) {
@@ -2910,11 +2954,11 @@ document.querySelectorAll(".duration-options button").forEach(b => {
 });
 $("playBtn").addEventListener("click", () => show("categories"));
 $("tutorialNext").addEventListener("click", () => show("categories"));
-$("tutorialBack").addEventListener("click", () => show("home"));
-$("backHome").addEventListener("click", () => show("home"));
-$("durationBack").addEventListener("click", () => show("categories"));
+$("tutorialBack").addEventListener("click", () => navigateBack("home"));
+$("backHome").addEventListener("click", () => navigateBack("home"));
+$("durationBack").addEventListener("click", () => navigateBack("categories"));
 $("startBtn").addEventListener("click", () => show("setup"));
-$("setupBack").addEventListener("click", () => show("duration"));
+$("setupBack").addEventListener("click", () => navigateBack("duration"));
 $("setupStart").addEventListener("click", () => {
   if (gameMode === "team") {
     teamNames = ["teamA", "teamB", "teamC", "teamD"].map(id => $(id).value.trim()).filter(Boolean);
@@ -3027,9 +3071,14 @@ $("orientationCancelBtn").addEventListener("click", () => {
     releaseWake();
     S = null;
   }
-  show("duration");
+  navigateBack("setup");
 });
-$("cancelBtn").addEventListener("click", () => { clearInterval(readyTimer); S = null; show("categories"); });
+$("cancelBtn").addEventListener("click", () => {
+  clearInterval(readyTimer);
+  readyTimer = null;
+  S = null;
+  navigateBack("setup");
+});
 $("quitBtn").addEventListener("click", endRound);
 $("againBtn").addEventListener("click", () => {
   initMatch();
@@ -3037,11 +3086,11 @@ $("againBtn").addEventListener("click", () => {
 });
 $("decksBtn").addEventListener("click", () => {
   S = null;
-  show("categories");
+  show("categories", { replace: true });
 });
 $("homeBtn").addEventListener("click", () => {
   S = null;
-  show("home");
+  show("home", { replace: true });
 });
 $("soundToggle").addEventListener("change", event => {
   soundMuted = !event.target.checked;
@@ -3069,16 +3118,48 @@ function openSettings() {
   modal.classList.add("open");
   const trigger = $("openSettingsBtn");
   if (trigger) trigger.setAttribute("aria-expanded", "true");
+
+  if (window.history && window.history.pushState) {
+    navDepth++;
+    window.history.pushState({ modal: "settings", screen: currentScreenId, depth: navDepth }, "", "#settings");
+  }
 }
 
 function closeSettings() {
   const modal = $("settingsModal");
-  if (!modal) return;
+  if (!modal || !modal.classList.contains("open")) return;
   modal.classList.remove("open");
   const trigger = $("openSettingsBtn");
   if (trigger) {
     trigger.setAttribute("aria-expanded", "false");
     trigger.focus();
+  }
+
+  if (window.history && window.history.state && window.history.state.modal === "settings") {
+    isClosingModalViaHistory = true;
+    window.history.back();
+  }
+}
+
+function openIosInstallModal() {
+  const modal = $("pwaIosModal");
+  if (!modal) return;
+  modal.classList.add("open");
+
+  if (window.history && window.history.pushState) {
+    navDepth++;
+    window.history.pushState({ modal: "pwaIos", screen: currentScreenId, depth: navDepth }, "", "#install");
+  }
+}
+
+function closeIosInstallModal() {
+  const modal = $("pwaIosModal");
+  if (!modal || !modal.classList.contains("open")) return;
+  modal.classList.remove("open");
+
+  if (window.history && window.history.state && window.history.state.modal === "pwaIos") {
+    isClosingModalViaHistory = true;
+    window.history.back();
   }
 }
 
@@ -3086,10 +3167,17 @@ $("openSettingsBtn").addEventListener("click", openSettings);
 $("closeSettingsBtn").addEventListener("click", closeSettings);
 $("doneSettingsBtn").addEventListener("click", closeSettings);
 $("settingsBackdrop").addEventListener("click", closeSettings);
+
 window.addEventListener("keydown", event => {
-  if (event.key === "Escape" && $("settingsModal")?.classList.contains("open")) {
-    closeSettings();
-    return;
+  if (event.key === "Escape") {
+    if ($("settingsModal")?.classList.contains("open")) {
+      closeSettings();
+      return;
+    }
+    if ($("pwaIosModal")?.classList.contains("open")) {
+      closeIosInstallModal();
+      return;
+    }
   }
   if (S && S.running && !S.locked) {
     if (event.key === "ArrowDown" || event.key === "Enter") {
@@ -3100,11 +3188,107 @@ window.addEventListener("keydown", event => {
   }
 });
 
+window.addEventListener("popstate", event => {
+  if (isClosingModalViaHistory) {
+    isClosingModalViaHistory = false;
+    if (event.state && typeof event.state.depth === "number") {
+      navDepth = event.state.depth;
+    } else {
+      navDepth = Math.max(0, navDepth - 1);
+    }
+    return;
+  }
+
+  // If a modal was open and user pressed phone back: close it without switching screen
+  if ($("settingsModal")?.classList.contains("open")) {
+    $("settingsModal").classList.remove("open");
+    const trigger = $("openSettingsBtn");
+    if (trigger) trigger.setAttribute("aria-expanded", "false");
+    if (event.state && typeof event.state.depth === "number") {
+      navDepth = event.state.depth;
+    }
+    return;
+  }
+  if ($("pwaIosModal")?.classList.contains("open")) {
+    $("pwaIosModal").classList.remove("open");
+    if (event.state && typeof event.state.depth === "number") {
+      navDepth = event.state.depth;
+    }
+    return;
+  }
+
+  // Update navDepth
+  if (event.state && typeof event.state.depth === "number") {
+    navDepth = event.state.depth;
+  } else {
+    navDepth = Math.max(0, navDepth - 1);
+  }
+
+  // Clean up any active timers or gameplay
+  if (readyTimer) {
+    clearInterval(readyTimer);
+    readyTimer = null;
+  }
+  if (teamReadyTimer) {
+    clearInterval(teamReadyTimer);
+    teamReadyTimer = null;
+  }
+  if (S && S.running) {
+    S.running = false;
+    clearInterval(S.timer);
+    releaseWake();
+    S = null;
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }
+  pendingStart = false;
+
+  // Determine target screen from state or fallback to home
+  let targetScreen = (event.state && event.state.screen) || "home";
+  if (!$(targetScreen)) targetScreen = "home";
+
+  // Safeguards for game screens that require active game state
+  if (targetScreen === "orientation" && !pendingStart && (!S || !S.running)) {
+    targetScreen = "setup";
+  } else if (targetScreen === "ready" && !readyTimer) {
+    targetScreen = "setup";
+  } else if (targetScreen === "teamReady" && !teamReadyTimer) {
+    targetScreen = "setup";
+  } else if ((targetScreen === "game" || targetScreen === "teamGame") && (!S || !S.running)) {
+    targetScreen = "setup";
+  } else if (targetScreen === "turnBreak" && !S) {
+    targetScreen = "setup";
+  }
+
+  // Nani Huyu room cleanup if navigating away from Nani screens
+  if (typeof naniState !== "undefined" && naniState && naniState.roomCode) {
+    const isNaniActiveGameScreen = s => s === "naniLobby" || s === "naniCountdown" || s === "naniPlay" || s === "naniRevealed" || s === "naniLeaderboard";
+    if (!isNaniActiveGameScreen(targetScreen)) {
+      if (typeof leaveNaniRoom === "function") {
+        leaveNaniRoom(null);
+      }
+      if (targetScreen === "naniHost" || targetScreen === "naniJoin") {
+        targetScreen = "naniHome";
+      }
+    }
+  } else if (targetScreen.startsWith("nani") && targetScreen !== "naniHome" && targetScreen !== "naniHost" && targetScreen !== "naniJoin") {
+    targetScreen = "naniHome";
+  }
+
+  isHandlingPopState = true;
+  try {
+    show(targetScreen, { push: false });
+  } finally {
+    isHandlingPopState = false;
+  }
+});
+
 function resumeRound() {
   if (!S || !S.pausedAt || !isLandscape()) return;
   S.endAt += Date.now() - S.pausedAt;
   S.pausedAt = null;
-  show("game");
+  show("game", { replace: true });
   S.timer = setInterval(tick, 100);
   tick();
 }
@@ -3116,11 +3300,11 @@ function handleOrientationChange() {
       S.pausedAt = Date.now();
       clearInterval(S.timer);
       S.timer = null;
-      show("orientation");
+      show("orientation", { replace: true });
     } else if ($("ready").classList.contains("active")) {
       clearInterval(readyTimer);
       pendingStart = true;
-      show("orientation");
+      show("orientation", { replace: true });
     }
     return;
   }
@@ -3138,7 +3322,7 @@ $("teamReadyStartBtn")?.addEventListener("click", () => {
 $("teamReadyCancelBtn")?.addEventListener("click", () => {
   clearInterval(teamReadyTimer);
   teamReadyTimer = null;
-  show("setup");
+  navigateBack("setup");
 });
 
 /* Team Game Checklist Listeners */
@@ -3423,7 +3607,7 @@ async function triggerPwaInstall() {
       console.warn("[PWA] Prompt error:", e);
     }
   } else if (isIos()) {
-    $("pwaIosModal")?.classList.add("open");
+    openIosInstallModal();
   } else {
     showMoment("To install: open your browser menu (⋮) and tap 'Add to Home Screen' or 'Install App'.");
   }
@@ -3455,9 +3639,9 @@ window.addEventListener("appinstalled", () => {
 
 $("pwaInstallBanner")?.addEventListener("click", triggerPwaInstall);
 $("pwaSettingsInstallBtn")?.addEventListener("click", triggerPwaInstall);
-$("closeIosInstallBtn")?.addEventListener("click", () => $("pwaIosModal")?.classList.remove("open"));
-$("pwaIosBackdrop")?.addEventListener("click", () => $("pwaIosModal")?.classList.remove("open"));
-$("gotItIosInstallBtn")?.addEventListener("click", () => $("pwaIosModal")?.classList.remove("open"));
+$("closeIosInstallBtn")?.addEventListener("click", closeIosInstallModal);
+$("pwaIosBackdrop")?.addEventListener("click", closeIosInstallModal);
+$("gotItIosInstallBtn")?.addEventListener("click", closeIosInstallModal);
 
 if (window.matchMedia) {
   window.matchMedia("(display-mode: standalone)").addEventListener("change", () => {
@@ -3473,6 +3657,21 @@ loadPublishedDecks();
 loadGameSounds();
 startHomeBanter();
 updatePwaUI();
+
+(function initNavigationHistory() {
+  if (window.history && window.history.replaceState) {
+    const rawHash = window.location.hash ? window.location.hash.slice(1) : "";
+    const validScreen = rawHash && $(rawHash) && $(rawHash).classList.contains("screen") ? rawHash : null;
+    if (validScreen && validScreen !== "home") {
+      navDepth = 1;
+      window.history.replaceState({ screen: validScreen, depth: 1 }, "", window.location.pathname + window.location.search + "#" + validScreen);
+      show(validScreen, { push: false });
+    } else {
+      navDepth = 0;
+      window.history.replaceState({ screen: "home", depth: 0 }, "", window.location.pathname + window.location.search);
+    }
+  }
+})();
 </script>
 <script src="nani-client.js"></script>
 </body>
