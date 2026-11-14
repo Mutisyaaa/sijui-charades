@@ -373,34 +373,160 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 #setup .ghost { margin-top: 1rem; }
 .setup-label { font-family: var(--display); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--chalk-muted); }
 
-/* ---------- DECKS ---------- */
+/* ---------- DECKS (with Kenyan Lighting) ---------- */
 #categories h2 { font-size: 2.6rem; margin-bottom: 4px; }
 #deckList { display: grid; gap: 16px; margin-top: 0.8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); padding-bottom: 16px; }
+
 .deck {
-  position: relative; display: flex; align-items: flex-end; text-align: left; overflow: hidden;
-  aspect-ratio: 1; min-height: 0; padding: 14px;
-  color: var(--ink); background: var(--amber) center / cover no-repeat;
-  border: var(--bw) solid var(--ink); border-radius: 22px; box-shadow: var(--shadow);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  align-items: stretch;
+  text-align: left;
+  color: var(--white);
+  background: #140F0D;
+  border: none;
+  border-radius: 18px;
+  padding: 16px;
+  min-height: 0;
+  aspect-ratio: 1;
+  overflow: hidden;
+  box-shadow: 0 6px 0 var(--ink), 0 14px 22px rgba(0, 0, 0, 0.4);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.deck.theme-sunset { background-color: var(--amber); }
-.deck.theme-mint { background-color: #7FE0A8; }
-.deck.theme-berry { background-color: #FF9FB1; }
-.deck.theme-classic { background-color: #A8C0FF; }
-.deck::before, .deck::after { display: none; }
+
+/* Kenya Flag Rotating Glowing Light Beam */
+.deck::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 205deg,
+    #000000 220deg,
+    #FFFFFF 235deg,
+    #C1272D 245deg 285deg,
+    #FFFFFF 295deg,
+    #008A00 305deg 325deg,
+    transparent 340deg 360deg
+  );
+  animation: kenyaBeamSpin 3.5s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+  filter: drop-shadow(0 0 6px rgba(0, 138, 0, 0.85)) drop-shadow(0 0 8px rgba(193, 39, 45, 0.85)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.85));
+}
+
+/* Inner Card Surface */
+.deck::after {
+  content: "";
+  position: absolute;
+  inset: 2.5px;
+  background: #3A2E28;
+  border-radius: 15.5px;
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.18s ease;
+}
+
 .deck.has-cover::after {
-  display: block; content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(to top, rgba(23, 18, 15, 0.88) 0%, rgba(23, 18, 15, 0.25) 55%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(26,21,18,.25) 15%, rgba(26,21,18,.92) 100%), var(--deck-cover, inherit);
+  background-size: cover;
+  background-position: center;
 }
-.deck > * { position: relative; z-index: 1; }
-.deck .deck-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
-.deck b { display: block; font-family: var(--display); font-size: clamp(1.15rem, 4.6vw, 1.55rem); font-weight: 800; line-height: 1.08; letter-spacing: -0.025em; }
-.deck.has-cover b { color: var(--white); text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5); }
-.deck small { font-size: 0.9rem; opacity: 0.85; }
-.deck:hover { transform: translateY(-3px) rotate(-0.6deg); box-shadow: 0 8px 0 var(--ink); }
-.deck:active { transform: translateY(5px); box-shadow: 0 0 0 var(--ink); }
-.deck .n { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; min-width: 40px; min-height: 40px; padding: 0 8px; background: var(--white); border: 2.5px solid var(--ink); border-radius: 999px; font-family: var(--display); font-weight: 800; }
-.deck .deck-icon { display: grid; place-items: center; width: 46px; height: 46px; background: var(--white); border: 2.5px solid var(--ink); border-radius: 14px; font-size: 1.5rem; }
+.deck.has-cover:hover::after, .deck.has-cover:focus-visible::after {
+  background: linear-gradient(to bottom, rgba(26,21,18,.15) 15%, rgba(26,21,18,.85) 100%), var(--deck-cover, inherit);
+  background-size: cover;
+  background-position: center;
+}
+
+.deck > * {
+  position: relative;
+  z-index: 2;
+}
+
+.deck .deck-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.deck .deck-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--amber);
+  color: var(--ink);
+  border-radius: 13px;
+  font-size: 1.55rem;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.deck:hover, .deck:focus-visible {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 var(--ink), 0 18px 28px rgba(0, 0, 0, 0.5);
+}
+.deck:hover::after, .deck:focus-visible::after {
+  background: linear-gradient(180deg, #463831 0%, #3A2E28 100%);
+}
+.deck:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 var(--ink), 0 8px 14px rgba(0, 0, 0, 0.4);
+}
+.deck:hover b, .deck:focus-visible b {
+  color: var(--amber);
+}
+
+.deck b {
+  display: block;
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 4.8vw, 1.6rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.75);
+  line-height: 1.25;
+}
+.deck small { opacity: 0.78; font-size: 0.95rem; color: var(--chalk); }
+
+.deck .n {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  color: var(--ink);
+  background: var(--amber);
+  border-radius: 999px;
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+.deck:hover .n, .deck:focus-visible .n { color: var(--chalk); background: var(--ink); }
+
+@keyframes kenyaBeamSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck::before {
+    animation: none;
+  }
+}
 @media (min-width: 720px) { #deckList { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 /* ---------- DURATION / ORIENTATION ---------- */
