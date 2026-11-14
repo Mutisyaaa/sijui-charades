@@ -496,6 +496,9 @@ app.delete("/api/admin/cards/:cardId", requireAdmin, async (request, response) =
   response.status(204).end();
 });
 
+const naniRoutes = require("./nani-routes");
+app.use("/api/nani", naniRoutes);
+
 app.get("/favicon.ico", (_request, response) => {
   response.sendFile(path.join(__dirname, "assets", "images", "favicon.ico"));
 });

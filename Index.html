@@ -1634,6 +1634,8 @@ body.high-contrast .toggle-switch:checked {
   padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+  width: min(560px, 100%);
   gap: 6px;
   width: min(520px, 100%);
   margin-inline: auto;
@@ -1645,6 +1647,9 @@ body.high-contrast .toggle-switch:checked {
 }
 .team-word-row {
   background: var(--espresso);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 16px;
+  padding: 12px 16px;
   border: 1px solid var(--espresso-border);
   border-radius: 10px;
   padding: 8px 12px;
@@ -1654,15 +1659,19 @@ body.high-contrast .toggle-switch:checked {
   transition: all 0.15s ease;
   user-select: none;
   -webkit-user-select: none;
+  box-shadow: 0 3px 0 var(--espresso-dark);
   box-shadow: 0 2px 0 var(--espresso-dark);
 }
 .team-word-row:active {
+  transform: translateY(2px);
   transform: translateY(1px);
   box-shadow: 0 1px 0 var(--espresso-dark);
 }
 .team-word-row.is-checked {
+  background: rgba(30, 95, 191, 0.24);
   background: rgba(30, 95, 191, 0.2);
   border-color: var(--nganya-blue);
+  box-shadow: 0 0 14px rgba(30, 95, 191, 0.35), 0 3px 0 var(--nganya-blue-dark);
   box-shadow: 0 2px 0 var(--nganya-blue-dark);
 }
 .team-word-label {
@@ -1680,6 +1689,10 @@ body.high-contrast .toggle-switch:checked {
   height: 0;
 }
 .team-checkbox-box {
+  width: 32px;
+  height: 32px;
+  border: 2.5px solid rgba(245, 239, 228, 0.4);
+  border-radius: 9px;
   width: 22px;
   height: 22px;
   border: 2px solid rgba(245, 239, 228, 0.45);
@@ -1688,6 +1701,7 @@ body.high-contrast .toggle-switch:checked {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  margin-right: 14px;
   margin-right: 10px;
   background: rgba(26, 21, 18, 0.6);
   transition: all 0.15s ease;
@@ -1699,15 +1713,19 @@ body.high-contrast .toggle-switch:checked {
 }
 .team-word-row.is-checked .team-checkbox-box::after {
   content: "✓";
+  font-size: 1.35rem;
   font-size: 0.95rem;
   font-weight: 900;
   line-height: 1;
 }
 .team-word-text {
   flex: 1 1 auto;
+  font-size: clamp(1.15rem, 4.2vmin, 1.45rem);
+  font-weight: 800;
   font-size: 0.96rem;
   font-weight: 700;
   color: var(--chalk);
+  letter-spacing: -0.01em;
   letter-spacing: 0;
   line-height: 1.25;
   transition: color 0.15s ease, opacity 0.15s ease;
@@ -1719,12 +1737,15 @@ body.high-contrast .toggle-switch:checked {
   opacity: 0.65;
 }
 .team-word-cat {
+  font-size: 0.76rem;
+  font-weight: 800;
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--amber);
   background: rgba(242, 167, 27, 0.12);
   border: 1px solid rgba(242, 167, 27, 0.3);
   border-radius: 999px;
+  padding: 3px 10px;
   padding: 2px 8px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -1866,6 +1887,828 @@ body.high-contrast .toggle-switch:checked {
   .how-card { display: grid; grid-template-columns: 40px 1fr; text-align: left; align-items: center; column-gap: 8px; }
   .how-card span { grid-row: span 2; }
 }
+
+/* ============================================================
+   Nani Huyu? (Who Am I? Sticky Phone Image Game) Styling
+   ============================================================ */
+
+/* Home Game Switcher */
+.home-game-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: min(540px, 100%);
+  margin: 0 auto;
+}
+.home-game-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: 18px;
+  min-height: 110px;
+  gap: 6px;
+  box-shadow: 0 6px 0 var(--espresso-dark);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+.home-game-card:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 var(--espresso-dark);
+}
+.home-game-card.primary {
+  background: var(--amber);
+  color: var(--charcoal);
+  border: 2px solid var(--amber-dark);
+}
+.home-game-card.secondary {
+  background: var(--espresso);
+  color: var(--chalk);
+  border: 2px solid var(--espresso-border);
+}
+.nani-card-pulse {
+  border-color: rgba(242, 167, 27, 0.6) !important;
+  background: linear-gradient(145deg, rgba(44, 34, 30, 0.95) 0%, rgba(30, 23, 20, 0.98) 100%) !important;
+}
+.game-badge-new {
+  position: absolute;
+  top: -8px;
+  right: 12px;
+  background: var(--shuka-red);
+  color: #FFFFFF;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(193, 39, 45, 0.4);
+}
+.game-card-emoji {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+.game-card-info strong {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+.game-card-info small {
+  display: block;
+  font-size: 0.78rem;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+@media (max-width: 440px) {
+  .home-game-choices {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .home-game-card {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    padding: 14px 18px;
+    min-height: auto;
+    gap: 14px;
+  }
+}
+
+/* Nani Screens Common */
+.nani-mode-badge {
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(242, 167, 27, 0.15);
+  color: var(--amber);
+  border: 1px solid rgba(242, 167, 27, 0.35);
+}
+.nani-intro {
+  text-align: center;
+  margin-top: 4px;
+}
+.nani-brand-icon {
+  font-size: 3rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.nani-steps-card {
+  width: min(500px, 100%);
+  margin: 10px auto;
+  background: var(--espresso);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 18px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.nani-step-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.nani-step-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.nani-step-row strong {
+  display: block;
+  font-size: 0.98rem;
+  color: var(--chalk);
+}
+.nani-step-row small {
+  display: block;
+  font-size: 0.82rem;
+  color: rgba(245, 239, 228, 0.7);
+}
+
+/* Form inputs */
+.nani-form-group {
+  width: min(500px, 100%);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+.nani-text-input {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 12px;
+  color: var(--chalk);
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 12px 14px;
+  width: 100%;
+}
+.nani-text-input:focus {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 10px rgba(242, 167, 27, 0.3);
+}
+.nani-code-input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 2.5px solid var(--amber);
+  border-radius: 14px;
+  color: var(--amber);
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 12px 16px;
+  width: 100%;
+  font-family: monospace;
+}
+.nani-code-input:focus {
+  outline: none;
+  box-shadow: 0 0 16px rgba(242, 167, 27, 0.4);
+}
+.nani-error-text {
+  color: #ff6b70;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 6px 0 0;
+}
+
+/* Deck selector grid */
+.nani-deck-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 100%;
+}
+.nani-deck-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--espresso);
+  border: 1.5px solid var(--espresso-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.nani-deck-option:hover {
+  border-color: rgba(242, 167, 27, 0.6);
+}
+.nani-deck-option.selected {
+  background: rgba(242, 167, 27, 0.14);
+  border-color: var(--amber);
+  box-shadow: 0 0 12px rgba(242, 167, 27, 0.25);
+}
+.nani-deck-opt-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+.nani-deck-opt-info {
+  flex: 1 1 auto;
+  text-align: left;
+}
+.nani-deck-opt-info strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--chalk);
+}
+.nani-deck-opt-info small {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(245, 239, 228, 0.7);
+}
+.nani-deck-opt-check {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--amber);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.nani-deck-option.selected .nani-deck-opt-check {
+  opacity: 1;
+}
+
+/* Join Card */
+.nani-join-card {
+  width: min(440px, 100%);
+  margin: 0 auto;
+  background: var(--espresso);
+  border: 2px solid var(--espresso-border);
+  border-radius: 22px;
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Lobby */
+.nani-lobby-header {
+  margin: 6px 0 12px;
+  text-align: center;
+}
+.nani-lobby-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(245, 239, 228, 0.6);
+  display: block;
+  margin-bottom: 4px;
+}
+.nani-code-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2.5px dashed var(--amber);
+  border-radius: 18px;
+  padding: 10px 24px;
+  color: var(--amber);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.nani-code-pill:hover {
+  background: rgba(242, 167, 27, 0.1);
+  transform: scale(1.02);
+}
+.nani-code-pill span {
+  font-size: clamp(2rem, 8vmin, 2.8rem);
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  font-family: monospace;
+  line-height: 1.05;
+}
+.nani-code-pill small {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--chalk);
+  opacity: 0.85;
+  margin-top: 2px;
+}
+.nani-lobby-deck-card {
+  width: min(500px, 100%);
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--espresso);
+  border: 1px solid var(--espresso-border);
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+.nani-lobby-deck-card .deck-icon {
+  font-size: 1.8rem;
+}
+.nani-lobby-deck-card strong {
+  display: block;
+  font-size: 0.98rem;
+  color: var(--chalk);
+}
+.nani-lobby-deck-card small {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(245, 239, 228, 0.7);
+}
+.nani-roster-box {
+  width: min(500px, 100%);
+  margin: 0 auto 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nani-roster-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nani-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ECC71;
+  box-shadow: 0 0 8px #2ECC71;
+  animation: pulseDot 1.4s infinite alternate;
+}
+@keyframes pulseDot {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.3); }
+}
+.nani-roster-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.nani-roster-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--espresso);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--chalk);
+}
+.nani-roster-pill.is-me {
+  border-color: var(--amber);
+  background: rgba(242, 167, 27, 0.16);
+}
+.nani-me-tag {
+  font-size: 0.68rem;
+  font-weight: 900;
+  background: var(--amber);
+  color: var(--charcoal);
+  border-radius: 99px;
+  padding: 1px 6px;
+}
+.nani-waiting-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  text-align: left;
+}
+.nani-waiting-spinner {
+  font-size: 1.8rem;
+  animation: spinSlow 3s linear infinite;
+}
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.nani-waiting-box strong {
+  display: block;
+  font-size: 1rem;
+  color: var(--chalk);
+}
+.nani-waiting-box small {
+  display: block;
+  font-size: 0.84rem;
+  color: rgba(245, 239, 228, 0.7);
+}
+
+/* 5s Flip Countdown */
+#naniCountdown {
+  padding: 24px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+.nani-countdown-card {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  background: var(--espresso);
+  border: 2.5px solid var(--amber);
+  border-radius: 24px;
+  padding: 28px 20px;
+  box-shadow: 0 0 35px rgba(242, 167, 27, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.nani-countdown-banner {
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--charcoal);
+  background: var(--amber);
+  border-radius: 999px;
+  padding: 4px 16px;
+}
+.nani-big-countdown {
+  font-size: clamp(6rem, 28vmin, 12rem);
+  font-weight: 900;
+  color: var(--amber);
+  line-height: 1;
+  text-shadow: 0 0 40px rgba(242, 167, 27, 0.5);
+  margin: 6px 0;
+}
+.nani-countdown-instruction {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--espresso-border);
+  border-radius: 16px;
+  padding: 14px 18px;
+  text-align: center;
+}
+.nani-countdown-instruction strong {
+  display: block;
+  font-size: 1.15rem;
+  color: #ff858a;
+  margin-bottom: 4px;
+}
+.nani-countdown-instruction p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--chalk);
+  opacity: 0.9;
+}
+
+/* Main Playing Screen (Outward Facing) */
+#naniPlay {
+  padding: max(12px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--charcoal);
+  overflow: hidden;
+}
+#naniPlay.active {
+  display: flex;
+}
+.nani-play-hud {
+  width: min(540px, 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.nani-facing-pill {
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(245, 239, 228, 0.1);
+  color: var(--chalk);
+  border: 1px solid rgba(245, 239, 228, 0.2);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+.nani-progress-pill {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--amber);
+  background: rgba(242, 167, 27, 0.14);
+  border: 1px solid rgba(242, 167, 27, 0.35);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+.nani-card-display {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: min(540px, 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+}
+.nani-card-frame {
+  width: 100%;
+  max-height: 100%;
+  background: var(--espresso);
+  border: 2.5px solid var(--amber);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 25px rgba(242, 167, 27, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.nani-img-wrapper {
+  width: 100%;
+  height: clamp(220px, 48vh, 360px);
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nani-character-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.nani-avatar-fallback {
+  display: none;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(30, 95, 191, 0.3) 0%, rgba(242, 167, 27, 0.25) 100%);
+  gap: 8px;
+}
+.nani-fallback-emoji {
+  font-size: 4rem;
+  line-height: 1;
+}
+.nani-fallback-name {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--chalk);
+}
+.nani-card-footer {
+  width: 100%;
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.nani-card-category-badge {
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  background: rgba(242, 167, 27, 0.14);
+  border: 1px solid rgba(242, 167, 27, 0.35);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+.nani-card-character-name {
+  font-size: clamp(1.4rem, 5.5vmin, 2.2rem);
+  font-weight: 900;
+  color: #FFFFFF;
+  margin: 2px 0;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.nani-card-hint-text {
+  font-size: 0.88rem;
+  color: rgba(245, 239, 228, 0.78);
+  font-weight: 700;
+  margin: 0;
+}
+.nani-play-actions {
+  width: min(540px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.nani-guess-btn {
+  width: 100%;
+  min-height: 56px;
+  font-size: 1.25rem;
+  font-weight: 900;
+  background: #2ECC71 !important;
+  color: #0b381a !important;
+  box-shadow: 0 4px 0 #1e824c, 0 8px 24px rgba(46, 204, 113, 0.4) !important;
+  border-radius: 18px !important;
+}
+.nani-guess-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #1e824c !important;
+}
+.nani-guess-sub {
+  font-size: 0.8rem;
+  color: rgba(245, 239, 228, 0.75);
+  font-weight: 700;
+}
+
+/* Revealed Screen */
+.nani-revealed-card {
+  width: min(500px, 100%);
+  margin: 0 auto;
+  background: var(--espresso);
+  border: 2px solid var(--espresso-border);
+  border-radius: 24px;
+  padding: 22px 18px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+}
+.nani-revealed-badge {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 900;
+  padding: 6px 18px;
+  border-radius: 999px;
+  background: rgba(46, 204, 113, 0.18);
+  color: #2ECC71;
+  border: 1.5px solid rgba(46, 204, 113, 0.5);
+  margin-bottom: 6px;
+}
+.nani-revealed-badge.gold {
+  background: rgba(242, 167, 27, 0.2);
+  color: var(--amber);
+  border-color: var(--amber);
+}
+.nani-revealed-badge.last {
+  background: rgba(231, 76, 60, 0.18);
+  color: #ff858a;
+  border-color: rgba(231, 76, 60, 0.4);
+}
+.nani-revealed-character-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--espresso-border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  text-align: left;
+  margin: 12px 0 16px;
+}
+.nani-revealed-thumb {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1.5px solid var(--amber);
+  flex-shrink: 0;
+}
+.nani-round-live-status {
+  text-align: left;
+}
+.nani-live-roster {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+.nani-live-pill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+.nani-live-pill.is-done {
+  border-color: rgba(46, 204, 113, 0.35);
+  color: #2ECC71;
+}
+
+/* Leaderboard Screen */
+.nani-leaderboard-card {
+  width: min(520px, 100%);
+  margin: 0 auto;
+  background: var(--espresso);
+  border: 2px solid var(--amber);
+  border-radius: 24px;
+  padding: 24px 18px;
+  text-align: center;
+  box-shadow: 0 0 35px rgba(242, 167, 27, 0.25);
+}
+.nani-leaderboard-banner {
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--amber);
+  color: var(--charcoal);
+  border-radius: 999px;
+  padding: 3px 14px;
+}
+.nani-podiums-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin: 14px 0 16px;
+}
+.nani-podium-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid var(--espresso-border);
+  border-radius: 16px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.nani-podium-card.rank-1 {
+  border-color: var(--amber);
+  background: linear-gradient(180deg, rgba(242, 167, 27, 0.18) 0%, rgba(44, 34, 30, 0.9) 100%);
+}
+.podium-medal {
+  font-size: 1.8rem;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.podium-char {
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: var(--amber);
+}
+.podium-cat {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+.nani-full-rankings-box {
+  text-align: left;
+}
+.nani-rankings-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nani-ranking-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 0.94rem;
+}
+.nani-ranking-row.is-last-place {
+  border-color: rgba(231, 76, 60, 0.4);
+  background: rgba(231, 76, 60, 0.1);
+}
+.nani-ranking-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.nani-ranking-num {
+  font-weight: 900;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+.nani-ranking-row.is-last-place .nani-ranking-num {
+  color: #ff858a;
+}
+.nani-ranking-info strong {
+  display: block;
+  font-size: 0.96rem;
+  color: var(--chalk);
+}
+.nani-ranking-info small {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.nani-banter-pill {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ff858a;
+  background: rgba(193, 39, 45, 0.18);
+  border-radius: 99px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
 </style>
 </head>
 <body>
@@ -1884,7 +2727,24 @@ body.high-contrast .toggle-switch:checked {
       <p class="tag">Hold the phone to your forehead. Your mbogi acts out the word.</p>
     </div>
     <div class="spacer"></div>
-    <button id="playBtn" class="primary" type="button">Play</button>
+    <div class="home-game-choices">
+      <button id="playBtn" class="primary home-game-card" type="button">
+        <span class="game-card-emoji" aria-hidden="true">🎭</span>
+        <div class="game-card-info">
+          <strong>Sijui Charades</strong>
+          <small>Forehead tilt & team checklist</small>
+        </div>
+      </button>
+
+      <button id="naniHuyuBtn" class="secondary home-game-card nani-card-pulse" type="button">
+        <span class="game-badge-new">NEW GAME</span>
+        <span class="game-card-emoji" aria-hidden="true">🖼️</span>
+        <div class="game-card-info">
+          <strong>Nani Huyu?</strong>
+          <small>Who am I? Sticky phone image game</small>
+        </div>
+      </button>
+    </div>
     <div class="home-tools">
       <span>Ready to embarrass your friends?</span>
       <button id="openSettingsBtn" class="settings-trigger-btn" type="button" aria-haspopup="dialog" aria-expanded="false">⚙️ Settings</button>
@@ -2202,6 +3062,230 @@ body.high-contrast .toggle-switch:checked {
     </div>
   </section>
 
+  <!-- ============================================================
+       Nani Huyu? (Who Am I? Sticky Phone Image Game) Screens
+       ============================================================ -->
+  <section id="naniHome" class="screen">
+    <div class="top-bar">
+      <button id="naniHomeBack" class="back" type="button" aria-label="Back to home">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="brand">Nani Huyu?</span>
+      <span style="width:40px"></span>
+    </div>
+    <div class="nani-intro">
+      <div class="nani-brand-icon">🖼️</div>
+      <h2>Nani Huyu?</h2>
+      <p class="tag">The sticky-note forehead guessing game, right on your phones!</p>
+    </div>
+    <div class="nani-steps-card">
+      <div class="nani-step-row">
+        <span class="nani-step-icon">1️⃣</span>
+        <div>
+          <strong>Host or Join a Room</strong>
+          <small>Everyone connects on their own phone with a 4-letter code</small>
+        </div>
+      </div>
+      <div class="nani-step-row">
+        <span class="nani-step-icon">2️⃣</span>
+        <div>
+          <strong>Point Phone Outward (5s Countdown)</strong>
+          <small>Hold your phone straight facing friends so they see your secret card, but you can't!</small>
+        </div>
+      </div>
+      <div class="nani-step-row">
+        <span class="nani-step-icon">3️⃣</span>
+        <div>
+          <strong>Ask Yes / No Questions</strong>
+          <small>“Am I alive?”, “Am I a musician?”, “Am I Kenyan?” at your own pace</small>
+        </div>
+      </div>
+      <div class="nani-step-row">
+        <span class="nani-step-icon">4️⃣</span>
+        <div>
+          <strong>Tap "I Guessed It!"</strong>
+          <small>Fastest guess wins 🥇. Last player to guess is marked Last Place 🐢!</small>
+        </div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button id="naniGoHostBtn" class="primary" type="button">👑 Host New Game</button>
+      <button id="naniGoJoinBtn" class="secondary" type="button">📱 Join Game With Code</button>
+    </div>
+  </section>
+
+  <section id="naniHost" class="screen">
+    <div class="top-bar">
+      <button id="naniHostBack" class="back" type="button" aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="brand">Host Game</span>
+      <span style="width:40px"></span>
+    </div>
+    <div class="nani-form-group">
+      <label for="naniHostNameInput" class="nani-input-label">Your Name</label>
+      <input id="naniHostNameInput" class="nani-text-input" type="text" maxlength="20" placeholder="e.g. Brian" autocomplete="name" />
+    </div>
+    <div class="nani-deck-select-section" style="width:min(500px, 100%); margin:14px auto 0;">
+      <h3 class="nani-section-title" style="font-size:0.96rem; margin:0 0 8px; color:var(--chalk);">Select Character Deck</h3>
+      <div id="naniDeckList" class="nani-deck-grid" role="radiogroup" aria-label="Character Decks">
+        <!-- Loaded dynamically from /api/nani/decks -->
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button id="naniCreateRoomBtn" class="primary" type="button">Create Room & Get Code</button>
+    </div>
+  </section>
+
+  <section id="naniJoin" class="screen">
+    <div class="top-bar">
+      <button id="naniJoinBack" class="back" type="button" aria-label="Back">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="brand">Join Game</span>
+      <span style="width:40px"></span>
+    </div>
+    <div class="nani-join-card">
+      <div class="nani-form-group" style="width:100%;">
+        <label for="naniJoinNameInput" class="nani-input-label">Your Name</label>
+        <input id="naniJoinNameInput" class="nani-text-input" type="text" maxlength="20" placeholder="e.g. Sarah" autocomplete="name" />
+      </div>
+      <div class="nani-form-group" style="width:100%; margin-top:14px;">
+        <label for="naniJoinCodeInput" class="nani-input-label">4-Letter Room Code</label>
+        <input id="naniJoinCodeInput" class="nani-code-input" type="text" maxlength="4" placeholder="KUKU" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+      </div>
+      <div id="naniJoinError" class="nani-error-text" hidden style="margin-top:10px;"></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button id="naniSubmitJoinBtn" class="primary" type="button">Join Room</button>
+    </div>
+  </section>
+
+  <section id="naniLobby" class="screen">
+    <div class="top-bar">
+      <span class="brand">Nani Huyu? Lobby</span>
+      <span id="naniLobbyRoleBadge" class="nani-mode-badge">Player</span>
+    </div>
+    <div class="nani-lobby-header">
+      <span class="nani-lobby-eyebrow">Room Code</span>
+      <div id="naniCopyCodeBtn" class="nani-code-pill" role="button" tabindex="0" title="Click to copy link">
+        <span id="naniLobbyCodeText">----</span>
+        <small>Tap to copy share link 📋</small>
+      </div>
+    </div>
+    <div class="nani-lobby-deck-card">
+      <span id="naniLobbyDeckIcon" class="deck-icon">🇰🇪</span>
+      <div>
+        <strong id="naniLobbyDeckName">Kenyan Celebs & Icons</strong>
+        <small id="naniLobbyDeckDesc">Politicians, artists, athletes & legends</small>
+      </div>
+    </div>
+    <div class="nani-roster-box">
+      <div class="nani-roster-header">
+        <span class="nani-roster-title">Players in room (<span id="naniRosterCount">0</span>)</span>
+        <span class="nani-pulse-dot" aria-hidden="true"></span>
+      </div>
+      <div id="naniRosterList" class="nani-roster-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div id="naniHostControls" class="actions" style="display:none;">
+      <button id="naniHostStartBtn" class="primary" type="button">Start Game (5s Countdown)</button>
+      <button id="naniLobbyLeaveBtn" class="ghost" type="button">Leave Room</button>
+    </div>
+    <div id="naniGuestNotice" class="nani-waiting-box" style="display:none; width:min(500px, 100%); margin:0 auto 12px;">
+      <span class="nani-waiting-spinner">⏳</span>
+      <div>
+        <strong>Waiting for Host to start…</strong>
+        <small>Get ready to hold your phone outward facing your friends!</small>
+      </div>
+    </div>
+  </section>
+
+  <section id="naniCountdown" class="screen">
+    <div class="nani-countdown-card">
+      <span class="nani-countdown-banner">Get Ready!</span>
+      <div id="naniCountdownNum" class="nani-big-countdown">5</div>
+      <div class="nani-countdown-instruction">
+        <strong>📱 HOLD PHONE FACING YOUR FRIENDS!</strong>
+        <p>Do NOT look at your screen! Let everyone else see who you are!</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="naniPlay" class="screen">
+    <div class="nani-play-hud">
+      <span class="nani-facing-pill">👀 Point at friends</span>
+      <span id="naniPlayRosterProgress" class="nani-progress-pill">0 / 0 Guessed</span>
+    </div>
+    <div class="nani-card-display">
+      <div class="nani-card-frame">
+        <div class="nani-img-wrapper">
+          <img id="naniCardImage" class="nani-character-photo" src="" alt="Secret Character" />
+          <div id="naniCardAvatarFallback" class="nani-avatar-fallback">
+            <span id="naniCardAvatarEmoji" class="nani-fallback-emoji">👤</span>
+            <span id="naniCardAvatarName" class="nani-fallback-name"></span>
+          </div>
+        </div>
+        <div class="nani-card-footer">
+          <span id="naniCardCategory" class="nani-card-category-badge">Category</span>
+          <h2 id="naniCardName" class="nani-card-character-name">Character Name</h2>
+          <p id="naniCardHint" class="nani-card-hint-text">Hint</p>
+        </div>
+      </div>
+    </div>
+    <div class="nani-play-actions">
+      <button id="naniGuessBtn" class="primary nani-guess-btn" type="button">✅ I GUESSED IT!</button>
+      <span class="nani-guess-sub">Tap once you figure out who you are</span>
+    </div>
+  </section>
+
+  <section id="naniRevealed" class="screen">
+    <div class="nani-revealed-card">
+      <span id="naniRevealedRankBadge" class="nani-revealed-badge gold">🥇 1st Place!</span>
+      <h2>You were:</h2>
+      <div class="nani-revealed-character-box">
+        <img id="naniRevealedImg" class="nani-revealed-thumb" src="" alt="" />
+        <div>
+          <span id="naniRevealedCat" class="nani-card-category-badge">Category</span>
+          <h3 id="naniRevealedName" style="margin:2px 0; font-size:1.3rem; color:var(--chalk);">Character</h3>
+          <small id="naniRevealedHint" style="color:rgba(245,239,228,0.7);"></small>
+        </div>
+      </div>
+      <div class="nani-round-live-status">
+        <strong style="font-size:0.9rem; color:var(--amber);">Other players still guessing:</strong>
+        <div id="naniRevealedLiveRoster" class="nani-live-roster">
+          <!-- Live progress -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="naniLeaderboard" class="screen">
+    <div class="nani-leaderboard-card">
+      <span class="nani-leaderboard-banner">Round Finished!</span>
+      <h2 style="margin:8px 0 16px;">🏆 Final Leaderboard</h2>
+      <div id="naniPodiumContainer" class="nani-podiums-grid">
+        <!-- Top 3 podiums -->
+      </div>
+      <div class="nani-full-rankings-box">
+        <strong style="font-size:0.92rem; color:var(--chalk);">All Players:</strong>
+        <ul id="naniRankingsList" class="nani-rankings-list">
+          <!-- Full list with Last Place banter -->
+        </ul>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button id="naniPlayAgainBtn" class="primary" type="button">Play Next Round</button>
+      <button id="naniExitBtn" class="ghost" type="button">Exit to Home</button>
+    </div>
+  </section>
+
 </main>
 <div id="confetti" aria-hidden="true"></div>
 <div id="moment" class="moment" aria-live="polite"></div>
@@ -2322,7 +3406,9 @@ function shuffle(a) {
   }
   return a;
 }
+let currentScreenId = "home";
 function show(id) {
+  currentScreenId = id;
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   $(id).classList.add("active");
   window.scrollTo(0, 0);
@@ -3886,7 +4972,7 @@ function resumeRound() {
 }
 
 function handleOrientationChange() {
-  if (gameMode === "team") return; // Team mode is played straight (portrait)
+  if (gameMode === "team" || (typeof currentScreenId !== "undefined" && currentScreenId && currentScreenId.startsWith("nani"))) return; // Team mode & Nani Huyu are played straight (portrait)
   if (!isLandscape()) {
     if (S && S.running && !S.pausedAt) {
       S.pausedAt = Date.now();
@@ -4250,5 +5336,6 @@ loadGameSounds();
 startHomeBanter();
 updatePwaUI();
 </script>
+<script src="nani-client.js"></script>
 </body>
 </html>

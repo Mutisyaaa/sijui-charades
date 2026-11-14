@@ -3,11 +3,12 @@
    Offline caching, fast loading, and standalone app support.
    ============================================================ */
 
-const CACHE_NAME = "sijui-pwa-v3";
+const CACHE_NAME = "sijui-pwa-v4";
 
 const PRECACHE_ASSETS = [
   "/",
   "/Index.html",
+  "/nani-client.js",
   "/manifest.json",
   "/assets/fonts/ManlineSlabs-pgPVy.otf",
   "/assets/fonts/ManlineSlabs-xRWVj.ttf",
