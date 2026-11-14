@@ -38,7 +38,17 @@ async function initNaniTable() {
         created_at timestamptz NOT NULL DEFAULT now(),
         updated_at timestamptz NOT NULL DEFAULT now()
       );
+      CREATE TABLE IF NOT EXISTS public.nani_categories (
+        name text PRIMARY KEY,
+        created_at timestamptz NOT NULL DEFAULT now()
+      );
     `);
+    // Insert common defaults if empty
+    await pool.query(`
+      INSERT INTO public.nani_categories (name)
+      VALUES ('Friends & Family'), ('Kenyan Celebs'), ('Footballers'), ('Musicians'), ('Memes')
+      ON CONFLICT (name) DO NOTHING;
+    `).catch(() => {});
     // Remove any test seed entries
     await pool.query("DELETE FROM public.nani_characters WHERE name ~ '^[0-9a-f]{32}$'").catch(() => {});
   } catch (err) {
@@ -333,9 +343,89 @@ app.get("/api/nani/custom-characters", async (_request, response) => {
   }
 });
 
+// Public endpoint to get Nani categories with photo counts
+app.get("/api/nani/categories", async (_request, response) => {
+  try {
+    const result = await pool.query(`
+      SELECT c.name, COUNT(ch.id)::int AS count
+      FROM (
+        SELECT name FROM public.nani_categories
+        UNION
+        SELECT DISTINCT category AS name FROM public.nani_characters WHERE category IS NOT NULL AND category != ''
+      ) c
+      LEFT JOIN public.nani_characters ch ON LOWER(ch.category) = LOWER(c.name)
+      GROUP BY c.name
+      ORDER BY c.name ASC
+    `);
+    response.json(result.rows);
+  } catch (err) {
+    try {
+      const fallbackPath = path.join(__dirname, "nani-custom-cards.json");
+      let list = [];
+      if (fs.existsSync(fallbackPath)) {
+        list = JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
+      }
+      const catMap = new Map([
+        ["Friends & Family", 0],
+        ["Kenyan Celebs", 0],
+        ["Footballers", 0],
+        ["Musicians", 0],
+        ["Memes", 0]
+      ]);
+      for (const item of list) {
+        const cat = item.category || "General";
+        catMap.set(cat, (catMap.get(cat) || 0) + 1);
+      }
+      const out = Array.from(catMap.entries()).map(([name, count]) => ({ name, count }));
+      return response.json(out);
+    } catch (_) {}
+    response.json([
+      { name: "Friends & Family", count: 0 },
+      { name: "Kenyan Celebs", count: 0 }
+    ]);
+  }
+});
+
+// Admin endpoint to create a new category
+app.post("/api/admin/nani/categories", requireAdmin, async (request, response) => {
+  const name = String(request.body.name || "").trim().slice(0, 80);
+  if (!name) {
+    return response.status(400).json({ error: "Category name is required." });
+  }
+  try {
+    await pool.query(
+      "INSERT INTO public.nani_categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING",
+      [name]
+    );
+    response.status(201).json({ ok: true, name });
+  } catch (err) {
+    response.status(500).json({ error: "Failed to create category: " + err.message });
+  }
+});
+
+// Admin endpoint to delete a category and its photos
+app.delete("/api/admin/nani/categories/:name", requireAdmin, async (request, response) => {
+  const name = String(request.params.name || "").trim();
+  if (!name) return response.status(400).json({ error: "Category name is required." });
+
+  try {
+    await pool.query("DELETE FROM public.nani_characters WHERE LOWER(category) = LOWER($1)", [name]);
+    await pool.query("DELETE FROM public.nani_categories WHERE LOWER(name) = LOWER($1)", [name]);
+    const fallbackPath = path.join(__dirname, "nani-custom-cards.json");
+    if (fs.existsSync(fallbackPath)) {
+      let list = JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
+      list = list.filter(c => (c.category || "").toLowerCase() !== name.toLowerCase());
+      fs.writeFileSync(fallbackPath, JSON.stringify(list, null, 2));
+    }
+    response.status(204).end();
+  } catch (err) {
+    response.status(500).json({ error: "Failed to delete category: " + err.message });
+  }
+});
+
 // Admin endpoint to upload/add character image
 app.post("/api/admin/nani/characters", requireAdmin, async (request, response) => {
-  const category = String(request.body.category || "Kenyan Celebs & Icons").trim().slice(0, 80) || "General";
+  const category = String(request.body.category || "").trim().slice(0, 80) || "General";
   const name = String(request.body.name || "Character").trim().slice(0, 100);
   const imageUrl = String(request.body.image_url || request.body.imageUrl || "").trim();
 
@@ -344,6 +434,12 @@ app.post("/api/admin/nani/characters", requireAdmin, async (request, response) =
   }
 
   try {
+    // Ensure category exists in categories table
+    await pool.query(
+      "INSERT INTO public.nani_categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING",
+      [category]
+    ).catch(() => {});
+
     const result = await pool.query(
       `INSERT INTO public.nani_characters (category, name, image_url)
        VALUES ($1, $2, $3)

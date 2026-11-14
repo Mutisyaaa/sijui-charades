@@ -93,7 +93,7 @@ async function getDeckCards(deckId) {
   }
 
   if (!deckId || deckId === "all") {
-    return allCards;
+    return shuffle(allCards);
   }
 
   // Check if deckId matches built-in deck
@@ -117,7 +117,7 @@ async function getDeckCards(deckId) {
     return matchingCustom;
   }
 
-  return allCards;
+  return shuffle(allCards);
 }
 
 // Helper: auto-advance countdown if 5s has elapsed
@@ -138,7 +138,7 @@ function serializeRoom(room, viewerPlayerId) {
     code: room.code,
     hostId: room.hostId,
     deckId: room.deckId,
-    deckName: (NANI_DECKS.find(d => d.id === room.deckId) || { name: room.deckName || "Nani Huyu?" }).name,
+    deckName: room.deckId === "all" ? "🎲 Random Mix (All Photos)" : (NANI_DECKS.find(d => d.id === room.deckId) || { name: (room.deckName || room.deckId.replace(/^custom_/, "").replace(/-/g, " ")) || "Nani Huyu?" }).name,
     status: room.status,
     countdownEndsAt: room.countdownEndsAt,
     startedAt: room.startedAt,
@@ -167,6 +167,7 @@ function serializeRoom(room, viewerPlayerId) {
 router.get("/decks", async (_req, res) => {
   const customCards = await fetchCustomCards();
   const allBuiltinCount = NANI_DECKS.reduce((acc, d) => acc + (d.cards ? d.cards.length : 0), 0);
+  const totalCount = allBuiltinCount + customCards.length;
 
   // Group any custom categories that don't match built-in decks
   const customGroupMap = new Map();
@@ -174,6 +175,18 @@ router.get("/decks", async (_req, res) => {
     const cat = (card.category || "General").trim();
     if (!customGroupMap.has(cat)) customGroupMap.set(cat, []);
     customGroupMap.get(cat).push(card);
+  }
+
+  // Also include any categories from dbPool even if they have 0 cards yet
+  if (dbPool) {
+    try {
+      const catRes = await dbPool.query("SELECT name FROM public.nani_categories");
+      if (catRes && catRes.rows) {
+        for (const row of catRes.rows) {
+          if (!customGroupMap.has(row.name)) customGroupMap.set(row.name, []);
+        }
+      }
+    } catch (_) {}
   }
 
   const customDecks = [];
@@ -187,8 +200,11 @@ router.get("/decks", async (_req, res) => {
       const slug = "custom_" + catName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       customDecks.push({
         id: slug,
+        categoryName: catName,
         name: catName,
-        description: `${cards.length} character photo${cards.length === 1 ? '' : 's'}`,
+        description: cards.length > 0
+          ? `${cards.length} character photo${cards.length === 1 ? '' : 's'}`
+          : "0 photos (upload in studio)",
         icon: "📸",
         count: cards.length
       });
@@ -210,13 +226,14 @@ router.get("/decks", async (_req, res) => {
   });
 
   const result = [...builtinDecks, ...customDecks];
-  const totalCount = allBuiltinCount + customCards.length;
-  if (result.length > 1 && totalCount > 0) {
-    result.push({
+
+  // ALWAYS include "🎲 Random Mix (All Photos)" whenever there are pictures in the library!
+  if (totalCount > 0) {
+    result.unshift({
       id: "all",
-      name: "Mix of Everything",
-      description: "A wild mix of all character pictures!",
-      icon: "🌟",
+      name: "🎲 Random Mix (All Photos)",
+      description: `A wild shuffle of all ${totalCount} photos across every category!`,
+      icon: "🎲",
       count: totalCount
     });
   }

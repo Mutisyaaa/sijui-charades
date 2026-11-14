@@ -125,9 +125,13 @@ CREATE TABLE IF NOT EXISTS public.nani_characters (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-DROP TRIGGER IF EXISTS nani_characters_set_updated_at ON public.nani_characters;
-CREATE TRIGGER nani_characters_set_updated_at
-BEFORE UPDATE ON public.nani_characters
-FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+CREATE TABLE IF NOT EXISTS public.nani_categories (
+  name text PRIMARY KEY,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO public.nani_categories (name)
+VALUES ('Friends & Family'), ('Kenyan Celebs'), ('Footballers'), ('Musicians'), ('Memes')
+ON CONFLICT (name) DO NOTHING;
 
 
