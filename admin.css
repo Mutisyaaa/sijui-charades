@@ -245,7 +245,7 @@ h1 {
    ============================================================ */
 .layout {
   display: grid;
-  grid-template-columns: minmax(380px, 460px) minmax(0, 1fr);
+  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
@@ -419,7 +419,13 @@ h1 {
   background: var(--red);
 }
 
-.deck-actions, .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.deck-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
 
 .small-button {
   padding: 8px 16px;
@@ -451,18 +457,27 @@ h1 {
   background: var(--red-deep);
 }
 
-.card-list { display: grid; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+.card-list { display: grid; gap: 10px; margin: 16px 0 0; padding: 0; list-style: none; }
 .card-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 12px 14px;
+  gap: 12px;
+  padding: 10px 14px;
   background: var(--paper);
   border: 2px solid var(--ink);
   border-radius: 14px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background 0.15s ease, transform 0.08s ease;
 }
-.card-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.card-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
 .card-num {
   display: grid;
   place-items: center;
@@ -478,9 +493,33 @@ h1 {
   border-radius: 8px;
   flex-shrink: 0;
 }
-.card-text { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
-.card-text b { font-family: var(--display); color: var(--ink); font-size: 1.05rem; font-weight: 800; }
-.card-text small { color: var(--ink); opacity: 0.7; font-size: 0.82rem; text-transform: capitalize; font-weight: 600; }
+.card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.card-text b {
+  font-family: var(--display);
+  color: var(--ink);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.card-text small {
+  color: var(--ink);
+  opacity: 0.75;
+  font-size: 0.82rem;
+  text-transform: capitalize;
+  font-weight: 600;
+  white-space: normal;
+}
 
 .card-preview {
   display: grid;
@@ -499,7 +538,12 @@ h1 {
 
 .card-row.inactive .card-text b { color: var(--ink); opacity: 0.5; text-decoration: line-through; }
 .card-row.inactive .card-num { opacity: 0.45; }
-.card-actions { flex-shrink: 0; }
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
 
 /* ============================================================
    Nani Huyu Photo Studio
@@ -695,17 +739,47 @@ h1 {
 /* ============================================================
    Responsive Adaptations
    ============================================================ */
-@media (max-width: 960px) {
-  .admin-shell { padding: 20px 14px; }
-  .layout { grid-template-columns: 1fr; }
-  .nani-upload-grid { grid-template-columns: 1fr; }
+@media (max-width: 1040px) {
+  .layout { grid-template-columns: 1fr; gap: 24px; }
   .sounds-layout { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .admin-shell { padding: 18px 12px 60px; width: 96vw; }
+  .panel { padding: 22px 18px; border-radius: 20px; }
+  .deck-card { padding: 18px 16px; border-radius: 18px; }
+  .nani-upload-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 540px) {
   .admin-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .brand { font-size: 1.15rem; }
+  .admin-tabs { gap: 8px; margin-bottom: 20px; }
+  .admin-tab-btn { font-size: 0.92rem; padding: 10px 14px; gap: 6px; }
   .field-row { grid-template-columns: 1fr; }
-  .panel { padding: 20px 16px; border-radius: 18px; }
-  .admin-tab-btn { font-size: 0.95rem; padding: 10px 16px; }
-  .nani-gallery-grid { grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 12px; }
+  .panel { padding: 16px 12px; border-radius: 16px; }
+  .deck-card { padding: 14px 10px; border-radius: 16px; }
+  .deck-heading { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .deck-heading h3 { font-size: 1.2rem; }
+
+  .card-row {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .card-main {
+    flex: 1 1 100%;
+    gap: 10px;
+  }
+  .card-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+  .card-actions .small-button {
+    padding: 6px 14px;
+    font-size: 0.84rem;
+  }
+
+  .nani-gallery-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
 }

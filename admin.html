@@ -426,12 +426,12 @@
               <li class="card-row ${card.is_active ? "" : "inactive"}">
                 <div class="card-main">
                   <span class="card-num">${cardIdx + 1}</span>
-                  <span class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")}</small></span>
+                  <div class="card-text"><b>${escapeHtml(card.text)}</b><small>${escapeHtml(card.category || "General")}</small></div>
                 </div>
-                <span class="card-actions">
+                <div class="card-actions">
                   <button class="small-button" data-action="edit-card" data-id="${card.id}" type="button">Edit</button>
                   <button class="small-button danger" data-action="delete-card" data-id="${card.id}" type="button">Delete</button>
-                </span>
+                </div>
               </li>`).join("") : `<li class="empty">No cards in this deck yet.</li>`}
           </ul>
         </article>`).join("");
