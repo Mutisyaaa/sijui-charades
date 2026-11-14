@@ -2,11 +2,53 @@ const express = require("express");
 const crypto = require("node:crypto");
 const https = require("node:https");
 const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
 const { URL } = require("node:url");
 const NANI_DECKS = require("./nani-data");
 
 const router = express.Router();
 const rooms = new Map();
+
+let dbPool = null;
+router.setPool = function(p) {
+  dbPool = p;
+};
+
+async function fetchCustomCards() {
+  if (dbPool) {
+    try {
+      const res = await dbPool.query(
+        "SELECT id, category, name, image_url FROM public.nani_characters ORDER BY created_at DESC"
+      );
+      if (res && res.rows) {
+        return res.rows.map(r => ({
+          id: r.id,
+          name: r.name || "Character",
+          category: r.category || "General",
+          hint: "",
+          avatar: "📸",
+          image: r.image_url
+        }));
+      }
+    } catch (_) {}
+  }
+  try {
+    const fp = path.join(__dirname, "nani-custom-cards.json");
+    if (fs.existsSync(fp)) {
+      const list = JSON.parse(fs.readFileSync(fp, "utf8"));
+      return list.map(r => ({
+        id: r.id,
+        name: r.name || "Character",
+        category: r.category || "General",
+        hint: "",
+        avatar: "📸",
+        image: r.image_url || r.image
+      }));
+    }
+  } catch (_) {}
+  return [];
+}
 
 // Helper: generate friendly 4-letter room code (avoiding confusing characters)
 const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -41,13 +83,37 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000);
 
-// Helper: get card pool by deck ID
-function getDeckCards(deckId) {
-  if (deckId === "all") {
-    return NANI_DECKS.flatMap(d => d.cards);
+// Helper: get card pool by deck ID (built-in + admin custom uploaded)
+async function getDeckCards(deckId) {
+  const customCards = await fetchCustomCards();
+  const allCards = [...NANI_DECKS.flatMap(d => d.cards), ...customCards];
+
+  if (!deckId || deckId === "all") {
+    return allCards.length ? allCards : NANI_DECKS[0].cards;
   }
-  const deck = NANI_DECKS.find(d => d.id === deckId);
-  return deck ? deck.cards : NANI_DECKS[0].cards;
+
+  // Check if deckId matches built-in deck
+  const builtin = NANI_DECKS.find(d => d.id === deckId);
+  if (builtin) {
+    const matchingCustom = customCards.filter(c => {
+      const cat = (c.category || "").toLowerCase();
+      const bName = (builtin.name || "").toLowerCase();
+      const bId = (builtin.id || "").toLowerCase();
+      return cat.includes(bId) || bName.includes(cat) || cat.includes(bName);
+    });
+    return [...builtin.cards, ...matchingCustom];
+  }
+
+  // Check custom category decks
+  const matchingCustom = customCards.filter(c => {
+    const slug = "custom_" + (c.category || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    return slug === deckId || (c.category || "").toLowerCase() === deckId.toLowerCase();
+  });
+  if (matchingCustom.length > 0) {
+    return matchingCustom;
+  }
+
+  return allCards.length ? allCards : NANI_DECKS[0].cards;
 }
 
 // Helper: auto-advance countdown if 5s has elapsed
@@ -93,23 +159,59 @@ function serializeRoom(room, viewerPlayerId) {
    Routes
    ============================================================ */
 
-// 1. Get available Nani Huyu decks
-router.get("/decks", (_req, res) => {
-  const allCardsCount = NANI_DECKS.reduce((acc, d) => acc + d.cards.length, 0);
+// 1. Get available Nani Huyu decks (built-in + admin custom)
+router.get("/decks", async (_req, res) => {
+  const customCards = await fetchCustomCards();
+  const allBuiltinCount = NANI_DECKS.reduce((acc, d) => acc + d.cards.length, 0);
+
+  // Group any custom categories that don't match built-in decks
+  const customGroupMap = new Map();
+  for (const card of customCards) {
+    const cat = (card.category || "General").trim();
+    if (!customGroupMap.has(cat)) customGroupMap.set(cat, []);
+    customGroupMap.get(cat).push(card);
+  }
+
+  const customDecks = [];
+  for (const [catName, cards] of customGroupMap.entries()) {
+    const isBuiltin = NANI_DECKS.some(d => 
+      d.name.toLowerCase().includes(catName.toLowerCase()) || 
+      catName.toLowerCase().includes(d.name.toLowerCase()) || 
+      d.id === catName.toLowerCase()
+    );
+    if (!isBuiltin) {
+      const slug = "custom_" + catName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      customDecks.push({
+        id: slug,
+        name: catName,
+        description: `Custom photos added by admin (${cards.length} photos)`,
+        icon: "📸",
+        count: cards.length
+      });
+    }
+  }
+
   const result = [
-    ...NANI_DECKS.map(d => ({
-      id: d.id,
-      name: d.name,
-      description: d.description,
-      icon: d.icon,
-      count: d.cards.length
-    })),
+    ...NANI_DECKS.map(d => {
+      const extraCount = customCards.filter(c => {
+        const cat = (c.category || "").toLowerCase();
+        return cat.includes(d.id.toLowerCase()) || d.name.toLowerCase().includes(cat);
+      }).length;
+      return {
+        id: d.id,
+        name: d.name,
+        description: d.description,
+        icon: d.icon,
+        count: d.cards.length + extraCount
+      };
+    }),
+    ...customDecks,
     {
       id: "all",
       name: "Mix of Everything",
-      description: "A wild mix of Kenyan icons, global superstars, and cartoon characters!",
-      icon: "🎉",
-      count: allCardsCount
+      description: "A wild mix of Kenyan icons, global superstars, cartoon characters & custom photos!",
+      icon: "🌟",
+      count: allBuiltinCount + customCards.length
     }
   ];
   res.json(result);
@@ -233,7 +335,7 @@ router.post("/rooms/:code/deck", (req, res) => {
 });
 
 // 6. Host starts round (initiates 5-second countdown)
-router.post("/rooms/:code/start", (req, res) => {
+router.post("/rooms/:code/start", async (req, res) => {
   const code = String(req.params.code || "").trim().toUpperCase();
   const playerId = String(req.body.playerId || req.body.hostId || "");
   const deckId = String(req.body.deckId || "").trim();
@@ -244,7 +346,7 @@ router.post("/rooms/:code/start", (req, res) => {
 
   if (deckId) room.deckId = deckId;
 
-  const pool = getDeckCards(room.deckId);
+  const pool = await getDeckCards(room.deckId);
   const shuffled = shuffle(pool);
 
   // Assign a distinct card to each player
@@ -303,7 +405,7 @@ router.post("/rooms/:code/guess", (req, res) => {
 });
 
 // 8. Host restarts round
-router.post("/rooms/:code/restart", (req, res) => {
+router.post("/rooms/:code/restart", async (req, res) => {
   const code = String(req.params.code || "").trim().toUpperCase();
   const playerId = String(req.body.playerId || req.body.hostId || "");
   const deckId = String(req.body.deckId || "").trim();
@@ -314,7 +416,7 @@ router.post("/rooms/:code/restart", (req, res) => {
 
   if (deckId) room.deckId = deckId;
 
-  const pool = getDeckCards(room.deckId);
+  const pool = await getDeckCards(room.deckId);
   const shuffled = shuffle(pool);
 
   room.players.forEach((player, idx) => {

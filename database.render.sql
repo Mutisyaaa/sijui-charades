@@ -116,3 +116,18 @@ CREATE TRIGGER game_sounds_set_updated_at
 BEFORE UPDATE ON public.game_sounds
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
+CREATE TABLE IF NOT EXISTS public.nani_characters (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  category text NOT NULL DEFAULT 'General',
+  name text NOT NULL DEFAULT 'Character',
+  image_url text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+DROP TRIGGER IF EXISTS nani_characters_set_updated_at ON public.nani_characters;
+CREATE TRIGGER nani_characters_set_updated_at
+BEFORE UPDATE ON public.nani_characters
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+

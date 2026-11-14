@@ -3,6 +3,7 @@ require("dotenv").config();
 const crypto = require("node:crypto");
 const express = require("express");
 const path = require("node:path");
+const fs = require("node:fs");
 const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 
@@ -25,6 +26,24 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const pool = new Pool(poolConfig);
+
+async function initNaniTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS public.nani_characters (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        category text NOT NULL DEFAULT 'General',
+        name text NOT NULL DEFAULT 'Character',
+        image_url text NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        updated_at timestamptz NOT NULL DEFAULT now()
+      );
+    `);
+  } catch (err) {
+    console.warn("⚠️  Could not initialize public.nani_characters table:", err.message);
+  }
+}
+initNaniTable();
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
@@ -294,6 +313,89 @@ app.delete("/api/admin/sounds/:idOrType", requireAdmin, async (request, response
   }
 });
 
+// Public endpoint for custom Nani character cards
+app.get("/api/nani/custom-characters", async (_request, response) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, category, name, image_url, created_at FROM public.nani_characters ORDER BY created_at DESC"
+    );
+    response.json(result.rows);
+  } catch (err) {
+    try {
+      const fallbackPath = path.join(__dirname, "nani-custom-cards.json");
+      if (fs.existsSync(fallbackPath)) {
+        return response.json(JSON.parse(fs.readFileSync(fallbackPath, "utf8")));
+      }
+    } catch (_) {}
+    response.json([]);
+  }
+});
+
+// Admin endpoint to upload/add character image
+app.post("/api/admin/nani/characters", requireAdmin, async (request, response) => {
+  const category = String(request.body.category || "Kenyan Celebs & Icons").trim().slice(0, 80) || "General";
+  const name = String(request.body.name || "Character").trim().slice(0, 100);
+  const imageUrl = String(request.body.image_url || request.body.imageUrl || "").trim();
+
+  if (!imageUrl) {
+    return response.status(400).json({ error: "Image data or URL is required." });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO public.nani_characters (category, name, image_url)
+       VALUES ($1, $2, $3)
+       RETURNING id, category, name, image_url, created_at`,
+      [category, name, imageUrl]
+    );
+    response.status(201).json(result.rows[0]);
+  } catch (err) {
+    try {
+      const fallbackPath = path.join(__dirname, "nani-custom-cards.json");
+      let list = [];
+      if (fs.existsSync(fallbackPath)) {
+        list = JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
+      }
+      const newChar = {
+        id: crypto.randomUUID ? crypto.randomUUID() : "char_" + Date.now(),
+        category,
+        name,
+        image_url: imageUrl,
+        created_at: new Date().toISOString()
+      };
+      list.unshift(newChar);
+      fs.writeFileSync(fallbackPath, JSON.stringify(list, null, 2));
+      return response.status(201).json(newChar);
+    } catch (fsErr) {
+      response.status(500).json({ error: "Failed to save character: " + err.message });
+    }
+  }
+});
+
+// Admin endpoint to delete a character image
+app.delete("/api/admin/nani/characters/:id", requireAdmin, async (request, response) => {
+  const targetId = String(request.params.id || "").trim();
+  try {
+    const result = await pool.query("DELETE FROM public.nani_characters WHERE id = $1 RETURNING id", [targetId]);
+    if (!result.rows[0]) {
+      const fallbackPath = path.join(__dirname, "nani-custom-cards.json");
+      if (fs.existsSync(fallbackPath)) {
+        let list = JSON.parse(fs.readFileSync(fallbackPath, "utf8"));
+        const beforeLen = list.length;
+        list = list.filter(c => c.id !== targetId);
+        if (list.length !== beforeLen) {
+          fs.writeFileSync(fallbackPath, JSON.stringify(list, null, 2));
+          return response.status(204).end();
+        }
+      }
+      return response.status(404).json({ error: "Character not found." });
+    }
+    response.status(204).end();
+  } catch (err) {
+    response.status(500).json({ error: "Failed to delete character: " + err.message });
+  }
+});
+
 app.get("/api/admin/decks", requireAdmin, async (_request, response) => {
   const deckResult = await pool.query(
     `SELECT id, name, description, icon, theme, cover_url, is_published, created_by, created_at, updated_at
@@ -497,6 +599,9 @@ app.delete("/api/admin/cards/:cardId", requireAdmin, async (request, response) =
 });
 
 const naniRoutes = require("./nani-routes");
+if (typeof naniRoutes.setPool === "function") {
+  naniRoutes.setPool(pool);
+}
 app.use("/api/nani", naniRoutes);
 
 app.get("/favicon.ico", (_request, response) => {
