@@ -87,13 +87,10 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   text-decoration: none;
 }
 .brand .auth-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  border: var(--bw) solid var(--ink);
-  background: var(--amber);
-  box-shadow: var(--shadow-sm);
-  object-fit: cover;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(2px 3px 0 var(--ink));
 }
 
 h1 {
